@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-05",
+  "unitTests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "browserTests": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "independentReplacement": "Marycia"
+  },
+  "productionBuild": "passed",
+  "gltfValidator": {
+    "errors": 0,
+    "warnings": 10,
+    "unsupportedVRMExtensionNotices": 3
+  },
+  "reviewFix": "Lock model selection across fetch/file read and parse",
+  "demoDurationSeconds": 24.24
+}

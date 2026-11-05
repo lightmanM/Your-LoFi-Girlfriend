@@ -1,0 +1,25 @@
+{
+  "file": "web/public/models/marycia/marycia.vrm",
+  "bytes": 14702500,
+  "sha256": "19002e49c7ea662bd39ded4391580f1511154f8c6b41a2d7e06929a0cbe0d298",
+  "humanoidBones": 53,
+  "faceMorphs": 160,
+  "expressionPresets": [
+    "blink",
+    "blinkLeft",
+    "blinkRight",
+    "happy",
+    "relaxed",
+    "sad",
+    "angry",
+    "surprised",
+    "aa",
+    "ih",
+    "ou",
+    "ee",
+    "oh"
+  ],
+  "springChains": 36,
+  "images": 3,
+  "triangles": 65113
+}
