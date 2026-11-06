@@ -29,3 +29,13 @@ spike/**/node_modules/
 spike/**/out/
 spike/render-pass/public/models/
 spike/render-pass/shots/
+
+# Balcony source and Blender/bake intermediates remain local.
+/assets/environment/Balcony/
+/assets/environment/balcony-web-exploration/*.blend
+/assets/environment/balcony-web-exploration/*.exr
+/assets/environment/balcony-web-exploration/*-raw.glb
+/assets/environment/balcony-web-exploration/*-webp.glb
+/assets/environment/balcony-web-exploration/*-joined.glb
+/assets/environment/balcony-web-exploration/*-meshopt.glb
+/assets/environment/balcony-web-exploration/balcony-web.glb
