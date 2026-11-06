@@ -5,6 +5,13 @@ __pycache__/
 .DS_Store
 # Purchased character source and generated binaries remain local.
 assets/characters/marycia/
+# Room/pose checkpoints embed the same private purchased character.
+assets/poses/*.blend
+assets/environment/base-option/room-base-option.blend
+assets/environment/room-refresh/room-seated-preview.blend
+assets/environment/room-refresh/room-rest-*.blend
+# User-provided pose photograph remains a local working reference.
+docs/room-refresh/references/sofa-lounge-user.jpg
 web/public/models/marycia/*.vrm
 web/public/models/marycia/*.glb
 
