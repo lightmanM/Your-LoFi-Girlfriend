@@ -59,6 +59,10 @@ function greet(name=$('source-action').value){
  character.request(name);
 }
 for(const [value,{label}] of Object.entries(SOURCE_ACTIONS))$('source-action').add(new Option(label,value));
+async function loadAuthored(){
+ try{const r=await fetch('/models/marycia/authored-motions.json');if(!r.ok)return null;loadCount++;return r.json();}
+ catch(e){return null;}
+}
 $('hello').onclick=()=>greet();
 $('pause-room').onclick=()=>{const c=character.interaction;c.paused=!c.paused;$('pause-room').textContent=c.paused?'Resume':'Pause';$('pause-room').setAttribute('aria-pressed',String(c.paused));};
 $('camera-reset').onclick=view.reset;
@@ -118,10 +122,12 @@ requestAnimationFrame(render);
 try{
  const useVivi=new URLSearchParams(location.search).get('character')==='vivi';
  const initial=useVivi?{url:'/models/vivi/vivi.vrm',name:'Vivi',profile:'vivi'}:{url:'/models/marycia/marycia.vrm',name:'Marycia',profile:'marycia'};
- const [env,motions,buffer]=await Promise.all([
-  loader.loadAsync('/environment/afternoon-room.glb'),fetchData('/models/marycia/source-motions.json','json'),fetchData(initial.url),
+ const [env,motions,authored,buffer]=await Promise.all([
+  loader.loadAsync('/environment/afternoon-room.glb'),fetchData('/models/marycia/source-motions.json','json'),loadAuthored(),fetchData(initial.url),
  ]);
  environment=view.addEnvironment(env);library=motions;
+ for(const [name,clip] of Object.entries(authored?.clips??{}))library.clips[name]=clip;
+ for(const [value,action] of Object.entries(SOURCE_ACTIONS))if(action.authored&&!library.clips[action.clip])$('source-action').querySelector(`option[value="${value}"]`)?.remove();
  if(!await replace(buffer,initial.name,initial.profile))throw Error(error);
  $('loader').hidden=true;enable();ui();
 }catch(e){error=e.message;loading=false;$('load-detail').textContent=`Could not open the room: ${e.message}. Reload to retry.`;$('loader').querySelector('strong').textContent='Room unavailable';$('loader').querySelector('.loading-ring').hidden=true;}

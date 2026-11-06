@@ -1,0 +1,2604 @@
+{
+ "unityVersion": "6000.6.8f1",
+ "samplingMethod": "SampleAnimation",
+ "frameConversion": {
+  "chosen": "mirrorX (x,-y,-z,w)",
+  "candidatesTotalDegOnCalibrationClip": {
+   "identity": 902.488,
+   "mirrorX (x,-y,-z,w)": 146.246,
+   "mirrorY (-x,y,-z,w)": 1373.752,
+   "mirrorZ (-x,-y,z,w)": 1423.144
+  },
+  "calibrationClip": "sit"
+ },
+ "overall": {
+  "meanDeg": 3.192,
+  "maxDeg": 30.955,
+  "regions": {
+   "arms": {
+    "meanDeg": 11.344,
+    "maxDeg": 30.955
+   },
+   "leftFingers": {
+    "meanDeg": 1.179,
+    "maxDeg": 13.119
+   },
+   "legs": {
+    "meanDeg": 1.91,
+    "maxDeg": 7.537
+   },
+   "rightFingers": {
+    "meanDeg": 1.468,
+    "maxDeg": 13.119
+   },
+   "torso": {
+    "meanDeg": 2.504,
+    "maxDeg": 8.738
+   }
+  }
+ },
+ "clips": {
+  "afk": {
+   "sourceFile": "bn0010_AFK.anim",
+   "frames": 121,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 3.186,
+   "maxDeg": 30.955,
+   "boneFrames": 5929,
+   "regions": {
+    "arms": {
+     "meanDeg": 11.567,
+     "maxDeg": 30.955,
+     "bones": 8
+    },
+    "leftFingers": {
+     "meanDeg": 1.121,
+     "maxDeg": 5.193,
+     "bones": 15
+    },
+    "legs": {
+     "meanDeg": 1.887,
+     "maxDeg": 7.045,
+     "bones": 8
+    },
+    "rightFingers": {
+     "meanDeg": 1.415,
+     "maxDeg": 7.251,
+     "bones": 13
+    },
+    "torso": {
+     "meanDeg": 2.658,
+     "maxDeg": 8.738,
+     "bones": 5
+    }
+   },
+   "worstBones": [
+    [
+     "rightUpperArm",
+     {
+      "meanDeg": 30.399,
+      "maxDeg": 30.955,
+      "worldDeltaMeanDeg": 33.845
+     }
+    ],
+    [
+     "leftUpperArm",
+     {
+      "meanDeg": 21.681,
+      "maxDeg": 22.771,
+      "worldDeltaMeanDeg": 27.653
+     }
+    ],
+    [
+     "leftHand",
+     {
+      "meanDeg": 10.122,
+      "maxDeg": 10.611,
+      "worldDeltaMeanDeg": 28.64
+     }
+    ],
+    [
+     "rightHand",
+     {
+      "meanDeg": 9.551,
+      "maxDeg": 9.663,
+      "worldDeltaMeanDeg": 34.354
+     }
+    ],
+    [
+     "rightLowerArm",
+     {
+      "meanDeg": 8.91,
+      "maxDeg": 8.937,
+      "worldDeltaMeanDeg": 31.44
+     }
+    ],
+    [
+     "leftLowerArm",
+     {
+      "meanDeg": 8.866,
+      "maxDeg": 9.284,
+      "worldDeltaMeanDeg": 22.526
+     }
+    ],
+    [
+     "hips",
+     {
+      "meanDeg": 8.738,
+      "maxDeg": 8.738,
+      "worldDeltaMeanDeg": 8.738
+     }
+    ],
+    [
+     "rightIndexProximal",
+     {
+      "meanDeg": 7.251,
+      "maxDeg": 7.251,
+      "worldDeltaMeanDeg": 37.875
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {
+    "leftFoot": 4.139,
+    "rightFoot": 6.275,
+    "head": 1.405,
+    "leftHand": 22.569,
+    "rightHand": 31.285
+   },
+   "perBone": {
+    "leftUpperLeg": {
+     "meanDeg": 3.636,
+     "maxDeg": 3.797,
+     "worldDeltaMeanDeg": 8.195
+    },
+    "rightUpperLeg": {
+     "meanDeg": 6.274,
+     "maxDeg": 7.045,
+     "worldDeltaMeanDeg": 11.828
+    },
+    "leftLowerLeg": {
+     "meanDeg": 2.513,
+     "maxDeg": 2.69,
+     "worldDeltaMeanDeg": 7.429
+    },
+    "rightLowerLeg": {
+     "meanDeg": 0.766,
+     "maxDeg": 0.964,
+     "worldDeltaMeanDeg": 12.211
+    },
+    "leftFoot": {
+     "meanDeg": 1.653,
+     "maxDeg": 1.774,
+     "worldDeltaMeanDeg": 7.828
+    },
+    "rightFoot": {
+     "meanDeg": 0.256,
+     "maxDeg": 0.291,
+     "worldDeltaMeanDeg": 12.141
+    },
+    "spine": {
+     "meanDeg": 1.146,
+     "maxDeg": 1.146,
+     "worldDeltaMeanDeg": 9.177
+    },
+    "chest": {
+     "meanDeg": 1.044,
+     "maxDeg": 1.044,
+     "worldDeltaMeanDeg": 8.712
+    },
+    "neck": {
+     "meanDeg": 2.203,
+     "maxDeg": 2.203,
+     "worldDeltaMeanDeg": 8.67
+    },
+    "head": {
+     "meanDeg": 0.16,
+     "maxDeg": 0.16,
+     "worldDeltaMeanDeg": 8.592
+    },
+    "leftShoulder": {
+     "meanDeg": 2.333,
+     "maxDeg": 2.333,
+     "worldDeltaMeanDeg": 8.85
+    },
+    "rightShoulder": {
+     "meanDeg": 0.671,
+     "maxDeg": 0.671,
+     "worldDeltaMeanDeg": 8.826
+    },
+    "leftUpperArm": {
+     "meanDeg": 21.681,
+     "maxDeg": 22.771,
+     "worldDeltaMeanDeg": 27.653
+    },
+    "rightUpperArm": {
+     "meanDeg": 30.399,
+     "maxDeg": 30.955,
+     "worldDeltaMeanDeg": 33.845
+    },
+    "leftLowerArm": {
+     "meanDeg": 8.866,
+     "maxDeg": 9.284,
+     "worldDeltaMeanDeg": 22.526
+    },
+    "rightLowerArm": {
+     "meanDeg": 8.91,
+     "maxDeg": 8.937,
+     "worldDeltaMeanDeg": 31.44
+    },
+    "leftHand": {
+     "meanDeg": 10.122,
+     "maxDeg": 10.611,
+     "worldDeltaMeanDeg": 28.64
+    },
+    "rightHand": {
+     "meanDeg": 9.551,
+     "maxDeg": 9.663,
+     "worldDeltaMeanDeg": 34.354
+    },
+    "leftToes": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 7.828
+    },
+    "rightToes": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 12.141
+    },
+    "leftThumbMetacarpal": {
+     "meanDeg": 0.975,
+     "maxDeg": 0.975,
+     "worldDeltaMeanDeg": 28.447
+    },
+    "leftThumbProximal": {
+     "meanDeg": 0.229,
+     "maxDeg": 0.229,
+     "worldDeltaMeanDeg": 28.242
+    },
+    "leftThumbDistal": {
+     "meanDeg": 0.037,
+     "maxDeg": 0.037,
+     "worldDeltaMeanDeg": 28.207
+    },
+    "leftIndexProximal": {
+     "meanDeg": 5.193,
+     "maxDeg": 5.193,
+     "worldDeltaMeanDeg": 33.018
+    },
+    "leftIndexIntermediate": {
+     "meanDeg": 2.765,
+     "maxDeg": 2.765,
+     "worldDeltaMeanDeg": 35.508
+    },
+    "leftIndexDistal": {
+     "meanDeg": 3.222,
+     "maxDeg": 3.222,
+     "worldDeltaMeanDeg": 38.126
+    },
+    "leftMiddleProximal": {
+     "meanDeg": 0.842,
+     "maxDeg": 0.842,
+     "worldDeltaMeanDeg": 29.342
+    },
+    "leftMiddleIntermediate": {
+     "meanDeg": 1.474,
+     "maxDeg": 1.474,
+     "worldDeltaMeanDeg": 28.444
+    },
+    "leftMiddleDistal": {
+     "meanDeg": 1.565,
+     "maxDeg": 1.565,
+     "worldDeltaMeanDeg": 28.677
+    },
+    "leftRingProximal": {
+     "meanDeg": 0.185,
+     "maxDeg": 0.185,
+     "worldDeltaMeanDeg": 28.479
+    },
+    "leftRingIntermediate": {
+     "meanDeg": 0.146,
+     "maxDeg": 0.146,
+     "worldDeltaMeanDeg": 28.393
+    },
+    "leftRingDistal": {
+     "meanDeg": 0.07,
+     "maxDeg": 0.07,
+     "worldDeltaMeanDeg": 28.386
+    },
+    "leftLittleProximal": {
+     "meanDeg": 0.009,
+     "maxDeg": 0.009,
+     "worldDeltaMeanDeg": 28.631
+    },
+    "leftLittleIntermediate": {
+     "meanDeg": 0.104,
+     "maxDeg": 0.104,
+     "worldDeltaMeanDeg": 28.542
+    },
+    "leftLittleDistal": {
+     "meanDeg": 0.004,
+     "maxDeg": 0.004,
+     "worldDeltaMeanDeg": 28.545
+    },
+    "rightThumbMetacarpal": {
+     "meanDeg": 0.957,
+     "maxDeg": 0.957,
+     "worldDeltaMeanDeg": 34.705
+    },
+    "rightIndexProximal": {
+     "meanDeg": 7.251,
+     "maxDeg": 7.251,
+     "worldDeltaMeanDeg": 37.875
+    },
+    "rightIndexIntermediate": {
+     "meanDeg": 0.707,
+     "maxDeg": 0.707,
+     "worldDeltaMeanDeg": 38.37
+    },
+    "rightIndexDistal": {
+     "meanDeg": 4.623,
+     "maxDeg": 4.623,
+     "worldDeltaMeanDeg": 41.629
+    },
+    "rightMiddleProximal": {
+     "meanDeg": 0.035,
+     "maxDeg": 0.035,
+     "worldDeltaMeanDeg": 34.339
+    },
+    "rightMiddleIntermediate": {
+     "meanDeg": 0.783,
+     "maxDeg": 0.783,
+     "worldDeltaMeanDeg": 34.755
+    },
+    "rightMiddleDistal": {
+     "meanDeg": 2.367,
+     "maxDeg": 2.367,
+     "worldDeltaMeanDeg": 35.929
+    },
+    "rightRingProximal": {
+     "meanDeg": 0.304,
+     "maxDeg": 0.304,
+     "worldDeltaMeanDeg": 34.195
+    },
+    "rightRingIntermediate": {
+     "meanDeg": 0.364,
+     "maxDeg": 0.364,
+     "worldDeltaMeanDeg": 34.033
+    },
+    "rightRingDistal": {
+     "meanDeg": 0.867,
+     "maxDeg": 0.867,
+     "worldDeltaMeanDeg": 34.287
+    },
+    "rightLittleProximal": {
+     "meanDeg": 0.007,
+     "maxDeg": 0.007,
+     "worldDeltaMeanDeg": 34.35
+    },
+    "rightLittleIntermediate": {
+     "meanDeg": 0.02,
+     "maxDeg": 0.02,
+     "worldDeltaMeanDeg": 34.339
+    },
+    "rightLittleDistal": {
+     "meanDeg": 0.106,
+     "maxDeg": 0.106,
+     "worldDeltaMeanDeg": 34.283
+    },
+    "hips": {
+     "meanDeg": 8.738,
+     "maxDeg": 8.738,
+     "worldDeltaMeanDeg": 8.738
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "faceIdle": {
+   "sourceFile": "bn0010_Face1_Default.anim",
+   "frames": 722,
+   "samplingMethod": "SampleAnimation",
+   "face": {
+    "morphCount": 17,
+    "maxAbsDiff": 8e-06,
+    "onlyInUnity": [],
+    "onlyInConverter": [],
+    "morphs": {
+     "Eyelash_Down": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.1,
+      "converterMax": 0.1
+     },
+     "Eyelash_Up": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.2,
+      "converterMax": 0.2
+     },
+     "Eyelight_Down": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.1,
+      "converterMax": 0.1
+     },
+     "Eyelight_Large": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.2,
+      "converterMax": 0.2
+     },
+     "Eyelight_Small": {
+      "maxAbsDiff": 2e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.5,
+      "converterMax": 0.5
+     },
+     "Eyelight_Wide": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3,
+      "converterMax": 0.3
+     },
+     "Mouth_Laugh1": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.05,
+      "converterMax": 0.05
+     },
+     "Mouth_Sad": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.15,
+      "converterMax": 0.15
+     },
+     "Pupil_Large": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3,
+      "converterMax": 0.3
+     },
+     "Pupil_Small": {
+      "maxAbsDiff": 2e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.7,
+      "converterMax": 0.7
+     },
+     "mouthDimpleLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3,
+      "converterMax": 0.3
+     },
+     "mouthDimpleRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3,
+      "converterMax": 0.3
+     },
+     "mouthFrownLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.6,
+      "converterMax": 0.6
+     },
+     "mouthPucker": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.302,
+      "converterMax": 0.302
+     },
+     "じと目_L": {
+      "maxAbsDiff": 3e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.38,
+      "converterMax": 0.38
+     },
+     "じと目_R": {
+      "maxAbsDiff": 3e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.38,
+      "converterMax": 0.38
+     },
+     "まばたき": {
+      "maxAbsDiff": 8e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 1.0,
+      "converterMax": 1.0
+     }
+    }
+   }
+  },
+  "fingerHeart": {
+   "sourceFile": "bn0010_hands_Heart_Tip.anim",
+   "frames": 1,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 2.913,
+   "maxDeg": 8.112,
+   "boneFrames": 30,
+   "regions": {
+    "leftFingers": {
+     "meanDeg": 2.915,
+     "maxDeg": 8.111,
+     "bones": 15
+    },
+    "rightFingers": {
+     "meanDeg": 2.912,
+     "maxDeg": 8.112,
+     "bones": 15
+    }
+   },
+   "worstBones": [
+    [
+     "rightIndexProximal",
+     {
+      "meanDeg": 8.112,
+      "maxDeg": 8.112,
+      "worldDeltaMeanDeg": 110.364
+     }
+    ],
+    [
+     "leftIndexProximal",
+     {
+      "meanDeg": 8.111,
+      "maxDeg": 8.111,
+      "worldDeltaMeanDeg": 110.364
+     }
+    ],
+    [
+     "leftMiddleProximal",
+     {
+      "meanDeg": 6.591,
+      "maxDeg": 6.591,
+      "worldDeltaMeanDeg": 110.272
+     }
+    ],
+    [
+     "rightMiddleProximal",
+     {
+      "meanDeg": 6.591,
+      "maxDeg": 6.591,
+      "worldDeltaMeanDeg": 110.273
+     }
+    ],
+    [
+     "leftIndexDistal",
+     {
+      "meanDeg": 6.356,
+      "maxDeg": 6.356,
+      "worldDeltaMeanDeg": 114.764
+     }
+    ],
+    [
+     "rightIndexDistal",
+     {
+      "meanDeg": 6.356,
+      "maxDeg": 6.356,
+      "worldDeltaMeanDeg": 114.763
+     }
+    ],
+    [
+     "leftMiddleIntermediate",
+     {
+      "meanDeg": 4.492,
+      "maxDeg": 4.492,
+      "worldDeltaMeanDeg": 107.132
+     }
+    ],
+    [
+     "rightMiddleIntermediate",
+     {
+      "meanDeg": 4.492,
+      "maxDeg": 4.492,
+      "worldDeltaMeanDeg": 107.134
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {},
+   "perBone": {
+    "leftThumbMetacarpal": {
+     "meanDeg": 3.172,
+     "maxDeg": 3.172,
+     "worldDeltaMeanDeg": 114.722
+    },
+    "leftThumbProximal": {
+     "meanDeg": 0.326,
+     "maxDeg": 0.326,
+     "worldDeltaMeanDeg": 114.802
+    },
+    "leftThumbDistal": {
+     "meanDeg": 1.138,
+     "maxDeg": 1.138,
+     "worldDeltaMeanDeg": 115.084
+    },
+    "leftIndexProximal": {
+     "meanDeg": 8.111,
+     "maxDeg": 8.111,
+     "worldDeltaMeanDeg": 110.364
+    },
+    "leftIndexIntermediate": {
+     "meanDeg": 1.155,
+     "maxDeg": 1.155,
+     "worldDeltaMeanDeg": 109.229
+    },
+    "leftIndexDistal": {
+     "meanDeg": 6.356,
+     "maxDeg": 6.356,
+     "worldDeltaMeanDeg": 114.764
+    },
+    "leftMiddleProximal": {
+     "meanDeg": 6.591,
+     "maxDeg": 6.591,
+     "worldDeltaMeanDeg": 110.272
+    },
+    "leftMiddleIntermediate": {
+     "meanDeg": 4.492,
+     "maxDeg": 4.492,
+     "worldDeltaMeanDeg": 107.132
+    },
+    "leftMiddleDistal": {
+     "meanDeg": 0.089,
+     "maxDeg": 0.089,
+     "worldDeltaMeanDeg": 107.153
+    },
+    "leftRingProximal": {
+     "meanDeg": 3.697,
+     "maxDeg": 3.697,
+     "worldDeltaMeanDeg": 111.73
+    },
+    "leftRingIntermediate": {
+     "meanDeg": 2.242,
+     "maxDeg": 2.242,
+     "worldDeltaMeanDeg": 110.17
+    },
+    "leftRingDistal": {
+     "meanDeg": 2.999,
+     "maxDeg": 2.999,
+     "worldDeltaMeanDeg": 111.502
+    },
+    "leftLittleProximal": {
+     "meanDeg": 2.776,
+     "maxDeg": 2.776,
+     "worldDeltaMeanDeg": 112.435
+    },
+    "leftLittleIntermediate": {
+     "meanDeg": 0.29,
+     "maxDeg": 0.29,
+     "worldDeltaMeanDeg": 112.699
+    },
+    "leftLittleDistal": {
+     "meanDeg": 0.287,
+     "maxDeg": 0.287,
+     "worldDeltaMeanDeg": 112.68
+    },
+    "rightThumbMetacarpal": {
+     "meanDeg": 3.156,
+     "maxDeg": 3.156,
+     "worldDeltaMeanDeg": 114.724
+    },
+    "rightThumbProximal": {
+     "meanDeg": 0.322,
+     "maxDeg": 0.322,
+     "worldDeltaMeanDeg": 114.804
+    },
+    "rightThumbDistal": {
+     "meanDeg": 1.122,
+     "maxDeg": 1.122,
+     "worldDeltaMeanDeg": 115.084
+    },
+    "rightIndexProximal": {
+     "meanDeg": 8.112,
+     "maxDeg": 8.112,
+     "worldDeltaMeanDeg": 110.364
+    },
+    "rightIndexIntermediate": {
+     "meanDeg": 1.154,
+     "maxDeg": 1.154,
+     "worldDeltaMeanDeg": 109.229
+    },
+    "rightIndexDistal": {
+     "meanDeg": 6.356,
+     "maxDeg": 6.356,
+     "worldDeltaMeanDeg": 114.763
+    },
+    "rightMiddleProximal": {
+     "meanDeg": 6.591,
+     "maxDeg": 6.591,
+     "worldDeltaMeanDeg": 110.273
+    },
+    "rightMiddleIntermediate": {
+     "meanDeg": 4.492,
+     "maxDeg": 4.492,
+     "worldDeltaMeanDeg": 107.134
+    },
+    "rightMiddleDistal": {
+     "meanDeg": 0.089,
+     "maxDeg": 0.089,
+     "worldDeltaMeanDeg": 107.157
+    },
+    "rightRingProximal": {
+     "meanDeg": 3.697,
+     "maxDeg": 3.697,
+     "worldDeltaMeanDeg": 111.73
+    },
+    "rightRingIntermediate": {
+     "meanDeg": 2.241,
+     "maxDeg": 2.241,
+     "worldDeltaMeanDeg": 110.171
+    },
+    "rightRingDistal": {
+     "meanDeg": 2.998,
+     "maxDeg": 2.998,
+     "worldDeltaMeanDeg": 111.503
+    },
+    "rightLittleProximal": {
+     "meanDeg": 2.777,
+     "maxDeg": 2.777,
+     "worldDeltaMeanDeg": 112.434
+    },
+    "rightLittleIntermediate": {
+     "meanDeg": 0.289,
+     "maxDeg": 0.289,
+     "worldDeltaMeanDeg": 112.697
+    },
+    "rightLittleDistal": {
+     "meanDeg": 0.286,
+     "maxDeg": 0.286,
+     "worldDeltaMeanDeg": 112.679
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "handsIdle": {
+   "sourceFile": "bn0010_hands_idle.anim",
+   "frames": 1,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 1.399,
+   "maxDeg": 5.696,
+   "boneFrames": 30,
+   "regions": {
+    "leftFingers": {
+     "meanDeg": 1.399,
+     "maxDeg": 5.696,
+     "bones": 15
+    },
+    "rightFingers": {
+     "meanDeg": 1.398,
+     "maxDeg": 5.696,
+     "bones": 15
+    }
+   },
+   "worstBones": [
+    [
+     "leftIndexDistal",
+     {
+      "meanDeg": 5.696,
+      "maxDeg": 5.696,
+      "worldDeltaMeanDeg": 120.417
+     }
+    ],
+    [
+     "rightIndexDistal",
+     {
+      "meanDeg": 5.696,
+      "maxDeg": 5.696,
+      "worldDeltaMeanDeg": 120.416
+     }
+    ],
+    [
+     "leftRingIntermediate",
+     {
+      "meanDeg": 2.79,
+      "maxDeg": 2.79,
+      "worldDeltaMeanDeg": 111.398
+     }
+    ],
+    [
+     "rightRingIntermediate",
+     {
+      "meanDeg": 2.789,
+      "maxDeg": 2.789,
+      "worldDeltaMeanDeg": 111.399
+     }
+    ],
+    [
+     "leftThumbMetacarpal",
+     {
+      "meanDeg": 2.325,
+      "maxDeg": 2.325,
+      "worldDeltaMeanDeg": 114.676
+     }
+    ],
+    [
+     "rightThumbMetacarpal",
+     {
+      "meanDeg": 2.306,
+      "maxDeg": 2.306,
+      "worldDeltaMeanDeg": 114.676
+     }
+    ],
+    [
+     "leftMiddleProximal",
+     {
+      "meanDeg": 2.219,
+      "maxDeg": 2.219,
+      "worldDeltaMeanDeg": 113.529
+     }
+    ],
+    [
+     "rightMiddleProximal",
+     {
+      "meanDeg": 2.219,
+      "maxDeg": 2.219,
+      "worldDeltaMeanDeg": 113.53
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {},
+   "perBone": {
+    "leftThumbMetacarpal": {
+     "meanDeg": 2.325,
+     "maxDeg": 2.325,
+     "worldDeltaMeanDeg": 114.676
+    },
+    "leftThumbProximal": {
+     "meanDeg": 0.295,
+     "maxDeg": 0.295,
+     "worldDeltaMeanDeg": 114.725
+    },
+    "leftThumbDistal": {
+     "meanDeg": 0.116,
+     "maxDeg": 0.116,
+     "worldDeltaMeanDeg": 114.748
+    },
+    "leftIndexProximal": {
+     "meanDeg": 0.483,
+     "maxDeg": 0.483,
+     "worldDeltaMeanDeg": 114.335
+    },
+    "leftIndexIntermediate": {
+     "meanDeg": 0.847,
+     "maxDeg": 0.847,
+     "worldDeltaMeanDeg": 115.038
+    },
+    "leftIndexDistal": {
+     "meanDeg": 5.696,
+     "maxDeg": 5.696,
+     "worldDeltaMeanDeg": 120.417
+    },
+    "leftMiddleProximal": {
+     "meanDeg": 2.219,
+     "maxDeg": 2.219,
+     "worldDeltaMeanDeg": 113.529
+    },
+    "leftMiddleIntermediate": {
+     "meanDeg": 1.785,
+     "maxDeg": 1.785,
+     "worldDeltaMeanDeg": 111.81
+    },
+    "leftMiddleDistal": {
+     "meanDeg": 1.831,
+     "maxDeg": 1.831,
+     "worldDeltaMeanDeg": 113.346
+    },
+    "leftRingProximal": {
+     "meanDeg": 0.931,
+     "maxDeg": 0.931,
+     "worldDeltaMeanDeg": 114.057
+    },
+    "leftRingIntermediate": {
+     "meanDeg": 2.79,
+     "maxDeg": 2.79,
+     "worldDeltaMeanDeg": 111.398
+    },
+    "leftRingDistal": {
+     "meanDeg": 0.479,
+     "maxDeg": 0.479,
+     "worldDeltaMeanDeg": 111.67
+    },
+    "leftLittleProximal": {
+     "meanDeg": 0.901,
+     "maxDeg": 0.901,
+     "worldDeltaMeanDeg": 114.043
+    },
+    "leftLittleIntermediate": {
+     "meanDeg": 0.275,
+     "maxDeg": 0.275,
+     "worldDeltaMeanDeg": 114.293
+    },
+    "leftLittleDistal": {
+     "meanDeg": 0.019,
+     "maxDeg": 0.019,
+     "worldDeltaMeanDeg": 114.279
+    },
+    "rightThumbMetacarpal": {
+     "meanDeg": 2.306,
+     "maxDeg": 2.306,
+     "worldDeltaMeanDeg": 114.676
+    },
+    "rightThumbProximal": {
+     "meanDeg": 0.291,
+     "maxDeg": 0.291,
+     "worldDeltaMeanDeg": 114.727
+    },
+    "rightThumbDistal": {
+     "meanDeg": 0.115,
+     "maxDeg": 0.115,
+     "worldDeltaMeanDeg": 114.751
+    },
+    "rightIndexProximal": {
+     "meanDeg": 0.483,
+     "maxDeg": 0.483,
+     "worldDeltaMeanDeg": 114.335
+    },
+    "rightIndexIntermediate": {
+     "meanDeg": 0.848,
+     "maxDeg": 0.848,
+     "worldDeltaMeanDeg": 115.038
+    },
+    "rightIndexDistal": {
+     "meanDeg": 5.696,
+     "maxDeg": 5.696,
+     "worldDeltaMeanDeg": 120.416
+    },
+    "rightMiddleProximal": {
+     "meanDeg": 2.219,
+     "maxDeg": 2.219,
+     "worldDeltaMeanDeg": 113.53
+    },
+    "rightMiddleIntermediate": {
+     "meanDeg": 1.785,
+     "maxDeg": 1.785,
+     "worldDeltaMeanDeg": 111.812
+    },
+    "rightMiddleDistal": {
+     "meanDeg": 1.831,
+     "maxDeg": 1.831,
+     "worldDeltaMeanDeg": 113.348
+    },
+    "rightRingProximal": {
+     "meanDeg": 0.931,
+     "maxDeg": 0.931,
+     "worldDeltaMeanDeg": 114.057
+    },
+    "rightRingIntermediate": {
+     "meanDeg": 2.789,
+     "maxDeg": 2.789,
+     "worldDeltaMeanDeg": 111.399
+    },
+    "rightRingDistal": {
+     "meanDeg": 0.479,
+     "maxDeg": 0.479,
+     "worldDeltaMeanDeg": 111.671
+    },
+    "rightLittleProximal": {
+     "meanDeg": 0.902,
+     "maxDeg": 0.902,
+     "worldDeltaMeanDeg": 114.042
+    },
+    "rightLittleIntermediate": {
+     "meanDeg": 0.274,
+     "maxDeg": 0.274,
+     "worldDeltaMeanDeg": 114.292
+    },
+    "rightLittleDistal": {
+     "meanDeg": 0.019,
+     "maxDeg": 0.019,
+     "worldDeltaMeanDeg": 114.278
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "heart": {
+   "sourceFile": "bn0010_hands_Heart.anim",
+   "frames": 1,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 3.013,
+   "maxDeg": 13.119,
+   "boneFrames": 30,
+   "regions": {
+    "leftFingers": {
+     "meanDeg": 3.014,
+     "maxDeg": 13.119,
+     "bones": 15
+    },
+    "rightFingers": {
+     "meanDeg": 3.012,
+     "maxDeg": 13.119,
+     "bones": 15
+    }
+   },
+   "worstBones": [
+    [
+     "leftIndexProximal",
+     {
+      "meanDeg": 13.119,
+      "maxDeg": 13.119,
+      "worldDeltaMeanDeg": 112.044
+     }
+    ],
+    [
+     "rightIndexProximal",
+     {
+      "meanDeg": 13.119,
+      "maxDeg": 13.119,
+      "worldDeltaMeanDeg": 112.044
+     }
+    ],
+    [
+     "leftMiddleDistal",
+     {
+      "meanDeg": 4.903,
+      "maxDeg": 4.903,
+      "worldDeltaMeanDeg": 120.442
+     }
+    ],
+    [
+     "rightMiddleDistal",
+     {
+      "meanDeg": 4.902,
+      "maxDeg": 4.902,
+      "worldDeltaMeanDeg": 120.441
+     }
+    ],
+    [
+     "leftIndexIntermediate",
+     {
+      "meanDeg": 4.805,
+      "maxDeg": 4.805,
+      "worldDeltaMeanDeg": 111.382
+     }
+    ],
+    [
+     "rightIndexIntermediate",
+     {
+      "meanDeg": 4.804,
+      "maxDeg": 4.804,
+      "worldDeltaMeanDeg": 111.382
+     }
+    ],
+    [
+     "leftRingIntermediate",
+     {
+      "meanDeg": 4.311,
+      "maxDeg": 4.311,
+      "worldDeltaMeanDeg": 109.957
+     }
+    ],
+    [
+     "rightRingIntermediate",
+     {
+      "meanDeg": 4.31,
+      "maxDeg": 4.31,
+      "worldDeltaMeanDeg": 109.958
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {},
+   "perBone": {
+    "leftThumbMetacarpal": {
+     "meanDeg": 2.298,
+     "maxDeg": 2.298,
+     "worldDeltaMeanDeg": 114.674
+    },
+    "leftThumbProximal": {
+     "meanDeg": 0.397,
+     "maxDeg": 0.397,
+     "worldDeltaMeanDeg": 114.599
+    },
+    "leftThumbDistal": {
+     "meanDeg": 0.473,
+     "maxDeg": 0.473,
+     "worldDeltaMeanDeg": 114.697
+    },
+    "leftIndexProximal": {
+     "meanDeg": 13.119,
+     "maxDeg": 13.119,
+     "worldDeltaMeanDeg": 112.044
+    },
+    "leftIndexIntermediate": {
+     "meanDeg": 4.805,
+     "maxDeg": 4.805,
+     "worldDeltaMeanDeg": 111.382
+    },
+    "leftIndexDistal": {
+     "meanDeg": 1.77,
+     "maxDeg": 1.77,
+     "worldDeltaMeanDeg": 109.918
+    },
+    "leftMiddleProximal": {
+     "meanDeg": 3.544,
+     "maxDeg": 3.544,
+     "worldDeltaMeanDeg": 112.765
+    },
+    "leftMiddleIntermediate": {
+     "meanDeg": 4.162,
+     "maxDeg": 4.162,
+     "worldDeltaMeanDeg": 116.471
+    },
+    "leftMiddleDistal": {
+     "meanDeg": 4.903,
+     "maxDeg": 4.903,
+     "worldDeltaMeanDeg": 120.442
+    },
+    "leftRingProximal": {
+     "meanDeg": 2.304,
+     "maxDeg": 2.304,
+     "worldDeltaMeanDeg": 113.299
+    },
+    "leftRingIntermediate": {
+     "meanDeg": 4.311,
+     "maxDeg": 4.311,
+     "worldDeltaMeanDeg": 109.957
+    },
+    "leftRingDistal": {
+     "meanDeg": 0.351,
+     "maxDeg": 0.351,
+     "worldDeltaMeanDeg": 109.871
+    },
+    "leftLittleProximal": {
+     "meanDeg": 2.306,
+     "maxDeg": 2.306,
+     "worldDeltaMeanDeg": 112.995
+    },
+    "leftLittleIntermediate": {
+     "meanDeg": 0.413,
+     "maxDeg": 0.413,
+     "worldDeltaMeanDeg": 113.372
+    },
+    "leftLittleDistal": {
+     "meanDeg": 0.054,
+     "maxDeg": 0.054,
+     "worldDeltaMeanDeg": 113.364
+    },
+    "rightThumbMetacarpal": {
+     "meanDeg": 2.28,
+     "maxDeg": 2.28,
+     "worldDeltaMeanDeg": 114.675
+    },
+    "rightThumbProximal": {
+     "meanDeg": 0.391,
+     "maxDeg": 0.391,
+     "worldDeltaMeanDeg": 114.603
+    },
+    "rightThumbDistal": {
+     "meanDeg": 0.467,
+     "maxDeg": 0.467,
+     "worldDeltaMeanDeg": 114.701
+    },
+    "rightIndexProximal": {
+     "meanDeg": 13.119,
+     "maxDeg": 13.119,
+     "worldDeltaMeanDeg": 112.044
+    },
+    "rightIndexIntermediate": {
+     "meanDeg": 4.804,
+     "maxDeg": 4.804,
+     "worldDeltaMeanDeg": 111.382
+    },
+    "rightIndexDistal": {
+     "meanDeg": 1.769,
+     "maxDeg": 1.769,
+     "worldDeltaMeanDeg": 109.918
+    },
+    "rightMiddleProximal": {
+     "meanDeg": 3.544,
+     "maxDeg": 3.544,
+     "worldDeltaMeanDeg": 112.766
+    },
+    "rightMiddleIntermediate": {
+     "meanDeg": 4.162,
+     "maxDeg": 4.162,
+     "worldDeltaMeanDeg": 116.471
+    },
+    "rightMiddleDistal": {
+     "meanDeg": 4.902,
+     "maxDeg": 4.902,
+     "worldDeltaMeanDeg": 120.441
+    },
+    "rightRingProximal": {
+     "meanDeg": 2.304,
+     "maxDeg": 2.304,
+     "worldDeltaMeanDeg": 113.299
+    },
+    "rightRingIntermediate": {
+     "meanDeg": 4.31,
+     "maxDeg": 4.31,
+     "worldDeltaMeanDeg": 109.958
+    },
+    "rightRingDistal": {
+     "meanDeg": 0.352,
+     "maxDeg": 0.352,
+     "worldDeltaMeanDeg": 109.872
+    },
+    "rightLittleProximal": {
+     "meanDeg": 2.307,
+     "maxDeg": 2.307,
+     "worldDeltaMeanDeg": 112.994
+    },
+    "rightLittleIntermediate": {
+     "meanDeg": 0.412,
+     "maxDeg": 0.412,
+     "worldDeltaMeanDeg": 113.37
+    },
+    "rightLittleDistal": {
+     "meanDeg": 0.055,
+     "maxDeg": 0.055,
+     "worldDeltaMeanDeg": 113.363
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "peace": {
+   "sourceFile": "bn0010_hands_peace.anim",
+   "frames": 1,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 2.548,
+   "maxDeg": 7.571,
+   "boneFrames": 30,
+   "regions": {
+    "leftFingers": {
+     "meanDeg": 2.549,
+     "maxDeg": 7.571,
+     "bones": 15
+    },
+    "rightFingers": {
+     "meanDeg": 2.547,
+     "maxDeg": 7.571,
+     "bones": 15
+    }
+   },
+   "worstBones": [
+    [
+     "leftIndexProximal",
+     {
+      "meanDeg": 7.571,
+      "maxDeg": 7.571,
+      "worldDeltaMeanDeg": 114.015
+     }
+    ],
+    [
+     "rightIndexProximal",
+     {
+      "meanDeg": 7.571,
+      "maxDeg": 7.571,
+      "worldDeltaMeanDeg": 114.014
+     }
+    ],
+    [
+     "leftIndexDistal",
+     {
+      "meanDeg": 6.575,
+      "maxDeg": 6.575,
+      "worldDeltaMeanDeg": 115.551
+     }
+    ],
+    [
+     "rightIndexDistal",
+     {
+      "meanDeg": 6.574,
+      "maxDeg": 6.574,
+      "worldDeltaMeanDeg": 115.551
+     }
+    ],
+    [
+     "leftIndexIntermediate",
+     {
+      "meanDeg": 4.581,
+      "maxDeg": 4.581,
+      "worldDeltaMeanDeg": 114.406
+     }
+    ],
+    [
+     "rightIndexIntermediate",
+     {
+      "meanDeg": 4.581,
+      "maxDeg": 4.581,
+      "worldDeltaMeanDeg": 114.406
+     }
+    ],
+    [
+     "leftRingIntermediate",
+     {
+      "meanDeg": 4.311,
+      "maxDeg": 4.311,
+      "worldDeltaMeanDeg": 109.957
+     }
+    ],
+    [
+     "rightRingIntermediate",
+     {
+      "meanDeg": 4.31,
+      "maxDeg": 4.31,
+      "worldDeltaMeanDeg": 109.958
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {},
+   "perBone": {
+    "leftThumbMetacarpal": {
+     "meanDeg": 2.298,
+     "maxDeg": 2.298,
+     "worldDeltaMeanDeg": 114.674
+    },
+    "leftThumbProximal": {
+     "meanDeg": 0.29,
+     "maxDeg": 0.29,
+     "worldDeltaMeanDeg": 114.62
+    },
+    "leftThumbDistal": {
+     "meanDeg": 0.094,
+     "maxDeg": 0.094,
+     "worldDeltaMeanDeg": 114.64
+    },
+    "leftIndexProximal": {
+     "meanDeg": 7.571,
+     "maxDeg": 7.571,
+     "worldDeltaMeanDeg": 114.015
+    },
+    "leftIndexIntermediate": {
+     "meanDeg": 4.581,
+     "maxDeg": 4.581,
+     "worldDeltaMeanDeg": 114.406
+    },
+    "leftIndexDistal": {
+     "meanDeg": 6.575,
+     "maxDeg": 6.575,
+     "worldDeltaMeanDeg": 115.551
+    },
+    "leftMiddleProximal": {
+     "meanDeg": 1.209,
+     "maxDeg": 1.209,
+     "worldDeltaMeanDeg": 114.822
+    },
+    "leftMiddleIntermediate": {
+     "meanDeg": 2.096,
+     "maxDeg": 2.096,
+     "worldDeltaMeanDeg": 116.115
+    },
+    "leftMiddleDistal": {
+     "meanDeg": 3.784,
+     "maxDeg": 3.784,
+     "worldDeltaMeanDeg": 118.793
+    },
+    "leftRingProximal": {
+     "meanDeg": 2.304,
+     "maxDeg": 2.304,
+     "worldDeltaMeanDeg": 113.299
+    },
+    "leftRingIntermediate": {
+     "meanDeg": 4.311,
+     "maxDeg": 4.311,
+     "worldDeltaMeanDeg": 109.957
+    },
+    "leftRingDistal": {
+     "meanDeg": 0.351,
+     "maxDeg": 0.351,
+     "worldDeltaMeanDeg": 109.871
+    },
+    "leftLittleProximal": {
+     "meanDeg": 2.306,
+     "maxDeg": 2.306,
+     "worldDeltaMeanDeg": 112.995
+    },
+    "leftLittleIntermediate": {
+     "meanDeg": 0.413,
+     "maxDeg": 0.413,
+     "worldDeltaMeanDeg": 113.372
+    },
+    "leftLittleDistal": {
+     "meanDeg": 0.054,
+     "maxDeg": 0.054,
+     "worldDeltaMeanDeg": 113.364
+    },
+    "rightThumbMetacarpal": {
+     "meanDeg": 2.28,
+     "maxDeg": 2.28,
+     "worldDeltaMeanDeg": 114.675
+    },
+    "rightThumbProximal": {
+     "meanDeg": 0.284,
+     "maxDeg": 0.284,
+     "worldDeltaMeanDeg": 114.624
+    },
+    "rightThumbDistal": {
+     "meanDeg": 0.094,
+     "maxDeg": 0.094,
+     "worldDeltaMeanDeg": 114.644
+    },
+    "rightIndexProximal": {
+     "meanDeg": 7.571,
+     "maxDeg": 7.571,
+     "worldDeltaMeanDeg": 114.014
+    },
+    "rightIndexIntermediate": {
+     "meanDeg": 4.581,
+     "maxDeg": 4.581,
+     "worldDeltaMeanDeg": 114.406
+    },
+    "rightIndexDistal": {
+     "meanDeg": 6.574,
+     "maxDeg": 6.574,
+     "worldDeltaMeanDeg": 115.551
+    },
+    "rightMiddleProximal": {
+     "meanDeg": 1.209,
+     "maxDeg": 1.209,
+     "worldDeltaMeanDeg": 114.823
+    },
+    "rightMiddleIntermediate": {
+     "meanDeg": 2.096,
+     "maxDeg": 2.096,
+     "worldDeltaMeanDeg": 116.116
+    },
+    "rightMiddleDistal": {
+     "meanDeg": 3.784,
+     "maxDeg": 3.784,
+     "worldDeltaMeanDeg": 118.792
+    },
+    "rightRingProximal": {
+     "meanDeg": 2.304,
+     "maxDeg": 2.304,
+     "worldDeltaMeanDeg": 113.299
+    },
+    "rightRingIntermediate": {
+     "meanDeg": 4.31,
+     "maxDeg": 4.31,
+     "worldDeltaMeanDeg": 109.958
+    },
+    "rightRingDistal": {
+     "meanDeg": 0.352,
+     "maxDeg": 0.352,
+     "worldDeltaMeanDeg": 109.872
+    },
+    "rightLittleProximal": {
+     "meanDeg": 2.307,
+     "maxDeg": 2.307,
+     "worldDeltaMeanDeg": 112.994
+    },
+    "rightLittleIntermediate": {
+     "meanDeg": 0.412,
+     "maxDeg": 0.412,
+     "worldDeltaMeanDeg": 113.37
+    },
+    "rightLittleDistal": {
+     "meanDeg": 0.055,
+     "maxDeg": 0.055,
+     "worldDeltaMeanDeg": 113.363
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "relax": {
+   "sourceFile": "bn0010_Face1_Relax.anim",
+   "frames": 571,
+   "samplingMethod": "SampleAnimation",
+   "face": {
+    "morphCount": 15,
+    "maxAbsDiff": 0.0,
+    "onlyInUnity": [],
+    "onlyInConverter": [],
+    "morphs": {
+     "Eyeunder_Up": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.4,
+      "converterMax": 0.4
+     },
+     "Mouth_Large": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.2624,
+      "converterMax": 0.2624
+     },
+     "Mouth_Laugh1": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.2232,
+      "converterMax": 0.2232
+     },
+     "Mouth_Small": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.401,
+      "converterMax": 0.401
+     },
+     "Mouth_Smile2": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.213,
+      "converterMax": 0.213
+     },
+     "Mouth_Square": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.321,
+      "converterMax": 0.321
+     },
+     "eyeLookDownLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.697,
+      "converterMax": 0.697
+     },
+     "eyeLookDownRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.686,
+      "converterMax": 0.686
+     },
+     "∧": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.346,
+      "converterMax": 0.346
+     },
+     "▲": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.468,
+      "converterMax": 0.468
+     },
+     "なごみ": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.6596,
+      "converterMax": 0.6596
+     },
+     "にこり": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 1.0,
+      "converterMax": 1.0
+     },
+     "上": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.7259,
+      "converterMax": 0.7259
+     },
+     "下": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.405,
+      "converterMax": 0.405
+     },
+     "笑い": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.406,
+      "converterMax": 0.406
+     }
+    }
+   }
+  },
+  "sit": {
+   "sourceFile": "bn0010_sit.anim",
+   "frames": 1,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 6.359,
+   "maxDeg": 20.824,
+   "boneFrames": 23,
+   "regions": {
+    "arms": {
+     "meanDeg": 13.738,
+     "maxDeg": 20.824,
+     "bones": 8
+    },
+    "legs": {
+     "meanDeg": 3.486,
+     "maxDeg": 7.537,
+     "bones": 8
+    },
+    "torso": {
+     "meanDeg": 1.207,
+     "maxDeg": 6.347,
+     "bones": 7
+    }
+   },
+   "worstBones": [
+    [
+     "leftHand",
+     {
+      "meanDeg": 20.824,
+      "maxDeg": 20.824,
+      "worldDeltaMeanDeg": 12.348
+     }
+    ],
+    [
+     "leftLowerArm",
+     {
+      "meanDeg": 19.624,
+      "maxDeg": 19.624,
+      "worldDeltaMeanDeg": 24.931
+     }
+    ],
+    [
+     "rightHand",
+     {
+      "meanDeg": 18.066,
+      "maxDeg": 18.066,
+      "worldDeltaMeanDeg": 9.035
+     }
+    ],
+    [
+     "rightLowerArm",
+     {
+      "meanDeg": 17.808,
+      "maxDeg": 17.808,
+      "worldDeltaMeanDeg": 17.972
+     }
+    ],
+    [
+     "leftUpperArm",
+     {
+      "meanDeg": 10.826,
+      "maxDeg": 10.826,
+      "worldDeltaMeanDeg": 14.282
+     }
+    ],
+    [
+     "rightUpperArm",
+     {
+      "meanDeg": 9.19,
+      "maxDeg": 9.19,
+      "worldDeltaMeanDeg": 9.906
+     }
+    ],
+    [
+     "leftFoot",
+     {
+      "meanDeg": 7.537,
+      "maxDeg": 7.537,
+      "worldDeltaMeanDeg": 4.401
+     }
+    ],
+    [
+     "leftShoulder",
+     {
+      "meanDeg": 7.057,
+      "maxDeg": 7.057,
+      "worldDeltaMeanDeg": 7.258
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {
+    "leftFoot": 4.153,
+    "rightFoot": 6.202,
+    "head": 6.352,
+    "leftHand": 10.844,
+    "rightHand": 10.157
+   },
+   "perBone": {
+    "leftUpperLeg": {
+     "meanDeg": 3.837,
+     "maxDeg": 3.837,
+     "worldDeltaMeanDeg": 3.9
+    },
+    "rightUpperLeg": {
+     "meanDeg": 6.288,
+     "maxDeg": 6.288,
+     "worldDeltaMeanDeg": 7.124
+    },
+    "leftLowerLeg": {
+     "meanDeg": 7.049,
+     "maxDeg": 7.049,
+     "worldDeltaMeanDeg": 6.835
+    },
+    "rightLowerLeg": {
+     "meanDeg": 1.665,
+     "maxDeg": 1.665,
+     "worldDeltaMeanDeg": 8.171
+    },
+    "leftFoot": {
+     "meanDeg": 7.537,
+     "maxDeg": 7.537,
+     "worldDeltaMeanDeg": 4.401
+    },
+    "rightFoot": {
+     "meanDeg": 1.515,
+     "maxDeg": 1.515,
+     "worldDeltaMeanDeg": 7.09
+    },
+    "spine": {
+     "meanDeg": 0.147,
+     "maxDeg": 0.147,
+     "worldDeltaMeanDeg": 1.654
+    },
+    "chest": {
+     "meanDeg": 0.036,
+     "maxDeg": 0.036,
+     "worldDeltaMeanDeg": 1.681
+    },
+    "neck": {
+     "meanDeg": 0.145,
+     "maxDeg": 0.145,
+     "worldDeltaMeanDeg": 1.744
+    },
+    "head": {
+     "meanDeg": 6.347,
+     "maxDeg": 6.347,
+     "worldDeltaMeanDeg": 6.1
+    },
+    "leftShoulder": {
+     "meanDeg": 7.057,
+     "maxDeg": 7.057,
+     "worldDeltaMeanDeg": 7.258
+    },
+    "rightShoulder": {
+     "meanDeg": 6.509,
+     "maxDeg": 6.509,
+     "worldDeltaMeanDeg": 6.876
+    },
+    "leftUpperArm": {
+     "meanDeg": 10.826,
+     "maxDeg": 10.826,
+     "worldDeltaMeanDeg": 14.282
+    },
+    "rightUpperArm": {
+     "meanDeg": 9.19,
+     "maxDeg": 9.19,
+     "worldDeltaMeanDeg": 9.906
+    },
+    "leftLowerArm": {
+     "meanDeg": 19.624,
+     "maxDeg": 19.624,
+     "worldDeltaMeanDeg": 24.931
+    },
+    "rightLowerArm": {
+     "meanDeg": 17.808,
+     "maxDeg": 17.808,
+     "worldDeltaMeanDeg": 17.972
+    },
+    "leftHand": {
+     "meanDeg": 20.824,
+     "maxDeg": 20.824,
+     "worldDeltaMeanDeg": 12.348
+    },
+    "rightHand": {
+     "meanDeg": 18.066,
+     "maxDeg": 18.066,
+     "worldDeltaMeanDeg": 9.035
+    },
+    "leftToes": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 4.401
+    },
+    "rightToes": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 7.09
+    },
+    "leftEye": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 6.1
+    },
+    "rightEye": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 6.1
+    },
+    "hips": {
+     "meanDeg": 1.777,
+     "maxDeg": 1.777,
+     "worldDeltaMeanDeg": 1.777
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "smile": {
+   "sourceFile": "bn0010_Face1_Smile1.anim",
+   "frames": 71,
+   "samplingMethod": "SampleAnimation",
+   "face": {
+    "morphCount": 22,
+    "maxAbsDiff": 1e-06,
+    "onlyInUnity": [],
+    "onlyInConverter": [],
+    "morphs": {
+     "EyeInner_Up_left": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.34,
+      "converterMax": 0.34
+     },
+     "EyeInner_Up_right": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3822,
+      "converterMax": 0.3822
+     },
+     "Eyeunder_Up": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.4591,
+      "converterMax": 0.4591
+     },
+     "Mouth_Large": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.2163,
+      "converterMax": 0.2163
+     },
+     "Mouth_Small": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.507,
+      "converterMax": 0.507
+     },
+     "Mouth_Smile1": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.8413,
+      "converterMax": 0.8413
+     },
+     "browInnerUp": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.352,
+      "converterMax": 0.352
+     },
+     "eyeBlinkLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.0519,
+      "converterMax": 0.0519
+     },
+     "eyeBlinkRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.0519,
+      "converterMax": 0.0519
+     },
+     "eyeSquintLeft": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.7511,
+      "converterMax": 0.7511
+     },
+     "eyeSquintRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3525,
+      "converterMax": 0.3525
+     },
+     "mouthDimpleLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.529,
+      "converterMax": 0.529
+     },
+     "mouthDimpleRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.486,
+      "converterMax": 0.486
+     },
+     "mouthLowerDownRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.1566,
+      "converterMax": 0.1566
+     },
+     "mouthShrugLower": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.1767,
+      "converterMax": 0.1767
+     },
+     "mouthShrugUpper": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.1887,
+      "converterMax": 0.1887
+     },
+     "mouthStretchLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.3706,
+      "converterMax": 0.3706
+     },
+     "なごみ": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.129,
+      "converterMax": 0.129
+     },
+     "にこり": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 1.0,
+      "converterMax": 1.0
+     },
+     "まばたき": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.4929,
+      "converterMax": 0.4929
+     },
+     "ウィンク右": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.038,
+      "converterMax": 0.038
+     },
+     "上": {
+      "maxAbsDiff": 1e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.747,
+      "converterMax": 0.747
+     }
+    }
+   }
+  },
+  "stand": {
+   "sourceFile": "bn0010_stand_still.anim",
+   "frames": 7,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 3.546,
+   "maxDeg": 21.899,
+   "boneFrames": 147,
+   "regions": {
+    "arms": {
+     "meanDeg": 7.15,
+     "maxDeg": 21.899,
+     "bones": 8
+    },
+    "legs": {
+     "meanDeg": 2.09,
+     "maxDeg": 5.957,
+     "bones": 8
+    },
+    "torso": {
+     "meanDeg": 0.108,
+     "maxDeg": 0.384,
+     "bones": 5
+    }
+   },
+   "worstBones": [
+    [
+     "rightUpperArm",
+     {
+      "meanDeg": 21.899,
+      "maxDeg": 21.899,
+      "worldDeltaMeanDeg": 22.359
+     }
+    ],
+    [
+     "leftUpperArm",
+     {
+      "meanDeg": 13.888,
+      "maxDeg": 13.888,
+      "worldDeltaMeanDeg": 13.424
+     }
+    ],
+    [
+     "rightHand",
+     {
+      "meanDeg": 7.755,
+      "maxDeg": 7.755,
+      "worldDeltaMeanDeg": 23.63
+     }
+    ],
+    [
+     "rightLowerArm",
+     {
+      "meanDeg": 6.426,
+      "maxDeg": 6.426,
+      "worldDeltaMeanDeg": 16.002
+     }
+    ],
+    [
+     "rightUpperLeg",
+     {
+      "meanDeg": 5.957,
+      "maxDeg": 5.957,
+      "worldDeltaMeanDeg": 5.696
+     }
+    ],
+    [
+     "leftUpperLeg",
+     {
+      "meanDeg": 5.883,
+      "maxDeg": 5.883,
+      "worldDeltaMeanDeg": 6.207
+     }
+    ],
+    [
+     "leftShoulder",
+     {
+      "meanDeg": 2.335,
+      "maxDeg": 2.335,
+      "worldDeltaMeanDeg": 2.369
+     }
+    ],
+    [
+     "leftFoot",
+     {
+      "meanDeg": 2.166,
+      "maxDeg": 2.166,
+      "worldDeltaMeanDeg": 5.03
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {
+    "leftFoot": 4.684,
+    "rightFoot": 5.034,
+    "head": 0.157,
+    "leftHand": 14.951,
+    "rightHand": 23.29
+   },
+   "perBone": {
+    "leftUpperLeg": {
+     "meanDeg": 5.883,
+     "maxDeg": 5.883,
+     "worldDeltaMeanDeg": 6.207
+    },
+    "rightUpperLeg": {
+     "meanDeg": 5.957,
+     "maxDeg": 5.957,
+     "worldDeltaMeanDeg": 5.696
+    },
+    "leftLowerLeg": {
+     "meanDeg": 1.226,
+     "maxDeg": 1.226,
+     "worldDeltaMeanDeg": 7.118
+    },
+    "rightLowerLeg": {
+     "meanDeg": 1.484,
+     "maxDeg": 1.484,
+     "worldDeltaMeanDeg": 4.81
+    },
+    "leftFoot": {
+     "meanDeg": 2.166,
+     "maxDeg": 2.166,
+     "worldDeltaMeanDeg": 5.03
+    },
+    "rightFoot": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 4.81
+    },
+    "spine": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 0.384
+    },
+    "chest": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 0.384
+    },
+    "neck": {
+     "meanDeg": 0.157,
+     "maxDeg": 0.157,
+     "worldDeltaMeanDeg": 0.403
+    },
+    "head": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 0.403
+    },
+    "leftShoulder": {
+     "meanDeg": 2.335,
+     "maxDeg": 2.335,
+     "worldDeltaMeanDeg": 2.369
+    },
+    "rightShoulder": {
+     "meanDeg": 1.897,
+     "maxDeg": 1.897,
+     "worldDeltaMeanDeg": 1.919
+    },
+    "leftUpperArm": {
+     "meanDeg": 13.888,
+     "maxDeg": 13.888,
+     "worldDeltaMeanDeg": 13.424
+    },
+    "rightUpperArm": {
+     "meanDeg": 21.899,
+     "maxDeg": 21.899,
+     "worldDeltaMeanDeg": 22.359
+    },
+    "leftLowerArm": {
+     "meanDeg": 0.97,
+     "maxDeg": 0.97,
+     "worldDeltaMeanDeg": 12.744
+    },
+    "rightLowerArm": {
+     "meanDeg": 6.426,
+     "maxDeg": 6.426,
+     "worldDeltaMeanDeg": 16.002
+    },
+    "leftHand": {
+     "meanDeg": 2.033,
+     "maxDeg": 2.033,
+     "worldDeltaMeanDeg": 14.722
+    },
+    "rightHand": {
+     "meanDeg": 7.755,
+     "maxDeg": 7.755,
+     "worldDeltaMeanDeg": 23.63
+    },
+    "leftToes": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 5.03
+    },
+    "rightToes": {
+     "meanDeg": 0.0,
+     "maxDeg": 0.0,
+     "worldDeltaMeanDeg": 4.809
+    },
+    "hips": {
+     "meanDeg": 0.384,
+     "maxDeg": 0.384,
+     "worldDeltaMeanDeg": 0.384
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "thumbsUp": {
+   "sourceFile": "bn0010_hands_thumbs_up.anim",
+   "frames": 1,
+   "samplingMethod": "SampleAnimation",
+   "meanDeg": 3.071,
+   "maxDeg": 11.16,
+   "boneFrames": 30,
+   "regions": {
+    "leftFingers": {
+     "meanDeg": 3.073,
+     "maxDeg": 11.16,
+     "bones": 15
+    },
+    "rightFingers": {
+     "meanDeg": 3.069,
+     "maxDeg": 11.158,
+     "bones": 15
+    }
+   },
+   "worstBones": [
+    [
+     "leftIndexIntermediate",
+     {
+      "meanDeg": 11.16,
+      "maxDeg": 11.16,
+      "worldDeltaMeanDeg": 102.914
+     }
+    ],
+    [
+     "rightIndexIntermediate",
+     {
+      "meanDeg": 11.158,
+      "maxDeg": 11.158,
+      "worldDeltaMeanDeg": 102.916
+     }
+    ],
+    [
+     "leftMiddleIntermediate",
+     {
+      "meanDeg": 5.811,
+      "maxDeg": 5.811,
+      "worldDeltaMeanDeg": 107.483
+     }
+    ],
+    [
+     "rightMiddleIntermediate",
+     {
+      "meanDeg": 5.811,
+      "maxDeg": 5.811,
+      "worldDeltaMeanDeg": 107.485
+     }
+    ],
+    [
+     "leftMiddleProximal",
+     {
+      "meanDeg": 4.162,
+      "maxDeg": 4.162,
+      "worldDeltaMeanDeg": 112.301
+     }
+    ],
+    [
+     "rightMiddleProximal",
+     {
+      "meanDeg": 4.161,
+      "maxDeg": 4.161,
+      "worldDeltaMeanDeg": 112.302
+     }
+    ],
+    [
+     "leftIndexDistal",
+     {
+      "meanDeg": 3.903,
+      "maxDeg": 3.903,
+      "worldDeltaMeanDeg": 103.598
+     }
+    ],
+    [
+     "rightIndexDistal",
+     {
+      "meanDeg": 3.902,
+      "maxDeg": 3.902,
+      "worldDeltaMeanDeg": 103.6
+     }
+    ]
+   ],
+   "endEffectorsHipsRelativeMeanDeg": {},
+   "perBone": {
+    "leftThumbMetacarpal": {
+     "meanDeg": 0.382,
+     "maxDeg": 0.382,
+     "worldDeltaMeanDeg": 114.58
+    },
+    "leftThumbProximal": {
+     "meanDeg": 1.078,
+     "maxDeg": 1.078,
+     "worldDeltaMeanDeg": 114.415
+    },
+    "leftThumbDistal": {
+     "meanDeg": 1.277,
+     "maxDeg": 1.277,
+     "worldDeltaMeanDeg": 114.13
+    },
+    "leftIndexProximal": {
+     "meanDeg": 3.092,
+     "maxDeg": 3.092,
+     "worldDeltaMeanDeg": 113.321
+    },
+    "leftIndexIntermediate": {
+     "meanDeg": 11.16,
+     "maxDeg": 11.16,
+     "worldDeltaMeanDeg": 102.914
+    },
+    "leftIndexDistal": {
+     "meanDeg": 3.903,
+     "maxDeg": 3.903,
+     "worldDeltaMeanDeg": 103.598
+    },
+    "leftMiddleProximal": {
+     "meanDeg": 4.162,
+     "maxDeg": 4.162,
+     "worldDeltaMeanDeg": 112.301
+    },
+    "leftMiddleIntermediate": {
+     "meanDeg": 5.811,
+     "maxDeg": 5.811,
+     "worldDeltaMeanDeg": 107.483
+    },
+    "leftMiddleDistal": {
+     "meanDeg": 3.012,
+     "maxDeg": 3.012,
+     "worldDeltaMeanDeg": 108.703
+    },
+    "leftRingProximal": {
+     "meanDeg": 2.669,
+     "maxDeg": 2.669,
+     "worldDeltaMeanDeg": 112.767
+    },
+    "leftRingIntermediate": {
+     "meanDeg": 3.67,
+     "maxDeg": 3.67,
+     "worldDeltaMeanDeg": 109.937
+    },
+    "leftRingDistal": {
+     "meanDeg": 2.999,
+     "maxDeg": 2.999,
+     "worldDeltaMeanDeg": 111.441
+    },
+    "leftLittleProximal": {
+     "meanDeg": 2.11,
+     "maxDeg": 2.11,
+     "worldDeltaMeanDeg": 113.101
+    },
+    "leftLittleIntermediate": {
+     "meanDeg": 0.405,
+     "maxDeg": 0.405,
+     "worldDeltaMeanDeg": 113.476
+    },
+    "leftLittleDistal": {
+     "meanDeg": 0.363,
+     "maxDeg": 0.363,
+     "worldDeltaMeanDeg": 113.382
+    },
+    "rightThumbMetacarpal": {
+     "meanDeg": 0.371,
+     "maxDeg": 0.371,
+     "worldDeltaMeanDeg": 114.578
+    },
+    "rightThumbProximal": {
+     "meanDeg": 1.063,
+     "maxDeg": 1.063,
+     "worldDeltaMeanDeg": 114.417
+    },
+    "rightThumbDistal": {
+     "meanDeg": 1.259,
+     "maxDeg": 1.259,
+     "worldDeltaMeanDeg": 114.137
+    },
+    "rightIndexProximal": {
+     "meanDeg": 3.092,
+     "maxDeg": 3.092,
+     "worldDeltaMeanDeg": 113.321
+    },
+    "rightIndexIntermediate": {
+     "meanDeg": 11.158,
+     "maxDeg": 11.158,
+     "worldDeltaMeanDeg": 102.916
+    },
+    "rightIndexDistal": {
+     "meanDeg": 3.902,
+     "maxDeg": 3.902,
+     "worldDeltaMeanDeg": 103.6
+    },
+    "rightMiddleProximal": {
+     "meanDeg": 4.161,
+     "maxDeg": 4.161,
+     "worldDeltaMeanDeg": 112.302
+    },
+    "rightMiddleIntermediate": {
+     "meanDeg": 5.811,
+     "maxDeg": 5.811,
+     "worldDeltaMeanDeg": 107.485
+    },
+    "rightMiddleDistal": {
+     "meanDeg": 3.011,
+     "maxDeg": 3.011,
+     "worldDeltaMeanDeg": 108.706
+    },
+    "rightRingProximal": {
+     "meanDeg": 2.669,
+     "maxDeg": 2.669,
+     "worldDeltaMeanDeg": 112.767
+    },
+    "rightRingIntermediate": {
+     "meanDeg": 3.669,
+     "maxDeg": 3.669,
+     "worldDeltaMeanDeg": 109.939
+    },
+    "rightRingDistal": {
+     "meanDeg": 2.998,
+     "maxDeg": 2.998,
+     "worldDeltaMeanDeg": 111.441
+    },
+    "rightLittleProximal": {
+     "meanDeg": 2.111,
+     "maxDeg": 2.111,
+     "worldDeltaMeanDeg": 113.101
+    },
+    "rightLittleIntermediate": {
+     "meanDeg": 0.404,
+     "maxDeg": 0.404,
+     "worldDeltaMeanDeg": 113.474
+    },
+    "rightLittleDistal": {
+     "meanDeg": 0.362,
+     "maxDeg": 0.362,
+     "worldDeltaMeanDeg": 113.381
+    }
+   },
+   "bonesMissingInUnity": []
+  },
+  "wink": {
+   "sourceFile": "bn0010_Face1_Wink.anim",
+   "frames": 61,
+   "samplingMethod": "SampleAnimation",
+   "face": {
+    "morphCount": 22,
+    "maxAbsDiff": 2e-06,
+    "onlyInUnity": [],
+    "onlyInConverter": [],
+    "morphs": {
+     "EyeInner_Up_left": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.19,
+      "converterMax": 0.19
+     },
+     "EyeInner_Up_right": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.23,
+      "converterMax": 0.23
+     },
+     "Eyeunder_Up": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.388,
+      "converterMax": 0.388
+     },
+     "Mouth_Laugh2": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.667,
+      "converterMax": 0.667
+     },
+     "Mouth_SquareTooth": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.529,
+      "converterMax": 0.529
+     },
+     "Pupil_Large": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.291,
+      "converterMax": 0.291
+     },
+     "browDownRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.379,
+      "converterMax": 0.379
+     },
+     "browInnerUp": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.296,
+      "converterMax": 0.296
+     },
+     "browOuterUpRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.35,
+      "converterMax": 0.35
+     },
+     "eyeWideLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.6,
+      "converterMax": 0.6
+     },
+     "eyeWideRight": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.6,
+      "converterMax": 0.6
+     },
+     "mouthDimpleLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.605,
+      "converterMax": 0.605
+     },
+     "mouthUpperUpLeft": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.263,
+      "converterMax": 0.263
+     },
+     "ω□": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.794,
+      "converterMax": 0.794
+     },
+     "なごみ": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.078,
+      "converterMax": 0.078
+     },
+     "にこり": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 1.0,
+      "converterMax": 1.0
+     },
+     "にやり": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.599,
+      "converterMax": 0.599
+     },
+     "まばたき": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.188,
+      "converterMax": 0.188
+     },
+     "ウィンク右": {
+      "maxAbsDiff": 2e-06,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.895,
+      "converterMax": 0.895
+     },
+     "下": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.287,
+      "converterMax": 0.287
+     },
+     "真面目": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.524,
+      "converterMax": 0.524
+     },
+     "ｳｨﾝｸ２右": {
+      "maxAbsDiff": 0.0,
+      "inUnity": true,
+      "inConverter": true,
+      "unityMax": 0.226,
+      "converterMax": 0.226
+     }
+    }
+   }
+  }
+ }
+}

@@ -4,7 +4,7 @@ Original anime character for a frontend-only lofi experience, with reusable outf
 
 ## Current: cozy scene MVP
 
-Latest: [Marycia supplied poses and expressions](docs/marycia-source-motions/README.md).
+Latest: [Motion spike: procedural life layer, a reference-video stretch, the same stretch through Rokoko Vision, and proportion-aware IK arms](docs/motion-spike/README.md); every iteration and its lesson in the [motion learning log](docs/motion-learning-log.md). Earlier: [Marycia supplied poses and expressions](docs/marycia-source-motions/README.md).
 
 A seated Marycia in a furnished afternoon room, with her supplied facial idle, expressions and finger poses. Actions blend back to idle. The previous placeholder motions are removed from playback. Furniture is CC0; character and current motions come from the purchased Marycia package.
 

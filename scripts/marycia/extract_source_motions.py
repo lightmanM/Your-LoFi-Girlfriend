@@ -2,7 +2,13 @@
 Samples actual float curves at 60 Hz, including weighted tangent interpolation.
 """
 import pathlib,re,json,argparse,math,hashlib,bisect
-CLIPS={'sit':'bn0010_sit','stand':'bn0010_stand_still','afk':'bn0010_AFK','handsIdle':'bn0010_hands_idle','peace':'bn0010_hands_peace','thumbsUp':'bn0010_hands_thumbs_up','heart':'bn0010_hands_Heart','fingerHeart':'bn0010_hands_Heart_Tip','faceIdle':'bn0010_Face1_Default','smile':'bn0010_Face1_Smile1','wink':'bn0010_Face1_Wink','relax':'bn0010_Face1_Relax'}
+CLIPS={'sit':'bn0010_sit','stand':'bn0010_stand_still','afk':'bn0010_AFK',
+ 'handsIdle':'bn0010_hands_idle','peace':'bn0010_hands_peace','thumbsUp':'bn0010_hands_thumbs_up','heart':'bn0010_hands_Heart','fingerHeart':'bn0010_hands_Heart_Tip',
+ 'fist':'bn0010_hands_fist','gun':'bn0010_hands_gun','open':'bn0010_hands_open','point':'bn0010_hands_point','rock':'bn0010_hands_rock',
+ 'faceIdle':'bn0010_Face1_Default','smile':'bn0010_Face1_Smile1','wink':'bn0010_Face1_Wink','relax':'bn0010_Face1_Relax',
+ 'ahoge':'bn0010_Face1_Ahoge','anger':'bn0010_Face1_Anger','ask':'bn0010_Face1_Ask','cry':'bn0010_Face1_Cry','laugh':'bn0010_Face1_D_Laugh','sad':'bn0010_Face1_D_Sad','serious':'bn0010_Face1_D_Serious',
+ 'eyesClosed':'bn0010_Face1_EyeClose_0','eyesClosedSoft':'bn0010_Face1_EyeClose_1','eyeClosedLeft':'bn0010_Face1_EyeClose_L','eyeClosedRight':'bn0010_Face1_EyeClose_R',
+ 'scared':'bn0010_Face1_Scared','smile2':'bn0010_Face1_Smile2','smug':'bn0010_Face1_Smug','star':'bn0010_Face1_Star','faceAfk':'bn0010_Face_AFK'}
 def evaluate_curve(keys,t):
  if len(keys)==1 or t<=keys[0]['time']:return keys[0]['value']
  if t>=keys[-1]['time']:return keys[-1]['value']

@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/room.html** for the full scene MVP. **Play action** runs the selected supplied expression or finger pose and blends back to Marycia’s supplied facial idle and sitting pose. **Demonstrate transition** runs two queued actions and opens the blend inspector. Finger poses retain the seated arms and still need contact/arm-placement polish. Pause/resume, half-speed inspection, a fixed camera with small pointing adjustments and local VRM replacement are included.
+Open **http://127.0.0.1:5173/room.html** for the full scene MVP. **Play action** runs the selected supplied expression or finger pose (20 face clips and 10 finger poses from the package, plus the authored stretch) and blends back to Marycia’s supplied facial idle and sitting pose. **Demonstrate transition** runs two queued actions and opens the blend inspector. Finger poses retain the seated arms and still need contact/arm-placement polish. Pause/resume, half-speed inspection, a fixed camera with small pointing adjustments and local VRM replacement are included.
 
 **Golden-hour mood:** warm lamps, a sunset window view, restrained bloom, grain and dust. The camera position is locked; drag permits at most 2.5° yaw / 1.5° pitch, then returns to center. Wheel/pinch cannot zoom the 3D camera. Use Behind the scene → Lighting to compare with the original lighting.
 

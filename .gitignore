@@ -15,3 +15,10 @@ scripts/marycia/.godot/
 # Keep compact final MP4 demos in Git; raw browser captures stay local.
 docs/**/raw-video/
 docs/**/*.webm
+web/public/models/marycia/authored-motions.json
+
+# Spike scratch: dependencies, renders and sample models stay local
+spike/**/node_modules/
+spike/**/out/
+spike/render-pass/public/models/
+spike/render-pass/shots/

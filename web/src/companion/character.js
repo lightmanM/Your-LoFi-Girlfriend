@@ -4,6 +4,7 @@ import {inspectCharacter} from '../character-contract.js';
 import {Interaction} from './interaction.js';
 import {applySeatedProfile} from './character-profile.js';
 import {sampleScalar,sampleRotation,loopTime,actionTime,SOURCE_ACTIONS} from './source-motion.js';
+import {lifeSignals,applyLife,gazePoint} from './life.js';
 
 export class CompanionCharacter {
  constructor(vrm,library,profile='generic'){
@@ -11,7 +12,10 @@ export class CompanionCharacter {
   applySeatedProfile(vrm,profile);VRMUtils.rotateVRM0(vrm);vrm.update(0);
   this.interaction=new Interaction({duration:3,blendIn:.5,blendOut:.65});
   this.time=0;this.speed=1;this.action='smile';this.queuedAction=null;this.faceValues={};
-  if(vrm.lookAt)vrm.lookAt.autoUpdate=false;
+  // Gaze target: a point the eyes track; the head follows a little through the life layer.
+  this.gaze=new THREE.Object3D();this.gaze.name='Gaze target';this.gazeFocus=new THREE.Vector3(.85,1.42,2.45);this.gazeGlance=new THREE.Vector3(-.95,.5,.45);
+  this.life={enabled:true,amount:1};
+  if(vrm.lookAt){vrm.lookAt.target=this.gaze;vrm.lookAt.autoUpdate=true;}
   this.faceTargets=new Map();
   vrm.scene.traverse(o=>{
    if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}
@@ -38,6 +42,12 @@ export class CompanionCharacter {
   this.applyTracks(clips.sit,0);this.applyTracks(clips.handsIdle,0);
   const action=clips[SOURCE_ACTIONS[this.action].clip];
   if(c.weight>0)this.applyTracks(action,actionTime(c.elapsed,action.duration),c.weight);
+  if(this.life.enabled){
+   // Keep breathing under actions; calm the idle head drift while one plays.
+   const s=lifeSignals(this.time,{headDepth:1-.7*c.weight,gazeDepth:1-.5*c.weight});
+   applyLife(this.vrm,s,this.life.amount);
+   gazePoint(this.time,s,{focus:this.gazeFocus,glance:c.weight>0?null:this.gazeGlance,out:this.gaze.position});
+  }
  }
  applyFace(){
   const clips=this.library.clips,c=this.interaction;
@@ -51,7 +61,8 @@ export class CompanionCharacter {
    for(const {mesh,index} of this.faceTargets.get(name)??[])mesh.morphTargetInfluences[index]=value;
   }
  }
- update(dt){
+ update(dt,camera){
+  if(camera)this.gazeFocus.copy(camera.position);
   const c=this.interaction,delta=c.paused?0:Math.min(dt,.05)*this.speed;
   const started=c.started;this.time+=delta;c.update(delta);
   if(c.started!==started&&this.queuedAction){this.setAction(this.queuedAction);this.queuedAction=null;}
@@ -73,7 +84,7 @@ export class CompanionCharacter {
    if(!raw||!normalized)continue;
    joints[name]={rawQuaternion:raw.quaternion.toArray(),position:raw.getWorldPosition(new THREE.Vector3()).toArray(),quaternion:normalized.quaternion.toArray()};
   }
-  return {expressions:Object.fromEntries(['blink','happy','aa'].map(n=>[n,this.vrm.expressionManager?.getValue(n)??0])),springJoints:this.vrm.springBoneManager?.joints.size??0,interaction:this.interaction.snapshot(),time:this.time,speed:this.speed,joints,source:this.library.source,action:this.action,faceMorphs:{...this.faceValues},missingFaceMorphs:this.missingFaceMorphs,clips:Object.entries(this.library.clips).map(([name,c])=>({name,duration:c.duration,tracks:c.tracks.length})),capabilities:this.report.capabilities};
+  return {life:{...this.life,gaze:this.gaze.position.toArray()},expressions:Object.fromEntries(['blink','happy','aa'].map(n=>[n,this.vrm.expressionManager?.getValue(n)??0])),springJoints:this.vrm.springBoneManager?.joints.size??0,interaction:this.interaction.snapshot(),time:this.time,speed:this.speed,joints,source:this.library.source,action:this.action,faceMorphs:{...this.faceValues},missingFaceMorphs:this.missingFaceMorphs,clips:Object.entries(this.library.clips).map(([name,c])=>({name,duration:c.duration,tracks:c.tracks.length})),capabilities:this.report.capabilities};
  }
  dispose(){this.vrm.scene.removeFromParent();VRMUtils.deepDispose(this.vrm.scene);}
 }

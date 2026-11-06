@@ -4,7 +4,7 @@ root=pathlib.Path(__file__).resolve().parents[2]
 p=root/'web/public/models/marycia/source-motions.json';data=json.loads(p.read_text())
 b=(root/'web/public/models/marycia/marycia.vrm').read_bytes();length=struct.unpack_from('<I',b,12)[0];vrm=json.loads(b[20:20+length]);names=set()
 for mesh in vrm['meshes']:names.update(mesh.get('extras',{}).get('targetNames',[]))
-report={'librarySHA256':hashlib.sha256(p.read_bytes()).hexdigest(),'libraryBytes':len(p.read_bytes()),'vrmBytes':len(b),'clips':{},'unityParityVerified':False}
+report={'librarySHA256':hashlib.sha256(p.read_bytes()).hexdigest(),'libraryBytes':len(p.read_bytes()),'vrmBytes':len(b),'clips':{},'unityParityVerified':bool(data.get('conversion',{}).get('unityParityVerified',False))}
 for key,c in data['clips'].items():
  times=c['times'];assert times and times[0]==0
  assert all(math.isfinite(t) for t in times) and all(b>a for a,b in zip(times,times[1:]))

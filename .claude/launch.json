@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lofi-web",
+      "runtimeExecutable": "web/node_modules/.bin/vite",
+      "runtimeArgs": [
+        "web",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5174",
+        "--strictPort"
+      ],
+      "port": 5174
+    },
+    {
+      "name": "spike-render-pass",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "spike/render-pass",
+        "run",
+        "dev"
+      ],
+      "port": 5175
+    }
+  ]
+}

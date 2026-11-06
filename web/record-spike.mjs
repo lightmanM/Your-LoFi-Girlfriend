@@ -1,0 +1,31 @@
+// Spike recording: idle life layer, the authored stretch, then a close-up with the
+// life layer off and on. QA-only camera moves; the public room keeps its fixed camera.
+import {chromium} from '@playwright/test';
+import fs from 'node:fs/promises';
+const out=new URL('../docs/motion-spike',import.meta.url).pathname;await fs.mkdir(out+'/raw-video',{recursive:true});
+const base=process.env.ROOM_URL??'http://127.0.0.1:5174/room.html';
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const context=await browser.newContext({viewport:{width:1280,height:900},recordVideo:{dir:out+'/raw-video',size:{width:1280,height:900}}});
+const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.route('**/src/companion/main.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace('const loader=','window.qaView=view;const loader=')});});
+await page.route('**/src/companion/character.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace('this.vrm=vrm;','window.qaCharacter=this;this.vrm=vrm;')});});
+await page.goto(base);await page.waitForFunction(()=>window.lofiRoom?.ready());
+const caption=(eyebrow,title,text)=>page.evaluate(([e,t,p])=>{document.querySelector('.scene-heading').innerHTML=`<p class="eyebrow">${e}</p><h1>${t}</h1><p>${p}</p>`;},[eyebrow,title,text]);
+await caption('MOTION SPIKE','Idle with the life layer','Breathing, weight shift, head drift, gaze.');
+await page.waitForTimeout(6000);
+await caption('MOTION SPIKE','Stretch break from a reference video','Pexels clip tracked with MediaPipe, retargeted over the supplied seated pose.');
+await page.evaluate(()=>lofiRoom.greet('stretch'));
+await page.waitForFunction(()=>lofiRoom.snapshot().interaction.completed>=1);await page.waitForTimeout(2500);
+await page.evaluate(()=>{const v=qaView;v.camera.position.set(-.05,1.05,.55);v.camera.lookAt(-.35,.95,-.57);v.controls.base.copy(v.camera.quaternion);qaCharacter.life.enabled=false;});
+await caption('CLOSE-UP QA VIEW','Life layer off','Supplied pose and facial idle only.');
+await page.waitForTimeout(4500);
+await page.evaluate(()=>{qaCharacter.life.enabled=true;});
+await caption('CLOSE-UP QA VIEW','Life layer on','Breath, drift and gaze added procedurally.');
+await page.waitForTimeout(9000);
+await page.evaluate(()=>lofiRoom.greet('stretch'));
+await caption('CLOSE-UP QA VIEW','Stretch break, close up','Eyes close while the arms are overhead; fingers keep the supplied relaxed hand.');
+await page.waitForFunction(()=>lofiRoom.snapshot().interaction.completed>=2);await page.waitForTimeout(2000);
+const final=await page.evaluate(()=>lofiRoom.snapshot());
+await fs.writeFile(out+'/demo-evidence.json',JSON.stringify({recordedAt:new Date().toISOString(),errors,completed:final.interaction.completed,clips:final.clips,life:final.life,maxJointStepMeters:final.maxJointStepMeters},null,2));
+const video=page.video();await context.close();await video.saveAs(out+'/demo.webm');await browser.close();
+console.log('recorded; completed='+final.interaction.completed+' errors='+errors.length);
