@@ -23,6 +23,7 @@ scripts/marycia/.godot/
 docs/**/raw-video/
 docs/**/*.webm
 web/public/models/marycia/authored-motions.json
+web/public/models/marycia/stretch-break.json
 
 # Spike scratch: dependencies, renders and sample models stay local
 spike/**/node_modules/
@@ -39,3 +40,19 @@ spike/render-pass/shots/
 /assets/environment/balcony-web-exploration/*-joined.glb
 /assets/environment/balcony-web-exploration/*-meshopt.glb
 /assets/environment/balcony-web-exploration/balcony-web.glb
+
+# Balcony plate: rendered from purchased archviz textures; stays local until the licence is cleared
+web/public/environment/balcony-plate/
+web/public/environment/balcony-toon/
+web/public/models/marycia/reading-balcony.json
+
+# Renders of the purchased Balcony scene, and clips filmed in it, stay local until the licence is cleared
+/docs/design/balcony-*/**/*.png
+/docs/design/balcony-*/**/*.mp4
+/docs/design/framing/**/*.png
+/docs/design/framing/**/*.mp4
+/docs/design/viewer/**/*.png
+/docs/design/viewer/**/*.mp4
+/docs/design/reading-motion/**/*.png
+/docs/design/reading-motion/**/*.mp4
+/docs/design/compression/**/*.png

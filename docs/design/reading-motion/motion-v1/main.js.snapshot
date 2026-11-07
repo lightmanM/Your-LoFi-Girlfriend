@@ -1,0 +1,264 @@
+// Balcony reading: a fixed-eye background plate rendered in Cycles, a depth-only chair, the live VRM in its
+// reading pose, and the out-of-focus foreground leaves drawn over her. Camera position is fixed; it only rotates
+// within the FixedCamera look limits, which the plate covers, so the flat plate stays exact.
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
+import {FixedCamera,bindCameraLook} from '../companion/fixed-camera.js';
+import {lifeSignals,applyLife} from '../companion/life.js';
+import {readVRMDocument} from '../vrm-file.js';
+import {ReadingMotion,BookGrip} from './reading.js';
+import {reachArm} from './arm-ik.js';
+import {ClipEvent} from './clip-player.js';
+import {shoulderRhythm,torsoFollow,armInTorso} from './body-coupling.js';
+
+const BASE='/environment/balcony-plate/';
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const host=$('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.NeutralToneMapping;renderer.info.autoReset=false;host.append(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(17,16/9,.05,120);
+const loader=new GLTFLoader();loader.register(p=>new VRMLoaderPlugin(p));
+const texLoader=new THREE.TextureLoader();
+const state={data:null,vrm:null,pose:null,time:0,ready:false,error:null,frames:[],bench:null,reading:null,grip:null,look:null,stretch:null,nextStretch:Infinity};
+
+class BalconyCamera extends FixedCamera{
+ constructor(cam,data){super(cam);this.data=data;}
+ frame(){
+  this.camera.position.fromArray(this.data.position);this.camera.quaternion.fromArray(this.data.quaternion);
+  this.base.copy(this.camera.quaternion);this.yaw=this.pitch=this.targetYaw=this.targetPitch=0;
+ }
+}
+let rig=null;
+const rad=THREE.MathUtils.degToRad;
+function fitCamera(){
+ const w=host.clientWidth,h=host.clientHeight,a=w/h,d=state.data.camera;
+ // Keep the authored 16:9 framing; wider screens crop top and bottom, narrower ones crop the sides.
+ camera.fov=a>=16/9?THREE.MathUtils.radToDeg(2*Math.atan(Math.tan(rad(d.display_hfov_deg)/2)/a)):d.display_vfov_deg;
+ camera.aspect=a;camera.updateProjectionMatrix();renderer.setSize(w,h);
+}
+function card(texture,hfov,vfov,distance,order,transparent){
+ const d=state.data.camera,q=new THREE.Quaternion().fromArray(d.quaternion);
+ const geo=new THREE.PlaneGeometry(2*distance*Math.tan(rad(hfov)/2),2*distance*Math.tan(rad(vfov)/2));
+ texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;
+ const mat=new THREE.MeshBasicMaterial({map:texture,toneMapped:false,depthTest:false,depthWrite:false,transparent});
+ const mesh=new THREE.Mesh(geo,mat);mesh.quaternion.copy(q);
+ mesh.position.fromArray(d.position).add(new THREE.Vector3(0,0,-distance).applyQuaternion(q));
+ mesh.renderOrder=order;mesh.frustumCulled=false;scene.add(mesh);return mesh;
+}
+function applyPose(){
+ const vrm=state.vrm,v0=vrm.meta.metaVersion==='0';
+ for(const t of state.pose.tracks){
+  const node=vrm.humanoid.getNormalizedBoneNode(t.bone);if(!node)continue;
+  node.quaternion.fromArray(t.rotations,0);if(v0){node.quaternion.x*=-1;node.quaternion.z*=-1;}
+ }
+ // Visible breathing and a slow weight shift; the head and eyes are driven by the reading layer.
+ applyLife(vrm,lifeSignals(state.time,{breathDepth:2.8,headDepth:.8,swayDepth:2.2}),1);
+}
+function placeCharacter(){
+ const vrm=state.vrm,c=state.data.character;
+ vrm.scene.scale.setScalar(c.scale);vrm.scene.rotation.y+=rad(c.yaw_deg);
+ applyPose();vrm.update(0);vrm.scene.updateMatrixWorld(true);
+ const hip=vrm.humanoid.getRawBoneNode('hips').getWorldPosition(new THREE.Vector3());
+ vrm.scene.position.add(new THREE.Vector3().fromArray(c.hips).sub(hip));vrm.scene.updateMatrixWorld(true);
+}
+async function load(){
+ const r=await fetch(BASE+'balcony.json');if(!r.ok)throw Error('balcony.json: HTTP '+r.status);
+ const data=state.data=await r.json();
+ rig=new BalconyCamera(camera,data.camera);rig.frame();bindCameraLook(renderer.domElement,rig);fitCamera();
+ new ResizeObserver(fitCamera).observe(host);
+ const [plate,fg,occluder,book,pose,vrmBuffer]=await Promise.all([
+  texLoader.loadAsync(BASE+data.plate.image),texLoader.loadAsync(BASE+data.foreground.image),
+  loader.loadAsync(BASE+data.occluder),loader.loadAsync(BASE+data.book),
+  fetch(data.pose).then(r=>{if(!r.ok)throw Error('pose: HTTP '+r.status);return r.json();}),
+  fetch(data.vrm).then(r=>{if(!r.ok)throw Error('character: HTTP '+r.status);return r.arrayBuffer();}),
+ ]);
+ card(plate,data.plate.hfov_deg,data.plate.vfov_deg,60,0,false);
+ card(fg,data.plate.hfov_deg,data.plate.vfov_deg,1.0,10,true);
+ occluder.scene.traverse(o=>{if(o.isMesh){o.material=new THREE.MeshBasicMaterial({colorWrite:false});o.renderOrder=1;}});scene.add(occluder.scene);
+ book.scene.traverse(o=>{if(o.isMesh)o.renderOrder=2;});scene.add(book.scene);
+ readVRMDocument(vrmBuffer);
+ const gltf=await loader.parseAsync(vrmBuffer,'');const vrm=state.vrm=gltf.userData.vrm;
+ VRMUtils.removeUnnecessaryVertices(vrm.scene);VRMUtils.combineSkeletons(vrm.scene);VRMUtils.rotateVRM0(vrm);
+ vrm.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.frustumCulled=false;}});
+ state.pose=pose;placeCharacter();scene.add(vrm.scene);
+ const look=state.look=new THREE.Object3D();look.position.fromArray(data.look_target);scene.add(look);
+ if(vrm.lookAt){vrm.lookAt.target=look;vrm.lookAt.autoUpdate=true;}
+ // The book rides between her hands; the reading layer moves her eyes and head along its text lines.
+ vrm.update(0);vrm.scene.updateMatrixWorld(true);
+ state.grip=new BookGrip(vrm,book.scene);
+ state.reading=new ReadingMotion(vrm,book.scene.children[0],{seed:+(params.get('seed')??7),eventScale:+(params.get('events')??1)});
+ // Occasional stretch break, if the authored clip is present (it is private: rendered from the purchased character).
+ const authored=await fetch('/models/marycia/authored-motions.json').then(r=>r.ok?r.json():null).catch(()=>null);
+ const sc=authored?.clips?.[STRETCH.clip];
+ if(sc){state.stretch=new ClipEvent(sc,STRETCH.options);state.nextStretch=params.has('stretch')?+params.get('stretch'):stretchGap();}
+ if(params.has('lines'))state.reading.linesPerPage=Math.max(1,+params.get('lines'));
+ const s=data.light;
+ const sun=new THREE.DirectionalLight(new THREE.Color().fromArray(s.color),s.intensity);sun.position.fromArray(s.direction).multiplyScalar(10).add(new THREE.Vector3().fromArray(data.character.hips));
+ sun.target.position.fromArray(data.character.hips);scene.add(sun,sun.target);
+ scene.add(new THREE.HemisphereLight(new THREE.Color().fromArray(s.sky),new THREE.Color().fromArray(s.ground),s.ambient));
+ state.ready=true;$('status').textContent='Marycia is reading. Drag to look around a little.';
+ if(params.has('stats'))$('stats').hidden=false;
+}
+function snapshot(){
+ const i=renderer.info,f=[...state.frames].sort((a,b)=>a-b);
+ const res=performance.getEntriesByType('resource').filter(e=>/balcony-plate|models\/marycia/.test(e.name));
+ return {ready:state.ready,error:state.error,calls:i.render.calls,triangles:i.render.triangles,textures:i.memory.textures,geometries:i.memory.geometries,
+  medianFrameMs:f.length?f[f.length>>1]:null,p95FrameMs:f.length?f[Math.floor(f.length*.95)]:null,frames:f.length,
+  transferBytes:res.reduce((n,e)=>n+(e.transferSize||e.encodedBodySize||0),0),resources:res.map(e=>({url:e.name.replace(location.origin,''),bytes:e.encodedBodySize})),
+  drawingBuffer:[renderer.domElement.width,renderer.domElement.height],pixelRatio:renderer.getPixelRatio(),camera:rig?.snapshot()};
+}
+// Stretch break: every 4 to 8 minutes of reading (scaled by ?events), never during a page turn or a look-up.
+// The clip's two-arm overhead stretch: from 10.4 s (hands resting on the lap) until the arms come down (19.4 s). Two
+// moments play slower: the swing up with a forearm snap (10.85 to 11.7 s) and the quick drop at the end (18.3 to 19.4 s).
+// pre/post: both hands carry the book down to her lap and back up; easeIn/easeOut: they let go of it and move into
+// (and out of) the clip. Shoulders follow the arms (body-coupling.js).
+const STRETCH={clip:'stretchRokokoIk',every:[240,480],options:{pre:2.3,easeIn:1.2,easeOut:1.2,post:1.7,start:10.4,end:19.4,
+ slow:[[10.85,11.7,.4],[18.3,19.4,.35]]}};
+function stretchGap(){const [a,b]=STRETCH.every,e=+(params.get('events')??1);return state.time+(a+(b-a)*Math.random())*e;}
+// The open book lying flat on her thighs, text toward her: the thighs' surface is found by casting rays down onto the
+// model where the book will rest; the pose is then kept relative to both upper legs, so the book rides along when
+// her legs shift.
+const lapRig={local:[new THREE.Matrix4(),new THREE.Matrix4()],legs:['leftUpperLeg','rightUpperLeg'],meshes:null};
+const lapM=new THREE.Matrix4();
+function bookLapPose(){
+ const v=state.vrm,h=v.humanoid,P=n=>h.getNormalizedBoneNode(n).getWorldPosition(new THREE.Vector3());
+ const hip=P('leftUpperLeg').add(P('rightUpperLeg')).multiplyScalar(.5),knee=P('leftLowerLeg').add(P('rightLowerLeg')).multiplyScalar(.5);
+ const r=P('rightUpperLeg').sub(P('leftUpperLeg')).normalize(),tdir=knee.clone().sub(hip);tdir.addScaledVector(r,-tdir.dot(r)).normalize();
+ const n=new THREE.Vector3().crossVectors(r,tdir).normalize();if(n.y<0)n.negate();
+ const centre=hip.clone().lerp(knee,.5);
+ if(!lapRig.meshes){lapRig.meshes=[];v.scene.traverse(o=>{if(o.isMesh)lapRig.meshes.push(o);});}
+ // fit a plane to the thigh surface under the book's footprint (rays straight down onto the model)
+ const rc=new THREE.Raycaster(),pts=[];
+ for(const s of [-.08,-.05,.05,.08])for(const u of [-.08,-.03,.03,.08]){
+  const o=centre.clone().addScaledVector(r,s).addScaledVector(tdir,u).addScaledVector(n,.4);rc.set(o,n.clone().negate());
+  const hit=rc.intersectObjects(lapRig.meshes,false)[0];if(hit)pts.push({s,u,h:hit.point.clone().sub(centre).dot(n)});
+ }
+ let normal=n.clone(),lift=.06;
+ if(pts.length>=6){
+  const fit=k=>{const m=pts.reduce((a,p)=>a+p[k],0)/pts.length,mh=pts.reduce((a,p)=>a+p.h,0)/pts.length;
+   return pts.reduce((a,p)=>a+(p[k]-m)*(p.h-mh),0)/pts.reduce((a,p)=>a+(p[k]-m)**2,0);};
+  const gs=fit('s'),gu=fit('u'),mh=pts.reduce((a,p)=>a+p.h,0)/pts.length,ms=pts.reduce((a,p)=>a+p.s,0)/pts.length,mu=pts.reduce((a,p)=>a+p.u,0)/pts.length;
+  normal=n.clone().addScaledVector(r,-gs).addScaledVector(tdir,-gu).normalize();
+  // rest on the highest points: the plane through the centre, raised by the largest residual
+  lift=mh-gs*ms-gu*mu+Math.max(0,...pts.map(p=>p.h-(mh+gs*(p.s-ms)+gu*(p.u-mu))));
+ }
+ const origin=centre.clone().addScaledVector(n,lift+.004);
+ const along=tdir.clone().addScaledVector(normal,-tdir.dot(normal)).normalize();
+ // turn the book so its page side faces up off the thighs and the top of the text points to her knees
+ const root=state.grip.book,pages=state.reading.book;root.updateWorldMatrix(true,true);
+ const e=pages.matrixWorld.elements,bx=new THREE.Vector3(e[0],e[1],e[2]).normalize(),by=new THREE.Vector3(e[4],e[5],e[6]).normalize(),bz=new THREE.Vector3(e[8],e[9],e[10]).normalize();
+ const hand=Math.sign(bx.dot(new THREE.Vector3().crossVectors(by,bz)));
+ const by2=normal.clone(),bz2=along.clone().multiplyScalar(Math.sign(state.reading.topZ)),bx2=new THREE.Vector3().crossVectors(by2,bz2).multiplyScalar(hand);
+ const B=new THREE.Matrix4().makeBasis(bx,by,bz),B2=new THREE.Matrix4().makeBasis(bx2,by2,bz2);
+ const R=new THREE.Quaternion().setFromRotationMatrix(B2.multiply(B.invert()));
+ const rp=new THREE.Vector3(),rq=new THREE.Quaternion(),rs=new THREE.Vector3();root.matrixWorld.decompose(rp,rq,rs);
+ const pp=pages.getWorldPosition(new THREE.Vector3());
+ lapM.compose(origin.clone().add(rp.sub(pp).applyQuaternion(R)),R.multiply(rq),rs);
+ lapRig.legs.forEach((name,i)=>{const leg=h.getNormalizedBoneNode(name);leg.updateWorldMatrix(true,false);lapRig.local[i].copy(leg.matrixWorld).invert().multiply(lapM);});
+ return lapM;
+}
+/** The lap pose now, following both upper legs. */
+function lapNow(){
+ const h=state.vrm.humanoid,a=[new THREE.Vector3(),new THREE.Quaternion(),new THREE.Vector3()],b=[new THREE.Vector3(),new THREE.Quaternion(),new THREE.Vector3()];
+ const m=lapRig.legs.map((name,i)=>{const leg=h.getNormalizedBoneNode(name);leg.updateWorldMatrix(true,false);return new THREE.Matrix4().multiplyMatrices(leg.matrixWorld,lapRig.local[i]);});
+ m[0].decompose(...a);m[1].decompose(...b);return lapM.compose(a[0].lerp(b[0],.5),a[1].slerp(b[1],.5),a[2]);
+}
+// Head: she looks up from the book before it lands (neck first, the head a beat later, with a little overshoot), and
+// back down to it as she takes hold of it again. Returns 0..1.
+const backOut=u=>{u=Math.min(1,Math.max(0,u));const c=1.7;return 1+(c+1)*(u-1)**3+c*(u-1)**2;};
+function headLift(st){
+ if(!st?.active)return {neck:0,head:0};
+ if(st.t<st.pre){const x=st.t/st.pre;return {neck:backOut((x-.38)/.34),head:backOut((x-.46)/.34)};}
+ const p=st.t-(st.length-st.post);
+ if(p>0){const d=THREE.MathUtils.smoothstep(p,0,st.post*.4);return {neck:1-d,head:1-THREE.MathUtils.smoothstep(p,-.1,st.post*.35)};}
+ return {neck:1,head:1};
+}
+const LIFT={pitch:24,roll:5,neckShare:.4};
+function applyHeadLift(l,sw){
+ const k=1-sw;if(k<=0||(!l.neck&&!l.head))return;
+ const h=state.vrm.humanoid,q=new THREE.Quaternion(),X=new THREE.Vector3(1,0,0),Z=new THREE.Vector3(0,0,1),d=THREE.MathUtils.DEG2RAD;
+ h.getNormalizedBoneNode('neck').quaternion.multiply(q.setFromAxisAngle(X,-LIFT.pitch*LIFT.neckShare*l.neck*k*d));
+ const head=h.getNormalizedBoneNode('head');head.quaternion.multiply(q.setFromAxisAngle(X,-LIFT.pitch*(1-LIFT.neckShare)*l.head*k*d));
+ head.quaternion.multiply(q.setFromAxisAngle(Z,LIFT.roll*Math.sin(Math.PI*Math.min(1,l.head))*k*d));
+}
+const leftTarget=new THREE.Vector3(),baseShoulders={left:new THREE.Quaternion(),right:new THREE.Quaternion()};
+function leftHand(weight){
+ if(weight<=0||!state.grip)return;
+ reachArm(state.vrm,'left',state.grip.leftGrip(leftTarget),weight);state.grip.alignLeft(weight);
+}
+// The right hand stays on its grip point on the book, with its grip orientation. During a page turn it travels, in the
+// book's own frame, out past the outer edge and up first, then over the page to just above the leaf's outer edge, so
+// it never passes through the cover; it keeps its orientation relative to the book the whole way.
+const V=()=>new THREE.Vector3();
+const grip=V(),handTarget=V(),gL=V(),pa=V(),pb=V(),p2=V(),cL=V(),toLocal=new THREE.Matrix4();
+const turnRest={offset:V(),active:false};
+// path through points, s 0..1, each leg eased; the legs' shares of s are given
+function path(pts,shares,s,out){
+ let a=0;for(let i=0;i<shares.length;i++){const b=a+shares[i];if(s<=b||i===shares.length-1){const k=THREE.MathUtils.smoothstep(s,a,b);return out.lerpVectors(pts[i],pts[i+1],k);}a=b;}
+ return out.copy(pts[pts.length-1]);
+}
+function rightHand(turn,weight=1){
+ if(!state.grip)return;
+ state.grip.rightGrip(grip);handTarget.copy(grip);
+ if(turn&&turn.hand>0){
+  const pages=state.reading.book,leaf=state.reading.leaf;pages.updateWorldMatrix(true,false);toLocal.copy(pages.matrixWorld).invert();
+  gL.copy(grip).applyMatrix4(toLocal);cL.copy(turn.target).applyMatrix4(toLocal);
+  if(!turnRest.active){turnRest.offset.subVectors(gL,cL);turnRest.active=true;}
+  // fingers wrap behind the cover up to ~4.5 cm in from the edge: slide straight out past that, then up, then over
+  pa.copy(gL);pa.x+=leaf.side*.06;
+  pb.copy(pa);pb.y=.10;
+  p2.copy(turnRest.offset).multiplyScalar(.6).add(cL);p2.y=Math.min(Math.max(p2.y,cL.y+.03,.075),gL.y+.14);// above the leaf edge
+  path([gL,pa,pb,p2],[.3,.25,.45],turn.hand,handTarget).applyMatrix4(pages.matrixWorld);
+ }else turnRest.active=false;
+ reachArm(state.vrm,'right',handTarget,weight);
+ state.grip.alignRight(weight);
+}
+let last=performance.now();
+function frame(now){
+ requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.1);last=now;
+ if(state.ready&&state.frames.length<600)state.frames.push(dt*1000);
+ renderer.info.reset();
+ if(state.vrm){
+  state.time+=dt;applyPose();
+  const st=state.stretch,busy=state.reading&&(state.reading.turn||state.reading.lookUp);
+  if(st&&!st.active&&state.time>=state.nextStretch&&!busy){state.grip.setLap(bookLapPose());st.begin();}
+  const wasActive=st?.active;st?.advance(dt);if(wasActive&&!st.active)state.nextStretch=stretchGap();
+  const sw=st?.weight()??0;
+  if(sw>0){
+   const h=state.vrm.humanoid;baseShoulders.left.copy(h.getNormalizedBoneNode('leftShoulder').quaternion);baseShoulders.right.copy(h.getNormalizedBoneNode('rightShoulder').quaternion);
+   st.apply(state.vrm,sw);
+   if(params.get('shoulders')!=='0')shoulderRhythm(state.vrm,baseShoulders,sw);
+   if(params.get('torso')!=='0')torsoFollow(state.vrm,sw,{left:st.armWeight('left'),right:st.armWeight('right')});
+  }
+  const lift=headLift(st),r=state.reading?.update(dt,state.look,Math.max(sw,Math.min(1,lift.head)));   // reading stops as she looks up
+  applyHeadLift(lift,sw);
+  // book: from her left hand toward the lap as she carries it; hands hold it unless the clip has taken them
+  const carry=st?.carry()??0;if(st?.active)state.grip.setLap(lapNow());state.grip?.update(carry);
+  if(st?.active)leftHand(1-sw*st.armWeight('left'));
+  rightHand(st?.active?null:r?.turn,1-sw*(st?.armWeight('right')??1));
+  const em=state.vrm.expressionManager;if(em)em.setValue('blink',Math.max(state.pose.blink??0,state.reading?.blink()??0,st?.face('eyeBlinkLeft')??0));
+  state.vrm.update(dt);
+  if(r)state.status=r;
+ }
+ rig?.update(dt);renderer.render(scene,camera);
+ if(params.has('stats')&&state.ready&&state.frames.length%20===0){const s=snapshot();$('stats').textContent=`calls ${s.calls}  tris ${s.triangles}\ntextures ${s.textures}\nframe ${s.medianFrameMs?.toFixed(1)} ms (p95 ${s.p95FrameMs?.toFixed(1)})\ndownload ${(s.transferBytes/1048576).toFixed(1)} MiB`;}
+}
+requestAnimationFrame(frame);
+const JOINTS=['hips','spine','chest','neck','head','leftShoulder','leftUpperArm','leftLowerArm','leftHand','rightShoulder','rightUpperArm','rightLowerArm','rightHand','leftUpperLeg','leftLowerLeg','leftFoot','rightLowerLeg','rightFoot'];
+const joints=()=>state.vrm?Object.fromEntries(JOINTS.map(n=>[n,state.vrm.humanoid.getRawBoneNode(n)?.getWorldPosition(new THREE.Vector3()).toArray().map(v=>+v.toFixed(4))])):null;
+window.lofiBalcony={joints,lapGap:()=>{if(!state.stretch?.active||!lapRig.meshes)return null;const pages=state.reading.book;pages.updateWorldMatrix(true,false);
+ const e=pages.matrixWorld.elements,n=new THREE.Vector3(e[4],e[5],e[6]).normalize(),o=pages.getWorldPosition(new THREE.Vector3()),rc=new THREE.Raycaster(),out=[];
+ for(const [dx,dz] of [[0,0],[.1,.07],[-.1,.07],[.1,-.07],[-.1,-.07]]){const p=new THREE.Vector3(dx,0,dz).applyMatrix4(pages.matrixWorld).addScaledVector(n,.05);rc.set(p,n.clone().negate());const hit=rc.intersectObjects(lapRig.meshes,false)[0];out.push(hit?+((hit.distance-.05)*1000).toFixed(0):null);}
+ return {gapMm:out,tiltDeg:+(Math.acos(Math.min(1,Math.abs(n.y)))*57.3).toFixed(1)};},torsoDepth:()=>{const v=state.vrm,P=n=>v.humanoid.getNormalizedBoneNode(n).getWorldPosition(new THREE.Vector3());
+ const up=P('neck').sub(P('hips')).normalize(),r=P('rightUpperArm').sub(P('leftUpperArm'));r.addScaledVector(up,-r.dot(up)).normalize();const f=new THREE.Vector3().crossVectors(up,r).normalize();
+ const rc=new THREE.Raycaster(),out={};const meshes=[];v.scene.traverse(o=>{if(o.isMesh)meshes.push(o);});
+ for(const [name,base] of [['chest',P('chest')],['spine',P('spine')],['upper',P('chest').lerp(P('neck'),.5)]])for(const side of [-1,-.5,0,.5,1]){
+  const o=base.clone().addScaledVector(r,side*.09).addScaledVector(f,.5);rc.set(o,f.clone().negate());const h=rc.intersectObjects(meshes,false)[0];
+  out[name+side]=h?+(.5-h.distance).toFixed(3):null;}
+ return out;},armInTorso:()=>state.vrm?+(armInTorso(state.vrm)*1000).toFixed(1):null,stretch:()=>state.stretch&&{active:state.stretch.active,t:+state.stretch.t.toFixed(2),w:+state.stretch.weight().toFixed(2),phase:+state.stretch.phase().toFixed(2),next:+(state.nextStretch-state.time).toFixed(1),book:state.reading.book.getWorldPosition(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3))},handInBook:()=>{const r=state.reading;if(!r)return null;r.book.updateWorldMatrix(true,false);const inv=new THREE.Matrix4().copy(r.book.matrixWorld).invert();let n=0,w='';
+ for(const b of ['rightHand','rightThumbProximal','rightThumbDistal','rightIndexProximal','rightIndexDistal','rightMiddleProximal','rightMiddleDistal','rightRingDistal','rightLittleDistal']){const nd=state.vrm.humanoid.getRawBoneNode(b);if(!nd)continue;const p=nd.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv);if(p.y>.003&&p.y<.034&&Math.abs(p.z)<.11&&.145-Math.abs(p.x)>n){n=.145-Math.abs(p.x);w=b+' y='+p.y.toFixed(3);}}return {mm:+(n*1000).toFixed(1),joint:w};},gripError:()=>{if(!state.grip)return null;const g=state.grip.rightGrip(new THREE.Vector3()),h=state.vrm.humanoid.getRawBoneNode('rightHand').getWorldPosition(new THREE.Vector3());return +(g.distanceTo(h)*1000).toFixed(1);},reading:()=>state.reading&&{time:+state.reading.time.toFixed(2),page:state.reading.page,line:state.reading.line,away:+state.reading.away.toFixed(2),head:state.reading.head,turn:state.reading.turn?{p:+state.reading.turnInfo.progress.toFixed(2),hand:+state.reading.turnInfo.hand.toFixed(2)}:null,gaze:state.look.position.toArray().map(v=>+v.toFixed(3))},meta:()=>state.vrm?.meta?.metaVersion,snapshot,ready:()=>state.ready,resetFrames:()=>{state.frames=[];},look:(x,y)=>rig?.look(x,y)};
+load().catch(e=>{state.error=e.message;$('status').textContent='Could not open the balcony: '+e.message;console.error(e);});

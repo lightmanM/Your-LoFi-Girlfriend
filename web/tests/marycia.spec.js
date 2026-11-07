@@ -34,7 +34,7 @@ test('Marycia uses source face animation and finger poses without additional dow
 });
 
 test('Marycia studio link opens the converted model and its facial controls respond',async({page})=>{
- await page.goto('/?character=marycia');await page.waitForFunction(()=>window.characterLab?.ready());
+ await page.goto('/studio.html?character=marycia');await page.waitForFunction(()=>window.characterLab?.ready());
  const first=await page.evaluate(()=>characterLab.snapshot());expect(first.name).toBe('Marycia');
  expect(first.mappedBones.length).toBe(53);
  await page.locator('#face-view').click();await page.locator('#smile').fill('0.9');await page.locator('#smile').dispatchEvent('input');
