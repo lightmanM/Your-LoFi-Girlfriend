@@ -1,0 +1,305 @@
+{
+  "version": 1,
+  "target_lufs": -16.0,
+  "tracks": [
+    {
+      "id": "lao-ban-fine-dining-bgm",
+      "file": "lao-ban-fine-dining-bgm.mp3",
+      "title": "Fine dining BGM",
+      "artist": "Lao Ban",
+      "duration": 157.85,
+      "gain_db": -1.18,
+      "license": {
+        "name": "CC0 1.0",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+      },
+      "source": "https://freemusicarchive.org/music/lao-ban/unnamed-album/fine-dining-bgm/"
+    },
+    {
+      "id": "lao-ban-luxury-hotel-bgm",
+      "file": "lao-ban-luxury-hotel-bgm.mp3",
+      "title": "Luxury hotel BGM",
+      "artist": "Lao Ban",
+      "duration": 157.03,
+      "gain_db": -0.57,
+      "license": {
+        "name": "CC0 1.0",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+      },
+      "source": "https://freemusicarchive.org/music/lao-ban/unnamed-album/luxury-hotel-bgm/"
+    },
+    {
+      "id": "vibedepot-calm",
+      "file": "vibedepot-calm.mp3",
+      "title": "calm",
+      "artist": "VibeDepot",
+      "duration": 127.56,
+      "gain_db": -8.93,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-easy-hiphop",
+      "file": "vibedepot-easy-hiphop.mp3",
+      "title": "easy hiphop",
+      "artist": "VibeDepot",
+      "duration": 119.96,
+      "gain_db": -7.96,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-video",
+      "file": "vibedepot-lofi-video.mp3",
+      "title": "lofi video",
+      "artist": "VibeDepot",
+      "duration": 129.0,
+      "gain_db": -10.07,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-evening",
+      "file": "vibedepot-evening.mp3",
+      "title": "evening",
+      "artist": "VibeDepot",
+      "duration": 120.28,
+      "gain_db": -8.78,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-fashion",
+      "file": "vibedepot-fashion.mp3",
+      "title": "fashion",
+      "artist": "VibeDepot",
+      "duration": 115.52,
+      "gain_db": -7.24,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lo-fi",
+      "file": "vibedepot-lo-fi.mp3",
+      "title": "lo-fi",
+      "artist": "VibeDepot",
+      "duration": 122.96,
+      "gain_db": -6.81,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-background",
+      "file": "vibedepot-lofi-background.mp3",
+      "title": "lofi background",
+      "artist": "VibeDepot",
+      "duration": 123.91,
+      "gain_db": -9.51,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-blog",
+      "file": "vibedepot-lofi-for-blog.mp3",
+      "title": "lofi for blog",
+      "artist": "VibeDepot",
+      "duration": 126.0,
+      "gain_db": -5.36,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-sweet",
+      "file": "vibedepot-sweet.mp3",
+      "title": "sweet",
+      "artist": "VibeDepot",
+      "duration": 110.2,
+      "gain_db": -5.17,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-instagram",
+      "file": "vibedepot-lofi-for-instagram.mp3",
+      "title": "lofi for instagram",
+      "artist": "VibeDepot",
+      "duration": 84.78,
+      "gain_db": -9.0,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-podcast",
+      "file": "vibedepot-lofi-for-podcast.mp3",
+      "title": "lofi for podcast",
+      "artist": "VibeDepot",
+      "duration": 123.51,
+      "gain_db": -7.96,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-urban",
+      "file": "vibedepot-urban.mp3",
+      "title": "urban",
+      "artist": "VibeDepot",
+      "duration": 129.78,
+      "gain_db": -9.72,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-relax",
+      "file": "vibedepot-lofi-for-relax.mp3",
+      "title": "lofi for relax",
+      "artist": "VibeDepot",
+      "duration": 106.04,
+      "gain_db": -8.03,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-blog",
+      "file": "vibedepot-blog.mp3",
+      "title": "blog",
+      "artist": "VibeDepot",
+      "duration": 121.36,
+      "gain_db": -9.13,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-shorts",
+      "file": "vibedepot-lofi-for-shorts.mp3",
+      "title": "lofi for shorts",
+      "artist": "VibeDepot",
+      "duration": 127.9,
+      "gain_db": -8.1,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-tiktok",
+      "file": "vibedepot-lofi-for-tiktok.mp3",
+      "title": "lofi for tiktok",
+      "artist": "VibeDepot",
+      "duration": 115.71,
+      "gain_db": -7.02,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-cafe",
+      "file": "vibedepot-cafe.mp3",
+      "title": "cafe",
+      "artist": "VibeDepot",
+      "duration": 119.95,
+      "gain_db": -10.14,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-tutorial",
+      "file": "vibedepot-lofi-for-tutorial.mp3",
+      "title": "lofi for tutorial",
+      "artist": "VibeDepot",
+      "duration": 112.44,
+      "gain_db": -7.04,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-calm-hiphop",
+      "file": "vibedepot-calm-hiphop.mp3",
+      "title": "calm hiphop",
+      "artist": "VibeDepot",
+      "duration": 119.96,
+      "gain_db": -7.36,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-video",
+      "file": "vibedepot-lofi-for-video.mp3",
+      "title": "lofi for video",
+      "artist": "VibeDepot",
+      "duration": 127.86,
+      "gain_db": -7.51,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "vibedepot-lofi-for-vlog",
+      "file": "vibedepot-lofi-for-vlog.mp3",
+      "title": "lofi for vlog",
+      "artist": "VibeDepot",
+      "duration": 124.4,
+      "gain_db": -5.23,
+      "license": {
+        "name": "CC BY-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+      },
+      "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    }
+  ]
+}

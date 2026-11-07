@@ -56,3 +56,8 @@ web/public/models/marycia/reading-balcony.json
 /docs/design/reading-motion/**/*.png
 /docs/design/reading-motion/**/*.mp4
 /docs/design/compression/**/*.png
+
+# Music: source downloads and encoded tracks stay local (regenerate with scripts/music/prepare_music.py);
+# the manifest, playlist and credits are tracked.
+/assets/music/
+web/public/music/*.mp3

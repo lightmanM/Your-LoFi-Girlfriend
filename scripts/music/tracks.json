@@ -1,0 +1,40 @@
+{
+  "_note": "Licences were checked on each Free Music Archive page on 2026-11-07. 'include': false keeps a track out of the web build.",
+  "sources": [
+    {
+      "artist": "Lao Ban",
+      "file": "Lao Ban - Fine dining BGM.mp3",
+      "title": "Fine dining BGM",
+      "include": true,
+      "license": {"name": "CC0 1.0", "url": "https://creativecommons.org/publicdomain/zero/1.0/"},
+      "source_url": "https://freemusicarchive.org/music/lao-ban/unnamed-album/fine-dining-bgm/",
+      "notes": "Marked AI-generated on FMA; also sold via Ditto (stores may register Content ID)."
+    },
+    {
+      "artist": "Lao Ban",
+      "file": "Lao Ban - Luxury hotel BGM.mp3",
+      "title": "Luxury hotel BGM",
+      "include": true,
+      "license": {"name": "CC0 1.0", "url": "https://creativecommons.org/publicdomain/zero/1.0/"},
+      "source_url": "https://freemusicarchive.org/music/lao-ban/unnamed-album/luxury-hotel-bgm/",
+      "notes": "Marked AI-generated on FMA; also sold via Ditto (stores may register Content ID)."
+    },
+    {
+      "artist": "VibeDepot",
+      "zip": "VibeDepot - Lofi.zip",
+      "include": true,
+      "license": {"name": "CC BY-ND 4.0", "url": "https://creativecommons.org/licenses/by-nd/4.0/"},
+      "source_url": "https://freemusicarchive.org/music/vibedepot/lofi/",
+      "notes": "Credit required. No edits: re-encoding and live crossfades only; never bake into a video."
+    },
+    {
+      "artist": "Lopkerjo",
+      "file": "Lopkerjo - Your Best Friend.mp3",
+      "title": "Your Best Friend",
+      "include": false,
+      "license": {"name": "CC BY-NC-ND 4.0", "url": "https://creativecommons.org/licenses/by-nc-nd/4.0/"},
+      "source_url": "https://freemusicarchive.org/music/john-lopker/tomorrows-never-come/your-best-friend/",
+      "notes": "Non-commercial only; excluded until we know the site will never make money."
+    }
+  ]
+}

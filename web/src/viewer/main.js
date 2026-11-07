@@ -9,6 +9,8 @@ import {GRADE,gradeMaterial} from './grade.js';
 import {seatCharacter} from '../balcony/seat.js';
 import {Wind,PLANTS,plateMaterial,leavesMaterial} from './wind.js';
 import {livePlants,PLANTS3D} from './plants.js';
+import {createMusic} from '../music/player.js';
+import {bindMusicControls} from '../music/controls.js';
 import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
 const BASE='/environment/balcony-toon/';
@@ -126,6 +128,11 @@ function frame(now){
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
+// Background music: starts on the first click or tap (browsers block sound before a gesture). ?music=0 turns it off.
+// ?musicstall=<s> shortens the wait before a track that will not start is skipped (for checks).
+const music=params.get('music')==='0'?null:createMusic({startTimeout:params.has('musicstall')?+params.get('musicstall'):undefined});
+const unbindMusic=music?bindMusicControls(music):null;
+import.meta.hot?.dispose(()=>{unbindMusic?.();music?.dispose();});
 // For automated checks only; nothing here is shown to visitors.
 window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state.wind.force(state.wind.t).toFixed(2),palmDeg:+(state.wind.angle('palm')*57.3).toFixed(2),leavesDeg:+(state.wind.angle('leaves')*57.3).toFixed(2),gusts:state.wind.gusts?.length??0,next:+(state.wind.next-state.wind.t).toFixed(1)},pose:()=>{const h=state.vrm.humanoid,P=n=>h.getNormalizedBoneNode(n).getWorldPosition(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3));
  const out=Object.fromEntries(['neck','chest','leftShoulder','rightShoulder','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm','leftHand','rightHand','head'].map(n=>[n,P(n)]));
@@ -134,5 +141,6 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
  out.shoulderQ=['leftShoulder','rightShoulder'].map(n=>h.getNormalizedBoneNode(n).quaternion.toArray().map(x=>+x.toFixed(3)));out.stretch=state.reader.stretch&&{active:state.reader.stretch.active,w:+state.reader.stretch.weight().toFixed(2),t:+state.reader.stretch.t.toFixed(2)};return out;},seat:()=>({drop:+(state.seat?.drop??0).toFixed(3),contactRadii:state.contactRadii}),ready:()=>state.ready,error:()=>state.error,
  chair:()=>{const meshes=[];state.chair?.traverse(o=>{if(o.isMesh)meshes.push(o);});return {meshes:meshes.length,visible:meshes.every(o=>o.visible&&[o.material].flat().every(m=>m.colorWrite)),receivesShadows:meshes.some(o=>o.receiveShadow),shadowMap:renderer.shadowMap.enabled};},
  stats:()=>{const f=[...state.frames].sort((a,b)=>a-b),i=renderer.info;return {calls:i.render.calls,triangles:i.render.triangles,textures:i.memory.textures,medianFrameMs:f[f.length>>1]??null,p95FrameMs:f[Math.floor(f.length*.95)]??null};},
- grips:()=>state.reader?.gripsLocal(),hands:()=>state.reader?.handsLocal(),reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1)};}};
+ grips:()=>state.reader?.gripsLocal(),hands:()=>state.reader?.handsLocal(),music:()=>music?.state()??null,musicSeekEnd:s=>music?.seekToEnd(s),
+ reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1)};}};
 load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';console.error(e);});
