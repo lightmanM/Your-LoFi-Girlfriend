@@ -1,2 +1,3 @@
 import {defineConfig} from 'vite';
-export default defineConfig({build:{rollupOptions:{input:{viewer:'index.html',studio:'studio.html',room:'room.html',balcony:'balcony.html'}}}});
+// One page: the balcony scene (index.html). three-vrm is one large chunk by design.
+export default defineConfig({build:{chunkSizeWarningLimit:800}});

@@ -2,24 +2,18 @@
 
 Original anime character for a frontend-only lofi experience, with reusable outfits and scripted scenes.
 
-## Current: cozy scene MVP
+## Current: balcony scene
 
-Latest: [Motion spike: procedural life layer, a reference-video stretch, the same stretch through Rokoko Vision, and proportion-aware IK arms](docs/motion-spike/README.md); every iteration and its lesson in the [motion learning log](docs/motion-learning-log.md). Earlier: [Marycia supplied poses and expressions](docs/marycia-source-motions/README.md).
+One web page: Marycia reading on a sunny balcony in a toon afternoon look, with page turns, look-ups, a stretch break
+every 4 to 8 minutes, and plants moving in the wind. No controls, fixed camera.
 
-A seated Marycia in a furnished afternoon room, with her supplied facial idle, expressions and finger poses. Actions blend back to idle. The previous placeholder motions are removed from playback. Furniture is CC0; character and current motions come from the purchased Marycia package.
+- [Run it](web/README.md) — local URL: http://127.0.0.1:5173/
+- [Viewer design notes](docs/design/viewer/README.md) · [reading motion](docs/design/reading-motion/README.md) · [toon look](docs/design/balcony-toon/README.md)
+- The character and the balcony scene are purchased or not yet licensed for the web: their files stay local, and the
+  build must not be deployed.
 
-- [Run the browser MVP](web/README.md) — local URL: http://127.0.0.1:5173/room.html
-- [Architecture, sources, verification and limitations](docs/scene-mvp/README.md)
-- [Actual browser demonstration](docs/marycia-source-motions/demo.mp4)
-- [Editable room source](assets/environment/afternoon-room/afternoon-room.blend)
-
-## Replaceable character baseline
-
-The room now uses a working conversion of **Marycia**, the purchased BOOTH character. [Conversion notes and demonstration](docs/marycia/README.md). **Vivi**, the original CC0 VRoid sample, remains available for comparison. It includes mapped humanoid controls, facial expressions, and local VRM replacement. Vivi is a technical placeholder; her appearance and proportions are not the final design.
-
-- [Run the character studio](web/README.md)
-- [Asset selection, compatibility evidence, and BOOTH migration](docs/character-baseline/README.md)
-- [Studio preview](docs/character-baseline/studio-preview.png)
+Earlier pages (the furnished room MVP, the character studio and the Vivi sample character) were removed on
+2026-11-07; their notes remain in [docs/scene-mvp](docs/scene-mvp/README.md) and [docs/character-baseline](docs/character-baseline/README.md).
 
 ## Earlier Blender studies
 
