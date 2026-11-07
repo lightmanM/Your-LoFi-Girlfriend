@@ -1,0 +1,214 @@
+"""Toon look test of the Balcony shot: a copy of 'Balcony • Plate (Claude)' rendered with EEVEE cel shading.
+Runs inside the live Blender via MCP (exec). Re-runnable: removes only what it made before ('Toon •').
+Objects are copied (mesh data shared, never edited) and get object-level toon material copies, so the plate scene,
+the source scenes and every original material stay as they are. Her copies are made visible to the camera here.
+"""
+import bpy
+SRC, NAME = 'Balcony • Plate (Claude)', 'Balcony • Toon test (Claude)'
+ENV, CHAR, GROUP = 'Toon • environment (Claude)', 'Toon • character (Claude)', 'Toon • cel (Claude)'
+SKIN = ('bn0010_m_Skin',)
+ENV_SHADOW, SKIN_SHADOW = (0.42, 0.38, 0.46), (0.80, 0.56, 0.54)
+
+
+def clear_previous() -> None:
+    if NAME in bpy.data.scenes: bpy.data.scenes.remove(bpy.data.scenes[NAME])
+    for cn in (ENV, CHAR, 'Toon • light link (Claude)'):
+        if cn in bpy.data.collections:
+            c = bpy.data.collections[cn]
+            for o in list(c.objects): bpy.data.objects.remove(o)
+            bpy.data.collections.remove(c)
+    for m in [m for m in bpy.data.materials if m.name.startswith('Toon • ')]: bpy.data.materials.remove(m)
+    for lp in [l for l in bpy.data.lightprobes if l.name.startswith('Toon • ')]: bpy.data.lightprobes.remove(lp)
+    for li in [l for l in bpy.data.lights if l.name.startswith('Toon • ')]: bpy.data.lights.remove(li)
+    for ng in [g for g in bpy.data.node_groups if g.name.startswith('Toon • ')]: bpy.data.node_groups.remove(ng)
+
+
+def socket(tree, kind, name, default=None, io='INPUT'):
+    s = tree.interface.new_socket(name, in_out=io, socket_type=kind)
+    if default is not None: s.default_value = default
+    return s
+
+
+def cel_group() -> bpy.types.ShaderNodeTree:
+    """Cel shading shared by every toon material: stepped light bands in stops, light colour kept, soft contact AO."""
+    g = bpy.data.node_groups.new(GROUP, 'ShaderNodeTree'); N, L = g.nodes, g.links
+    socket(g, 'NodeSocketColor', 'Color', (0.8, 0.8, 0.8, 1)); socket(g, 'NodeSocketColor', 'Shadow', (*ENV_SHADOW, 1))
+    socket(g, 'NodeSocketFloat', 'AO', 0.6); socket(g, 'NodeSocketFloat', 'Debug', 0.0)
+    socket(g, 'NodeSocketShader', 'Shader', io='OUTPUT')
+    gi, go = N.new('NodeGroupInput'), N.new('NodeGroupOutput')
+    dif = N.new('ShaderNodeBsdfDiffuse'); dif.inputs['Color'].default_value = (1, 1, 1, 1)
+    s2r = N.new('ShaderNodeShaderToRGB'); L.new(dif.outputs['BSDF'], s2r.inputs['Shader'])
+    lum = N.new('ShaderNodeRGBToBW'); L.new(s2r.outputs['Color'], lum.inputs['Color'])
+    mx = N.new('ShaderNodeMath'); mx.operation = 'MAXIMUM'; mx.inputs[1].default_value = 1e-4; L.new(lum.outputs['Val'], mx.inputs[0])
+    lg = N.new('ShaderNodeMath'); lg.operation = 'LOGARITHM'; lg.inputs[1].default_value = 2.0; L.new(mx.outputs[0], lg.inputs[0])
+    mr = N.new('ShaderNodeMapRange'); mr.name = 'Stops'; mr.inputs['From Min'].default_value = -6.0; mr.inputs['From Max'].default_value = 2.0
+    L.new(lg.outputs[0], mr.inputs['Value'])
+    ramp = N.new('ShaderNodeValToRGB'); ramp.name = 'Bands'; cr = ramp.color_ramp; cr.interpolation = 'CONSTANT'
+    cr.elements[0].position, cr.elements[0].color = 0.0, (0, 0, 0, 1); cr.elements[1].position, cr.elements[1].color = 0.45, (0.55, 0.55, 0.55, 1)
+    e = cr.elements.new(0.62); e.color = (1, 1, 1, 1)
+    L.new(mr.outputs['Result'], ramp.inputs['Fac'])
+    band = N.new('ShaderNodeMix'); band.data_type = 'RGBA'; band.inputs['B'].default_value = (1, 1, 1, 1)
+    L.new(ramp.outputs['Color'], band.inputs['Factor']); L.new(gi.outputs['Shadow'], band.inputs['A'])
+    div = N.new('ShaderNodeMix'); div.data_type = 'RGBA'; div.blend_type = 'DIVIDE'; div.inputs['Factor'].default_value = 1.0
+    L.new(s2r.outputs['Color'], div.inputs['A']); L.new(mx.outputs[0], div.inputs['B'])
+    tint = N.new('ShaderNodeMix'); tint.name = 'Tint'; tint.data_type = 'RGBA'; tint.inputs['Factor'].default_value = 0.5; tint.inputs['A'].default_value = (1, 1, 1, 1)
+    L.new(div.outputs['Result'], tint.inputs['B'])
+    ao = N.new('ShaderNodeAmbientOcclusion'); ao.inputs['Distance'].default_value = 0.25
+    aom = N.new('ShaderNodeMix'); aom.data_type = 'FLOAT'; aom.inputs['A'].default_value = 1.0
+    L.new(gi.outputs['AO'], aom.inputs['Factor']); L.new(ao.outputs['AO'], aom.inputs['B'])
+    m1 = N.new('ShaderNodeMix'); m1.data_type = 'RGBA'; m1.blend_type = 'MULTIPLY'; m1.inputs['Factor'].default_value = 1.0
+    L.new(gi.outputs['Color'], m1.inputs['A']); L.new(band.outputs['Result'], m1.inputs['B'])
+    m2 = N.new('ShaderNodeMix'); m2.data_type = 'RGBA'; m2.blend_type = 'MULTIPLY'; m2.inputs['Factor'].default_value = 1.0
+    L.new(m1.outputs['Result'], m2.inputs['A']); L.new(tint.outputs['Result'], m2.inputs['B'])
+    # contact darkening: colour * mix(1, ao, strength)
+    ao_rgb = N.new('ShaderNodeCombineColor'); [L.new(aom.outputs['Result'], ao_rgb.inputs[i]) for i in range(3)]
+    m3 = N.new('ShaderNodeMix'); m3.data_type = 'RGBA'; m3.blend_type = 'MULTIPLY'; m3.inputs['Factor'].default_value = 1.0
+    L.new(m2.outputs['Result'], m3.inputs['A']); L.new(ao_rgb.outputs['Color'], m3.inputs['B'])
+    em = N.new('ShaderNodeEmission'); L.new(m3.outputs['Result'], em.inputs['Color'])
+    dbg = N.new('ShaderNodeEmission'); L.new(mr.outputs['Result'], dbg.inputs['Color'])
+    sw = N.new('ShaderNodeMixShader'); L.new(gi.outputs['Debug'], sw.inputs['Fac']); L.new(em.outputs['Emission'], sw.inputs[1]); L.new(dbg.outputs['Emission'], sw.inputs[2])
+    L.new(sw.outputs['Shader'], go.inputs['Shader'])
+    return g
+
+
+def is_emissive(b) -> bool:
+    s, c = b.inputs['Emission Strength'], b.inputs['Emission Color']
+    return s.default_value > 0 and (c.is_linked or sum(c.default_value[:3]) > 0.03)
+
+
+def glass(m) -> bpy.types.Material:
+    t = bpy.data.materials.new('Toon • ' + m.name); N, L = t.node_tree.nodes, t.node_tree.links
+    for n in list(N): N.remove(n)
+    out = N.new('ShaderNodeOutputMaterial'); tr = N.new('ShaderNodeBsdfTransparent'); em = N.new('ShaderNodeEmission')
+    em.inputs['Color'].default_value = (0.86, 0.90, 0.92, 1); mix = N.new('ShaderNodeMixShader'); mix.inputs['Fac'].default_value = 0.10
+    L.new(tr.outputs['BSDF'], mix.inputs[1]); L.new(em.outputs['Emission'], mix.inputs[2]); L.new(mix.outputs['Shader'], out.inputs['Surface'])
+    t.surface_render_method = 'BLENDED'; return t
+
+
+def toon(m, group) -> bpy.types.Material:
+    b = next((n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'), None) if m.node_tree else None
+    if b is None: return glass(m)
+    t = m.copy(); t.name = 'Toon • ' + m.name
+    if is_emissive(b): return t
+    N, L = t.node_tree.nodes, t.node_tree.links
+    b = next(n for n in N if n.type == 'BSDF_PRINCIPLED'); out = next(n for n in N if n.type == 'OUTPUT_MATERIAL' and n.is_active_output)
+    gn = N.new('ShaderNodeGroup'); gn.node_tree = group
+    if m.name.startswith(SKIN): gn.inputs['Shadow'].default_value = (*SKIN_SHADOW, 1)
+    bc = b.inputs['Base Color']
+    if bc.is_linked: L.new(bc.links[0].from_socket, gn.inputs['Color'])
+    else: gn.inputs['Color'].default_value = bc.default_value
+    shader = gn.outputs['Shader']; trans = b.inputs['Transmission Weight'].default_value
+    if b.inputs['Alpha'].is_linked or trans > 0.3:
+        mix = N.new('ShaderNodeMixShader'); tr = N.new('ShaderNodeBsdfTransparent')
+        if b.inputs['Alpha'].is_linked: L.new(b.inputs['Alpha'].links[0].from_socket, mix.inputs['Fac'])
+        else: mix.inputs['Fac'].default_value = 1.0 - 0.55 * trans
+        L.new(tr.outputs['BSDF'], mix.inputs[1]); L.new(shader, mix.inputs[2]); shader = mix.outputs['Shader']
+        if not b.inputs['Alpha'].is_linked: t.surface_render_method = 'BLENDED'
+    for l in list(out.inputs['Surface'].links): L.remove(l)
+    L.new(shader, out.inputs['Surface']); return t
+
+
+def copy_into(src_coll, coll, cam_visible=None):
+    copies = {}
+    for o in src_coll.objects:
+        c = o.copy(); coll.objects.link(c); copies[o] = c
+        c['source_name'] = o.get('source_name', o.name)
+        if cam_visible is not None: c.visible_camera = cam_visible
+        elif c['source_name'] in bpy.data.objects: c.visible_camera = bpy.data.objects[c['source_name']].visible_camera
+    for o, c in copies.items():
+        if o.parent in copies: c.parent = copies[o.parent]; c.matrix_parent_inverse = o.matrix_parent_inverse.copy()
+        for m in c.modifiers:
+            if m.type == 'ARMATURE' and m.object in copies: m.object = copies[m.object]
+    return copies
+
+
+def relink_lights(copies, coll_name) -> None:
+    for o, c in copies.items():
+        ll = getattr(o, 'light_linking', None)
+        if ll and ll.receiver_collection:
+            rc = bpy.data.collections.new(coll_name)
+            for ob, co in zip(list(ll.receiver_collection.objects), ll.receiver_collection.collection_objects):
+                if ob in copies: rc.objects.link(copies[ob]); rc.collection_objects[-1].light_linking.link_state = co.light_linking.link_state
+            c.light_linking.receiver_collection = rc
+
+
+def neutral() -> bpy.types.Material:
+    """Stand-in for empty material slots, which would otherwise render with Blender's default shading."""
+    m = bpy.data.materials.get('Toon • source neutral') or bpy.data.materials.new('Toon • source neutral')
+    b = next(n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'); b.inputs['Base Color'].default_value = (0.74, 0.69, 0.62, 1)
+    return m
+
+
+def apply_toon(objects, group) -> int:
+    cache = {}
+    for o in objects:
+        if o.type != 'MESH': continue
+        for s in o.material_slots:
+            m = s.material or neutral()
+            if m.name not in cache: cache[m.name] = toon(m, group)
+            s.link = 'OBJECT'; s.material = cache[m.name]
+    for m in cache.values(): m.use_transparent_shadow = True
+    return len(cache)
+
+
+SUN_DIR, SUN_COLOR, SUN_ENERGY = (-0.5, -0.5, 0.7071), (1.0, 0.86, 0.70), 4.0
+SKY_COLOR, SKY_STRENGTH = (0.74, 0.74, 0.80), 0.42
+BANDS = ((0.0, 0.0), (1 / 6, 0.45), (1 / 3, 1.0))   # light level in stops mapped -4..+8 -> band (0 = shadow colour, 1 = full)
+
+
+def light_rig(T, env) -> dict:
+    from mathutils import Vector
+    import math
+    hidden = 0
+    for o in env.objects:
+        if o.type != 'LIGHT': continue
+        if o.data.type == 'SUN':
+            o.data = o.data.copy(); o.data.name = 'Toon • sun'
+            o.rotation_mode = 'QUATERNION'; o.rotation_quaternion = Vector(SUN_DIR).normalized().to_track_quat('Z', 'Y')
+            o.data.energy, o.data.color, o.data.angle = SUN_ENERGY, SUN_COLOR, math.radians(1.5)
+        else: o.hide_render = True; hidden += 1
+    w = bpy.data.worlds.get('Toon • world (Claude)') or bpy.data.worlds.new('Toon • world (Claude)')
+    bg = next(n for n in w.node_tree.nodes if n.type == 'BACKGROUND'); bg.inputs['Color'].default_value = (*SKY_COLOR, 1); bg.inputs['Strength'].default_value = SKY_STRENGTH
+    T.world = w
+    lp = bpy.data.lightprobes.new('Toon • indoor light probe', 'VOLUME')
+    pr = bpy.data.objects.new('Toon • indoor light probe', lp); env.objects.link(pr)
+    pr.location, pr.scale = (9.5, 24.8, 1.75), (6.2, 2.4, 1.85)
+    lp.resolution_x, lp.resolution_y, lp.resolution_z, lp.bake_samples = 24, 10, 8, 256
+    return {'lamps_off': hidden}
+
+
+def tune_group(group) -> None:
+    group.nodes['Stops'].inputs['From Min'].default_value = -4.0; group.nodes['Stops'].inputs['From Max'].default_value = 8.0
+    group.nodes['Tint'].inputs['Factor'].default_value = 0.35
+    cr = group.nodes['Bands'].color_ramp
+    while len(cr.elements) > len(BANDS): cr.elements.remove(cr.elements[-1])
+    while len(cr.elements) < len(BANDS): cr.elements.new(1.0)
+    for e, (pos, v) in zip(cr.elements, BANDS): e.position = pos; e.color = (v, v, v, 1)
+
+
+def render_settings(T) -> None:
+    T.render.engine = 'BLENDER_EEVEE'; T.render.resolution_x, T.render.resolution_y, T.render.resolution_percentage = 1600, 900, 100
+    T.view_settings.view_transform = 'Standard'; T.view_settings.look = 'None'; T.view_settings.exposure = 0.0
+    T.eevee.taa_render_samples = 32; T.eevee.use_bokeh_jittered = True
+
+
+def build() -> dict:
+    clear_previous(); src = bpy.data.scenes[SRC]
+    T = src.copy(); T.name = NAME
+    for c in list(T.collection.children): T.collection.children.unlink(c)
+    for o in list(T.collection.objects): T.collection.objects.unlink(o)
+    env = bpy.data.collections.new(ENV); T.collection.children.link(env)
+    ch = bpy.data.collections.new(CHAR); T.collection.children.link(ch)
+    ec = copy_into(bpy.data.collections['Plate • environment (Claude)'], env)
+    cc = copy_into(bpy.data.collections['Plate • character (Claude)'], ch, cam_visible=True)
+    relink_lights(ec, 'Toon • light link (Claude)')
+    disp = next(c for o, c in ec.items() if o.name == 'Plate • display camera'); disp.name = 'Toon • camera'
+    disp.data = disp.data.copy()
+    foc = disp.data.dof.focus_object
+    if foc is not None: disp.data.dof.focus_object = next((c for o, c in ec.items() if o == foc), foc)
+    for o, c in ec.items():
+        if o.type == 'CAMERA' and c is not disp: bpy.data.objects.remove(c)
+    T.camera = disp
+    group = cel_group(); tune_group(group); n = apply_toon(list(env.objects) + list(ch.objects), group)
+    rig = light_rig(T, env); render_settings(T)
+    return {'scene': T.name, 'env': len(env.objects), 'char': len(ch.objects), 'toon_materials': n, **rig}

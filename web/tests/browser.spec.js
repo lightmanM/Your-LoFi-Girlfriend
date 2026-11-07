@@ -21,7 +21,7 @@ function renameRig(source){
 
 test('renders the existing asset and drives mapped bones and facial expressions',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await ready(page);
+  await page.goto('/studio.html');await ready(page);
   await expect.poll(()=>page.evaluate(()=>{
     const j=characterLab.snapshot().joints;
     return j.leftHand.world[1]<j.leftUpperArm.world[1]&&j.rightHand.world[1]<j.rightUpperArm.world[1];
@@ -47,7 +47,7 @@ test('renders the existing asset and drives mapped bones and facial expressions'
 });
 
 test('renamed skeleton replacement and invalid-file recovery preserve the scene contract',async({page})=>{
-  await page.goto('/');await ready(page);
+  await page.goto('/studio.html');await ready(page);
   const initial=await page.evaluate(()=>characterLab.snapshot());
   const original=await readFile('public/models/vivi/vivi.vrm');
   await page.locator('#model-file').setInputFiles({name:'renamed-rig.vrm',mimeType:'application/octet-stream',buffer:renameRig(original)});
@@ -72,7 +72,7 @@ test('renamed skeleton replacement and invalid-file recovery preserve the scene 
 test('mobile layout fits and controls remain usable',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/');await ready(page);
+  await page.goto('/studio.html');await ready(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.locator('#blink').click();
   await page.locator('#smile').fill('0.5');
@@ -83,7 +83,7 @@ test('mobile layout fits and controls remain usable',async({page})=>{
 
 test('optional independent VRM can replace the placeholder',async({page})=>{
   test.skip(!process.env.VRM_SECOND_MODEL,'Set VRM_SECOND_MODEL to a separately licensed local VRM to test another actual character.');
-  await page.goto('/');await ready(page);
+  await page.goto('/studio.html');await ready(page);
   await page.locator('#model-file').setInputFiles(process.env.VRM_SECOND_MODEL);await ready(page);
   await expect(page.locator('#model-title')).not.toHaveText('Vivi');
   await page.locator('#smile').fill('0.5');

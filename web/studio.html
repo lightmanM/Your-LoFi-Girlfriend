@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e9e6de"><title>LoFi · Character studio</title></head>
+<body>
+  <header><a href="/" class="brand">lofi<span> / character studio</span></a><a href="/room.html" class="status-tag">OPEN THE COZY ROOM ↗</a></header>
+  <main>
+    <div class="heading"><div><p class="eyebrow">THE FOUNDATION · 01</p><h1>A character to build around.</h1></div><p>A replaceable character foundation.<br>Our scenes can grow from here.</p></div>
+    <div class="workspace">
+      <section class="viewport" aria-label="Interactive 3D character preview">
+        <div id="canvas-host"></div>
+        <div class="viewport-top"><span id="model-label">Loading character…</span><span id="view-label">FULL BODY</span></div>
+        <div id="loading" role="status"><span class="spinner"></span><strong>Preparing the character</strong><span id="progress">Loading the existing VRM model…</span></div>
+        <div class="viewport-bottom"><span>Drag to orbit · Scroll to zoom</span><div><button id="body-view" class="view-button selected">Body</button><button id="face-view" class="view-button">Face</button></div></div>
+      </section>
+      <aside>
+        <section class="model-card"><p class="eyebrow">CURRENT CHARACTER</p><h2 id="model-title">Vivi</h2><p id="model-description">Official VRoid beta sample · CC0</p><p class="note">A development character, not our final lofi girl's appearance.</p><div class="facts"><div><span>Humanoid</span><strong id="bones">Checking…</strong></div><div><span>Face controls</span><strong id="expressions">Checking…</strong></div><div><span>Finger joints</span><strong id="fingers">Checking…</strong></div></div></section>
+        <section class="controls-card"><p class="eyebrow">EXPRESSIONS & GAZE</p><label>Smile <output id="smile-value">0%</output><input id="smile" type="range" min="0" max="1" step="0.01" value="0" disabled></label><label>Mouth opening<input id="mouth" type="range" min="0" max="1" step="0.01" value="0" disabled></label><div class="row"><button id="blink" disabled>Blink</button><button id="look" aria-pressed="false" disabled>Look at me</button></div></section>
+        <section class="controls-card"><p class="eyebrow">SKELETON CHECK</p><div class="pose-options"><button data-pose="relaxed" class="selected" disabled>Relaxed</button><button data-pose="tpose" disabled>T-pose</button><button data-pose="reach" disabled>Arm check</button></div><p class="note">Simple rig checks. Try the cozy room for seated interactions.</p><button id="pause" class="quiet" disabled>Pause idle movement</button></section>
+      </aside>
+    </div>
+    <div id="message" role="status">Loading the character…</div>
+    <section class="replacement"><div><p class="eyebrow">BUILT TO BE REPLACED</p><h2>Same controls. A different character.</h2><p>Try a local VRM file. It stays on your computer. BOOTH FBX / Unity avatars need conversion and mapping before this step.</p></div><div class="replacement-actions"><label class="file-button">Load a VRM<input id="model-file" type="file" accept=".vrm" disabled></label><button id="restore" class="quiet" disabled>Restore Vivi</button></div></section>
+    <details><summary>Asset credits & technical details</summary><p>Vivi / β Ver AvatarSample_2 by pixiv Inc. · <a href="https://vroid.pixiv.help/hc/en-us/articles/360014900273" target="_blank" rel="noreferrer">Official CC0 terms</a> · <a href="/models/vivi/audit.json" target="_blank">Asset audit</a></p><p>The unmodified source is 18.09 MB with 25,834 triangles. This establishes compatibility; textures and materials still need production optimization. Selected replacement files retain their own licenses.</p><pre id="technical"></pre></details>
+  </main>
+  <footer>Existing character asset · Three.js + VRM · Development baseline</footer>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

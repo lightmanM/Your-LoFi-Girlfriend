@@ -1,0 +1,70 @@
+{
+ "url": "http://127.0.0.1:5174/balcony.html",
+ "loadMs": 483,
+ "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Max, Unspecified Version)",
+ "jsHeapMiB": 41,
+ "errors": [],
+ "ready": true,
+ "error": null,
+ "calls": 18,
+ "triangles": 77091,
+ "textures": 8,
+ "geometries": 18,
+ "medianFrameMs": 16.699999999999818,
+ "p95FrameMs": 16.799999999999272,
+ "frames": 300,
+ "transferBytes": 15695212,
+ "resources": [
+  {
+   "url": "/environment/balcony-plate/balcony.json",
+   "bytes": 1088
+  },
+  {
+   "url": "/environment/balcony-plate/book.glb",
+   "bytes": 40008
+  },
+  {
+   "url": "/models/marycia/reading-balcony.json",
+   "bytes": 4292
+  },
+  {
+   "url": "/environment/balcony-plate/chair-occluder.glb",
+   "bytes": 427860
+  },
+  {
+   "url": "/environment/balcony-plate/plate-reading.webp",
+   "bytes": 426994
+  },
+  {
+   "url": "/models/marycia/marycia.vrm",
+   "bytes": 14702500
+  },
+  {
+   "url": "/environment/balcony-plate/foreground.webp",
+   "bytes": 90370
+  }
+ ],
+ "drawingBuffer": [
+  1600,
+  900
+ ],
+ "pixelRatio": 1,
+ "camera": {
+  "position": [
+   15.35303,
+   1.37436,
+   -25.05971
+  ],
+  "quaternion": [
+   -0.0087256,
+   0.7070529,
+   0.0087256,
+   0.7070529
+  ],
+  "yaw": 0,
+  "pitch": 0,
+  "maxYaw": 0.04363323129985824,
+  "maxPitch": 0.02617993877991494,
+  "mode": "fixed-position"
+ }
+}
