@@ -38,7 +38,7 @@ test('music line: tap for music, then controls unfold and fold away',async({page
  expect(errors).toEqual([]);
 });
 
-test('music line: buttons pause, skip, mute, set volume and list credits',async({page,request})=>{
+test('music line: buttons pause, skip, mute, set volume and open the playlist',async({page,request})=>{
  test.skip(!(await hasMusic(request)),'music not prepared on this machine');
  await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.ready()&&window.lofiViewer.music()?.tracks>0,null,60000);
  await page.locator('.hud-now').click();await until(page,()=>window.lofiViewer.music().status==='playing');await page.waitForSelector('.hud.powered');
@@ -46,21 +46,29 @@ test('music line: buttons pause, skip, mute, set volume and list credits',async(
  await show();
  await page.getByRole('button',{name:'pause'}).click();await until(page,()=>window.lofiViewer.music().status==='paused');
  await expect(page.locator('.hud-now')).toHaveAttribute('aria-label',/^paused, /);
- await page.getByRole('button',{name:'play'}).click();await until(page,()=>window.lofiViewer.music().status==='playing');
+ await page.getByRole('button',{name:'play',exact:true}).click();await until(page,()=>window.lofiViewer.music().status==='playing');
  const id=(await music(page)).track.id;
  await page.getByRole('button',{name:'next song'}).click();await until(page,x=>window.lofiViewer.music().track.id!==x,id);
  await page.getByRole('button',{name:'mute'}).click();expect((await music(page)).muted).toBe(true);
  await page.getByRole('button',{name:'unmute'}).click();expect((await music(page)).muted).toBe(false);
  await page.getByRole('slider',{name:'volume'}).fill('0.3');expect((await music(page)).volume).toBeCloseTo(.3);
- await page.getByRole('button',{name:'credits'}).click();
- const panel=page.getByRole('dialog',{name:'music credits'});
+ await page.getByRole('button',{name:'playlist'}).click();
+ const panel=page.getByRole('dialog',{name:'playlist'});
  await expect(panel).toBeVisible();
  const p=await (await request.get('/music/playlist.json')).json();
  await expect(panel.locator('li')).toHaveCount(p.tracks.length);
- await expect(panel.locator('a[href^="https://creativecommons.org/"]').first()).toBeVisible();
- await expect(panel).toBeFocused();                                  // focus moves into the credits
+ await expect(panel.getByRole('link',{name:'source'})).toHaveCount(p.tracks.length);   // each track links to its page
+ await expect(panel.locator('a[href^="https://creativecommons.org/"]')).toHaveCount(0);  // no licence links in the list
+ await expect(panel.locator('li.playing')).toHaveCount(1);         // the playing track is marked
+ await expect(panel).toBeFocused();                                  // focus moves into the playlist
+ // picking a track switches to it
+ const playing=(await music(page)).track.id,pick=p.tracks.find(t=>t.id!==playing);
+ await panel.locator(`button[data-id="${pick.id}"]`).click();
+ await until(page,id=>window.lofiViewer.music().track.id===id&&!window.lofiViewer.music().fading,pick.id);
+ await expect(panel.locator('li.playing button')).toHaveAttribute('data-id',pick.id);
+ await expect(panel).toBeVisible();                                  // the list stays open while you browse
  await page.keyboard.press('Escape');await expect(panel).toBeHidden();
- await expect(page.getByRole('button',{name:'credits'})).toBeFocused();   // and back to the button
+ await expect(page.getByRole('button',{name:'playlist'})).toBeFocused();   // and focus returns to the button
  expect((await music(page)).status).toBe('playing');               // HUD clicks did not count as "tap anywhere"
 });
 

@@ -57,17 +57,24 @@
 .hud-vol::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:8px;margin-top:-3.25px;border-radius:50%;background:var(--ink);box-shadow:var(--shadow)}
 .hud-vol::-moz-range-thumb{width:8px;height:8px;border:0;border-radius:50%;background:var(--ink)}
 
-.hud-credits{position:absolute;left:0;bottom:calc(100% + 14px);pointer-events:auto;width:min(440px,calc(100vw - var(--l) - var(--r)));max-height:min(46vh,420px);overflow:auto;
+.hud-playlist{position:absolute;left:0;bottom:calc(100% + 14px);pointer-events:auto;width:min(440px,calc(100vw - var(--l) - var(--r)));max-height:min(46vh,420px);overflow:auto;
  padding:16px 18px;border-radius:10px;background:rgba(26,19,16,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
  box-shadow:0 0 0 1px rgba(255,246,232,.14);font-size:13px;line-height:1.55;text-shadow:none;user-select:text;outline:none}
-.hud-credits[hidden]{display:none}
-.hud-credits h2{all:unset;display:block;font-size:12px;color:var(--soft);margin-bottom:10px;letter-spacing:.12em}
-.hud-credits ol{list-style:none;margin:0;padding:0}
-.hud-credits li+li{margin-top:6px}
-.hud-credits a{color:var(--soft);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:2px}
-.hud-credits a:hover{color:var(--ink)}
+.hud-playlist[hidden]{display:none}
+.hud-playlist h2{all:unset;display:block;font-size:12px;color:var(--soft);margin-bottom:10px;letter-spacing:.12em}
+.hud-playlist ol{list-style:none;margin:0;padding:0}
+.hud-playlist li+li{margin-top:2px}
+.hud-playlist li{display:flex;align-items:center;gap:12px}
+.hud .hud-playlist .hud-pick{display:inline;min-width:0;min-height:0;padding:3px 0;border-radius:2px;cursor:pointer;text-align:left;flex:1 1 auto;line-height:1.45}
+.hud-pick-title{color:var(--ink)}.hud-pick-artist{color:var(--soft)}
+.hud .hud-playlist .hud-pick:hover .hud-pick-title{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.hud-playlist li.playing .hud-pick-title::before{content:'♪ ';color:var(--ink)}
+.hud-playlist li.playing .hud-pick-title{font-weight:400;color:#fff}
+.hud-playlist .hud-source{flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;opacity:.8;transition:opacity .2s ease}
+.hud-playlist .hud-source svg{width:15px;height:15px;filter:none}
+.hud-playlist .hud-source:hover,.hud-playlist .hud-source:focus-visible{opacity:1}
 
-@media (pointer:coarse){.hud{--hit:40px}.hud-vol{width:88px}}
+@media (pointer:coarse){.hud{--hit:40px}.hud-vol{width:88px}.hud .hud-playlist .hud-pick{padding:9px 0}.hud-playlist .hud-source{width:40px;height:40px}}
 @media (max-width:600px){
  .hud{--edge:14px;--inset:26px;--top:26px;--bottom:26px;font-size:16px}
  .hud-corner{width:20px;height:20px}

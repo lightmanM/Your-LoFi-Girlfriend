@@ -37,7 +37,7 @@ export function createMusic(options={}){
  const rng=cfg.random??Math.random,base=cfg.url.slice(0,cfg.url.lastIndexOf('/')+1);
  let tracks=null,loadError=null,ready=loadPlaylist();
 
- let ctx=null,master=null,analyser=null,spectrum=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0;
+ let ctx=null,master=null,analyser=null,spectrum=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0,chosen=-1,retryTimer=0;
  let status='idle',error=null,muted=false,volume=cfg.volume,entrance={fadeIn:cfg.fadeIn,delay:0};
  const failed=new Set(),strikes=new Map(),session=typeof navigator!=='undefined'?navigator.mediaSession:undefined;
  const onVisible=()=>{if(document.visibilityState==='visible'&&status==='playing')resumeContext();};
@@ -73,7 +73,9 @@ export function createMusic(options={}){
  const audible=()=>muted?0:volume;
 
  function load(deck){
-  const r=advance(queue,tracks.length,rng,failed);queue=r.queue;
+  // a track the visitor picked plays next; otherwise the shuffle decides (and avoids repeating the picked one)
+  const r=chosen>=0?{queue:Object.freeze({...queue,last:chosen}),index:chosen}:advance(queue,tracks.length,rng,failed);
+  chosen=-1;queue=r.queue;
   if(r.index<0){giveUp();return false;}
   deck.index=r.index;deck.track=tracks[r.index];
   deck.el.src=deck.track.url;deck.el.preload='auto';deck.el.load();
@@ -270,6 +272,23 @@ export function createMusic(options={}){
   if(status==='paused')resume();
   if(status==='playing')crossfade(cfg.skipFade);else start();
  }
+ /** Switch to a particular track (by id), crossfading from the current one; starts the music if it is stopped. */
+ function playTrack(id){
+  const index=tracks?.findIndex(t=>t.id===id)??-1;
+  if(index<0)return false;
+  clearTimeout(retryTimer);
+  if(status==='paused')resume();
+  if(status!=='playing'){chosen=index;start();return true;}
+  if(decks[cur].index===index&&!fade)return true;                    // already playing it
+  if(fade?.phase==='closing'){retryTimer=setTimeout(()=>playTrack(id),cfg.interruptFade*1000+80);return true;}
+  if(fade?.phase==='pending')abandon(fade);                          // drop the track that was still on its way
+  if(fade?.phase==='running'){interrupt(fade,()=>playTrack(id));return true;}
+  const to=decks[1-cur];
+  if(to.track&&to.index!==index)release(to);                          // replace whatever was preloaded
+  if(!to.track){chosen=index;if(!load(to))return false;}
+  crossfade(cfg.skipFade);
+  return true;
+ }
  /** For a tap: start if stopped, or wake a context the system suspended (calls, Siri, lock screen). */
  function wake(){
   if(status==='idle'||status==='error')start();else resumeContext();
@@ -296,7 +315,7 @@ export function createMusic(options={}){
  }
  /** Every playable track, for credits. */
  function playlist(){
-  return (tracks??[]).map(t=>({title:t.title,artist:t.artist,license:t.license,source:t.source}));
+  return (tracks??[]).map(t=>({id:t.id,title:t.title,artist:t.artist,license:t.license,source:t.source}));
  }
  /** For automated checks: jump to `seconds` before the end of the playing track. */
  function seekToEnd(seconds){
@@ -305,10 +324,10 @@ export function createMusic(options={}){
   d.el.currentTime=Math.max(0,duration-seconds);
  }
  function dispose(){
-  clearTimeout(pauseTimer);stopDecks();status='idle';
+  clearTimeout(pauseTimer);clearTimeout(retryTimer);stopDecks();status='idle';
   document.removeEventListener('visibilitychange',onVisible);
   bindSession({play:null,pause:null,nexttrack:null});
   ctx?.close().catch(()=>{});ctx=null;decks=null;analyser=null;
  }
- return Object.freeze({wake,start,toggle,pause,next,setVolume,toggleMute,state,levels,playlist,seekToEnd,dispose});
+ return Object.freeze({wake,start,toggle,pause,next,playTrack,setVolume,toggleMute,state,levels,playlist,seekToEnd,dispose});
 }

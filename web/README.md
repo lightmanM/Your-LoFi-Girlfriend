@@ -21,7 +21,7 @@ seconds. Part-way through, the camera display powers on with a soft synthesised 
 "rec", counter and music line wake one after another; the controls show for a couple of seconds, then fold. The music
 rises in behind it (`?intro=0` skips this; then the first click or tap
 starts the music). The frame is light: corner marks, a blinking "rec", a counter since start, and the music line bottom-left ("tap for music", then level bars and "song · artist"). Moving the mouse,
-tapping or pressing a key unfolds pause, next, mute, volume and credits (ⓘ, every track's artist and licence) for 3
+tapping or pressing a key unfolds pause, next, mute, volume and the playlist (pick a track to play it; ⓘ opens its source page) for 3
 seconds. Space plays or pauses, N skips, M mutes; phones and media keys also get the browser's own controls.
 
 The page needs local, git-ignored files that are never committed: `public/models/marycia/` (`marycia-web.vrm`,

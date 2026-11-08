@@ -9,6 +9,7 @@ const ICONS={
  volume:'<path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11.5 5.5a3.5 3.5 0 010 5"/>',
  muted:'<path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 6l4 4M15 6l-4 4"/>',
  info:'<circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4M8 4.8v.1"/>',
+ list:'<path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle class="fill" cx="2.6" cy="4" r=".9"/><circle class="fill" cx="2.6" cy="8" r=".9"/><circle class="fill" cx="2.6" cy="12" r=".9"/>',
 };
 const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 function icon(name){const s=document.createElementNS(SVG,'svg');s.setAttribute('viewBox','0 0 16 16');s.setAttribute('aria-hidden','true');s.innerHTML=ICONS[name];return s;}
@@ -20,21 +21,38 @@ function button(cls,label,iconName,onClick){
 }
 /** A HUD press is a user gesture: let it wake audio the system suspended (calls, lock screen). */
 const gesture=music=>{const s=music.state().status;if(s==='playing'||s==='paused')music.wake();};
-function link(text,href){const a=el('a',null,text);a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a;}
+function link(text,href,cls=null){const a=el('a',cls,text);a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a;}
 
-function creditsPanel(music){
- const panel=el('div','hud-credits');panel.hidden=true;panel.tabIndex=-1;panel.id='hud-credits';panel.setAttribute('role','dialog');panel.setAttribute('aria-label','music credits');
+/** The playlist panel: every track; pick one to play it, "source" opens its page on Free Music Archive. */
+function playlistPanel(music){
+ const panel=el('div','hud-playlist');panel.hidden=true;panel.tabIndex=-1;panel.id='hud-playlist';
+ panel.setAttribute('role','dialog');panel.setAttribute('aria-label','playlist');
  panel.addEventListener('click',e=>e.stopPropagation());
+ let rows=[];
  const fill=()=>{
   const list=el('ol');
-  for(const t of music.playlist()){
+  rows=music.playlist().map(t=>{
    const li=el('li');
-   li.append(t.source?link(t.title,t.source):document.createTextNode(t.title),document.createTextNode(` — ${t.artist} · `),link(t.license.name,t.license.url));
+   const pick=el('button','hud-pick');pick.type='button';pick.dataset.id=t.id;
+   pick.append(el('span','hud-pick-title',t.title),el('span','hud-pick-artist',` — ${t.artist}`));
+   pick.setAttribute('aria-label',`play ${t.title} by ${t.artist}`);
+   pick.addEventListener('click',e=>{e.stopPropagation();music.playTrack(t.id);mark(t.id);});
+   li.append(pick);
+   if(t.source){
+    const src=link('',t.source,'hud-source');src.append(icon('info'));
+    src.setAttribute('aria-label',`source of ${t.title}`);src.title='source';
+    li.append(src);
+   }
    list.append(li);
-  }
-  panel.replaceChildren(el('h2',null,'MUSIC · FREE MUSIC ARCHIVE'),list);
+   return {id:t.id,li,pick};
+  });
+  panel.replaceChildren(el('h2',null,'PLAYLIST · FREE MUSIC ARCHIVE'),list);
  };
- return {panel,fill};
+ /** Highlight the playing track. */
+ function mark(id){
+  for(const r of rows){const on=r.id===id;r.li.classList.toggle('playing',on);if(on)r.pick.setAttribute('aria-current','true');else r.pick.removeAttribute('aria-current');}
+ }
+ return {panel,fill,mark};
 }
 
 /** @returns {{update:(nowMs:number)=>void,isOpen:()=>boolean,close:()=>void}} */
@@ -51,13 +69,13 @@ export function mountMusicLine(root,music,{still=false}={}){
  const vol=el('input','hud-vol');Object.assign(vol,{type:'range',min:'0',max:'1',step:'0.01'});vol.setAttribute('aria-label','volume');
  vol.addEventListener('input',()=>{gesture(music);music.setVolume(+vol.value);vol.style.setProperty('--v',`${vol.value*100}%`);});
  vol.addEventListener('click',e=>e.stopPropagation());
- const {panel,fill}=creditsPanel(music);
+ const {panel,fill,mark}=playlistPanel(music);
  const setOpen=open=>{
   const hadFocus=panel.contains(document.activeElement);
   panel.hidden=!open;info.setAttribute('aria-expanded',String(open));
-  if(open){fill();panel.focus();}else if(hadFocus)info.focus();
+  if(open){fill();mark(music.state().track?.id);panel.focus({preventScroll:true});panel.querySelector('li.playing')?.scrollIntoView({block:'center'});}else if(hadFocus)info.focus();
  };
- const info=button('','credits','info',()=>setOpen(panel.hidden));
+ const info=button('','playlist','list',()=>setOpen(panel.hidden));
  info.setAttribute('aria-controls',panel.id);info.setAttribute('aria-expanded','false');
  const ctl=el('div','hud-ctl');ctl.append(toggle,next,mute,vol,info);
  const row=el('div','hud-row');row.append(now,ctl);
@@ -70,8 +88,9 @@ export function mountMusicLine(root,music,{still=false}={}){
 
  let shown='',level=[0,0,0];
  function text(s){
-  const line=musicLine(s),key=`${s.status}|${line.title}|${line.artist}|${s.muted}|${s.volume}`;
+  const line=musicLine(s),key=`${s.status}|${s.track?.id}|${line.title}|${line.artist}|${s.muted}|${s.volume}`;
   if(key===shown)return;shown=key;
+  if(!panel.hidden)mark(s.track?.id);
   title.replaceChildren(document.createTextNode(line.title));
   if(line.artist)title.append(el('span',null,` · ${line.artist}`));
   now.setAttribute('aria-label',line.artist?`${line.title}, ${line.artist}`:line.title);
