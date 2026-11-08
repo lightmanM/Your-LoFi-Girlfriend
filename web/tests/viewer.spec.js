@@ -6,7 +6,9 @@ test('viewer shows the scene with no controls and keeps reading',async({page,req
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto('/');await page.waitForFunction(()=>window.lofiViewer?.ready()||window.lofiViewer?.error(),null,{timeout:60000});
  expect(await page.evaluate(()=>window.lofiViewer.error())).toBeNull();
- expect(await page.locator('button,input,select,a').count()).toBe(0);
+ // the only controls are the camera HUD's music line; its buttons stay folded away until the visitor interacts
+ await expect(page.locator('.hud-ctl')).toBeHidden();
+ expect(await page.locator('button:visible,input:visible,select:visible,a:visible').count()).toBe(1);   // "tap for music"
  const t0=await page.evaluate(()=>window.lofiViewer.reader().time);await page.waitForTimeout(1500);
  const r=await page.evaluate(()=>window.lofiViewer.reader());
  expect(r.time).toBeGreaterThan(t0);expect(r.stretch).toBe(false);expect(r.nextStretch).toBeGreaterThan(200);

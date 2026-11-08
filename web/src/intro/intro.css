@@ -1,0 +1,29 @@
+/* Opening shot: the scene out of focus with a start button; pressing it pulls focus (src/intro/intro.js). */
+body.is-intro #stage canvas{filter:blur(16px) saturate(.92);transform:scale(1.06)}   /* scaled so blurred edges stay off-screen */
+body.is-focusing #stage canvas{animation:intro-focus var(--focus-ms,3200ms) cubic-bezier(.25,.7,.2,1) forwards}
+@keyframes intro-focus{
+ 0%{filter:blur(16px) saturate(.92);transform:scale(1.06)}
+ 35%{filter:blur(6px) saturate(.95);transform:scale(1.03)}
+ 55%{filter:blur(1.2px) saturate(.98);transform:scale(1.012)}
+ 68%{filter:blur(3.2px) saturate(.98);transform:scale(1.016)}   /* the lens hunts once, like a camera finding focus */
+ 100%{filter:blur(0) saturate(1);transform:scale(1)}
+}
+/* the camera HUD appears once the picture is sharp */
+body:is(.is-intro,.is-focusing) #stage~.hud{opacity:0;visibility:hidden}
+
+.intro{position:fixed;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
+#stage.ready~.intro{opacity:1}
+.intro.leaving{opacity:0!important;transition:opacity .5s ease}
+.intro button{all:unset;box-sizing:border-box;pointer-events:auto;cursor:pointer;
+ font:400 16px/1 'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.34em;text-indent:.34em;
+ padding:17px 40px;border:1px solid rgba(255,246,232,.72);border-radius:999px;color:rgba(255,246,232,.96);
+ text-shadow:0 0 7px rgba(30,15,5,.5),0 1px 2px rgba(30,15,5,.55);background:rgba(26,19,16,.22);
+ box-shadow:0 0 18px rgba(30,15,5,.18);transition:background .3s ease,border-color .3s ease,letter-spacing .4s ease}
+.intro button:hover{background:rgba(26,19,16,.3);border-color:rgba(255,246,232,.95);letter-spacing:.4em;text-indent:.4em}
+.intro button:focus-visible{outline:1px solid rgba(255,246,232,.9);outline-offset:5px}
+.intro.leaving button{pointer-events:none}
+@media (prefers-reduced-motion:reduce){
+ body.is-focusing #stage canvas{animation:intro-fade .8s ease forwards}
+ .intro button{transition:none}
+}
+@keyframes intro-fade{0%{filter:blur(16px);transform:scale(1.06)}100%{filter:blur(0);transform:scale(1)}}

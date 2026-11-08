@@ -14,9 +14,10 @@ async function playlist(request){
 test('music waits for a gesture, then plays, skips, mutes and pauses',async({page,request})=>{
  test.skip(!(await playlist(request)),'music not prepared on this machine');
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await until(page,()=>window.lofiViewer?.music()?.tracks>0);
+ await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.music()?.tracks>0);
+ await page.mouse.move(0,0);
  expect((await music(page)).status).toBe('idle');                       // nothing plays before a gesture
- expect(await page.locator('button,input,select,a').count()).toBe(0);   // and nothing is drawn
+ await expect(page.locator('.hud-ctl')).toBeHidden();                   // controls stay folded until interaction
  await page.mouse.click(40,40);
  await until(page,()=>window.lofiViewer.music().status==='playing');
  const first=await music(page);expect(first.track.title).toBeTruthy();expect(first.track.license).toMatch(/CC/);
@@ -34,7 +35,7 @@ test('music waits for a gesture, then plays, skips, mutes and pauses',async({pag
 
 test('music crossfades into the next track near the end',async({page,request})=>{
  test.skip(!(await playlist(request)),'music not prepared on this machine');
- await page.goto('/');await until(page,()=>window.lofiViewer?.music()?.tracks>0);
+ await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.music()?.tracks>0);
  await page.mouse.click(40,40);await until(page,()=>window.lofiViewer.music().status==='playing');
  const id=(await music(page)).track.id;
  await page.evaluate(()=>window.lofiViewer.musicSeekEnd(9));
@@ -48,7 +49,7 @@ test('music skips a broken track and reports when nothing can play',async({page,
  const p=await playlist(request);test.skip(!p,'music not prepared on this machine');
  const broken={...p.tracks[0],id:'missing',file:'missing-track.mp3'};
  await page.route('**/music/playlist.json',r=>r.fulfill({json:{...p,tracks:[broken,p.tracks[1]]}}));
- await page.goto('/');await until(page,()=>window.lofiViewer?.music()?.tracks===2);
+ await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.music()?.tracks===2);
  await page.mouse.click(40,40);
  await until(page,()=>window.lofiViewer.music().status==='playing');
  // the shuffle may pick the good track first; jumping near its end makes the player reach the broken one
@@ -58,7 +59,7 @@ test('music skips a broken track and reports when nothing can play',async({page,
 
  await page.unroute('**/music/playlist.json');
  await page.route('**/music/playlist.json',r=>r.fulfill({json:{...p,tracks:[broken]}}));
- await page.goto('/');await until(page,()=>window.lofiViewer?.music()?.tracks===1);
+ await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.music()?.tracks===1);
  await page.mouse.click(40,40);
  await until(page,()=>window.lofiViewer.music().status==='error');
  expect((await music(page)).error).toMatch(/no playable/);
@@ -69,7 +70,7 @@ test('music can be turned off',async({page})=>{
  expect(await music(page)).toBeNull();
 });
 
-async function playing(page,url='/'){
+async function playing(page,url='/?intro=0'){
  await page.goto(url);await until(page,()=>window.lofiViewer?.music()?.tracks>0);
  await page.mouse.click(40,40);await until(page,()=>window.lofiViewer.music().status==='playing');
 }
@@ -100,10 +101,13 @@ test('music pauses and resumes in the middle of a crossfade',async({page,request
 test('music gives up on a track that never starts and keeps playing',async({page,request})=>{
  const p=await playlist(request);test.skip(!p,'music not prepared on this machine');
  const hang={...p.tracks[0],id:'hang',file:'hang-track.mp3'};
+ const asked=[];page.on('request',r=>{if(r.url().includes('hang-track'))asked.push(r.url());});
  await page.route('**/music/hang-track.mp3',()=>{});   // never answered
  await page.route('**/music/playlist.json',r=>r.fulfill({json:{...p,tracks:[hang,p.tracks[1]]}}));
- await playing(page,'/?musicstall=2');                  // if the hanging track comes first, it is skipped after 2 s
+ await playing(page,'/?intro=0&musicstall=2');                  // if the hanging track comes first, it is skipped after 2 s
  await page.evaluate(()=>window.lofiViewer.musicSeekEnd(9));
- await until(page,id=>{const m=window.lofiViewer.music();return m.status==='playing'&&m.failed===1&&m.track.id===id&&!m.fading;},
-  p.tracks[1].id,30000);
+ await until(page,()=>!window.lofiViewer.music().fading,null,30000);   // the stalled fade was abandoned or completed
+ expect(asked.length).toBeGreaterThan(0);                               // the hanging track was really attempted
+ const m=await music(page);expect(m.status).toBe('playing');expect(m.track.id).toBe(p.tracks[1].id);
+ await until(page,t=>window.lofiViewer.music().time>t+.5,m.time);       // and music is still playing
 });

@@ -17,6 +17,7 @@ export const MUSIC=Object.freeze({
  volume:.7,
  album:'Your LoFi Girlfriend',
  curveSteps:16,
+ bands:[[1,4],[4,16],[16,48]],   // analyser bins (of 128) for the three level bars: lows, mids, highs
 });
 const MEDIA_ERR={DECODE:3,UNSUPPORTED:4};
 
@@ -36,8 +37,8 @@ export function createMusic(options={}){
  const rng=cfg.random??Math.random,base=cfg.url.slice(0,cfg.url.lastIndexOf('/')+1);
  let tracks=null,loadError=null,ready=loadPlaylist();
 
- let ctx=null,master=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0;
- let status='idle',error=null,muted=false,volume=cfg.volume;
+ let ctx=null,master=null,analyser=null,spectrum=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0;
+ let status='idle',error=null,muted=false,volume=cfg.volume,entrance={fadeIn:cfg.fadeIn,delay:0};
  const failed=new Set(),strikes=new Map(),session=typeof navigator!=='undefined'?navigator.mediaSession:undefined;
  const onVisible=()=>{if(document.visibilityState==='visible'&&status==='playing')resumeContext();};
  document.addEventListener('visibilitychange',onVisible);
@@ -157,8 +158,13 @@ export function createMusic(options={}){
   watch(d,()=>{if(status==='loading'&&d.track){strike(d,false);release(d);begin();}});
   play(d).then(ok=>{
    if(!ok||status!=='loading')return;
-   status='playing';toLevel(master.gain,audible(),cfg.fadeIn);announce();syncSession();
+   status='playing';fadeMasterIn(entrance);announce();syncSession();
   });
+ }
+ /** Bring the music in: silent for `delay` s, then a `fadeIn` s rise (both on the audio clock). */
+ function fadeMasterIn({fadeIn,delay}){
+  const t=ctx.currentTime,p=master.gain;
+  p.cancelScheduledValues(t);p.setValueAtTime(0,t);p.setValueAtTime(0,t+delay);p.linearRampToValueAtTime(audible(),t+delay+fadeIn);
  }
  function stopDecks(){
   if(fade){clearTimeout(fade.timer);fade=null;}
@@ -213,7 +219,11 @@ export function createMusic(options={}){
   for(const [action,fn] of Object.entries(handlers)){try{session.setActionHandler(action,fn);}catch{/* not supported here */}}
  }
 
- function start(){
+ /**
+  * Start the music (call from a user gesture). `fadeIn` and `delay` shape how the first track comes in, e.g. after
+  * an intro: playback starts now, inside the gesture, but stays silent until `delay` has passed.
+  */
+ function start({fadeIn=cfg.fadeIn,delay=0}={}){
   if(status==='paused'){resume();return;}
   if(status==='error'){   // a tap after a failure tries again from scratch
    failed.clear();strikes.clear();error=null;
@@ -224,7 +234,9 @@ export function createMusic(options={}){
   if(!ctx){
    const AC=window.AudioContext??window.webkitAudioContext;
    if(!AC){status='error';error='Web Audio is not supported';return;}
-   ctx=new AC();master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
+   ctx=new AC();master=ctx.createGain();master.gain.value=0;
+   analyser=ctx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.8;spectrum=new Uint8Array(analyser.frequencyBinCount);
+   master.connect(analyser).connect(ctx.destination);   // after the master gain: muted or paused reads as silence
    decks=[makeDeck(),makeDeck()];
    bindSession({play:()=>start(),pause:()=>pause(),nexttrack:()=>next()});
   }
@@ -232,6 +244,7 @@ export function createMusic(options={}){
   // unlock both elements while the gesture is live; the first one plays its real track below when it can
   if(!tracks)prime(decks[cur]);
   prime(decks[1-cur]);
+  entrance={fadeIn:Math.max(0,Number(fadeIn)||0),delay:Math.max(0,Number(delay)||0)};
   status='loading';
   if(tracks)begin();
   else ready.then(begin,()=>{if(status==='loading'){status='error';error=loadError;}});
@@ -275,6 +288,16 @@ export function createMusic(options={}){
    track:t?{id:t.id,title:t.title,artist:t.artist,license:t.license.name}:null,
    time:d?+d.el.currentTime.toFixed(2):0,duration:t?.duration??0,fading:fade!==null,context:ctx?.state??null};
  }
+ /** Three 0..1 levels (lows, mids, highs) of what is audible right now, for level meters. */
+ function levels(){
+  if(!analyser||status!=='playing')return [0,0,0];
+  analyser.getByteFrequencyData(spectrum);
+  return cfg.bands.map(([a,b])=>{let s=0;for(let i=a;i<b;i++)s+=spectrum[i];return s/((b-a)*255);});
+ }
+ /** Every playable track, for credits. */
+ function playlist(){
+  return (tracks??[]).map(t=>({title:t.title,artist:t.artist,license:t.license,source:t.source}));
+ }
  /** For automated checks: jump to `seconds` before the end of the playing track. */
  function seekToEnd(seconds){
   const d=decks?.[cur];if(!d?.track)return;
@@ -285,7 +308,7 @@ export function createMusic(options={}){
   clearTimeout(pauseTimer);stopDecks();status='idle';
   document.removeEventListener('visibilitychange',onVisible);
   bindSession({play:null,pause:null,nexttrack:null});
-  ctx?.close().catch(()=>{});ctx=null;decks=null;
+  ctx?.close().catch(()=>{});ctx=null;decks=null;analyser=null;
  }
- return Object.freeze({wake,start,toggle,pause,next,setVolume,toggleMute,state,seekToEnd,dispose});
+ return Object.freeze({wake,start,toggle,pause,next,setVolume,toggleMute,state,levels,playlist,seekToEnd,dispose});
 }

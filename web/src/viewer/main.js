@@ -11,6 +11,8 @@ import {Wind,PLANTS,plateMaterial,leavesMaterial} from './wind.js';
 import {livePlants,PLANTS3D} from './plants.js';
 import {createMusic} from '../music/player.js';
 import {bindMusicControls} from '../music/controls.js';
+import {mountHud} from '../hud/hud.js';
+import {mountIntro,INTRO} from '../intro/intro.js';
 import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
 const BASE='/environment/balcony-toon/';
@@ -131,8 +133,15 @@ requestAnimationFrame(frame);
 // Background music: starts on the first click or tap (browsers block sound before a gesture). ?music=0 turns it off.
 // ?musicstall=<s> shortens the wait before a track that will not start is skipped (for checks).
 const music=params.get('music')==='0'?null:createMusic({startTimeout:params.has('musicstall')?+params.get('musicstall'):undefined});
-const unbindMusic=music?bindMusicControls(music):null;
-import.meta.hot?.dispose(()=>{unbindMusic?.();music?.dispose();});
+// The camera-frame HUD (corner marks, rec, counter, music line). ?hud=0 hides it.
+const hud=params.get('hud')==='0'?null:mountHud(music);
+// Opening shot: out of focus with a start button; pressing it pulls focus and lets the music in. ?intro=0 skips it
+// (then the first click or tap anywhere starts the music). Page controls are bound only once the page has started.
+let unbindMusic=null;
+const bindControls=()=>{if(music&&!unbindMusic)unbindMusic=bindMusicControls(music);};
+const intro=params.get('intro')==='0'?null:mountIntro({onStart:()=>{music?.start({delay:INTRO.musicDelay,fadeIn:INTRO.musicFadeIn});bindControls();hud?.restartCounter();}});
+if(!intro)bindControls();
+import.meta.hot?.dispose(()=>{intro?.dispose();hud?.unmount();unbindMusic?.();music?.dispose();});
 // For automated checks only; nothing here is shown to visitors.
 window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state.wind.force(state.wind.t).toFixed(2),palmDeg:+(state.wind.angle('palm')*57.3).toFixed(2),leavesDeg:+(state.wind.angle('leaves')*57.3).toFixed(2),gusts:state.wind.gusts?.length??0,next:+(state.wind.next-state.wind.t).toFixed(1)},pose:()=>{const h=state.vrm.humanoid,P=n=>h.getNormalizedBoneNode(n).getWorldPosition(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3));
  const out=Object.fromEntries(['neck','chest','leftShoulder','rightShoulder','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm','leftHand','rightHand','head'].map(n=>[n,P(n)]));
