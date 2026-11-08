@@ -6,6 +6,7 @@ const hasMusic=async request=>(await request.get('/music/playlist.json')).ok();
 
 test('hud shows the frame and a counter that runs',async({page})=>{
  await page.goto('/?music=0&intro=0');
+ await page.waitForSelector('.hud.power',{timeout:60000});        // powers on by itself without the intro
  await expect(page.locator('.hud-corner')).toHaveCount(4);
  await expect(page.locator('.hud-rec')).toHaveText('rec');
  const t0=await page.locator('.hud-tc').textContent();expect(t0).toMatch(/^\d\d:\d\d:\d\d$/);
@@ -27,6 +28,7 @@ test('music line: tap for music, then controls unfold and fold away',async({page
  await expect(now).toHaveAttribute('aria-label','tap for music');
  await now.click();
  await until(page,()=>window.lofiViewer.music().status==='playing');
+ await page.waitForSelector('.hud.powered');
  const m=await music(page);
  await expect(now).toHaveAttribute('aria-label',`${m.track.title.toLowerCase()}, ${m.track.artist.toLowerCase()}`);
  await page.mouse.move(400,500);await page.mouse.move(420,520);
@@ -39,7 +41,7 @@ test('music line: tap for music, then controls unfold and fold away',async({page
 test('music line: buttons pause, skip, mute, set volume and list credits',async({page,request})=>{
  test.skip(!(await hasMusic(request)),'music not prepared on this machine');
  await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.ready()&&window.lofiViewer.music()?.tracks>0,null,60000);
- await page.locator('.hud-now').click();await until(page,()=>window.lofiViewer.music().status==='playing');
+ await page.locator('.hud-now').click();await until(page,()=>window.lofiViewer.music().status==='playing');await page.waitForSelector('.hud.powered');
  const show=async()=>{await page.mouse.move(300,860);await page.mouse.move(310,862);};
  await show();
  await page.getByRole('button',{name:'pause'}).click();await until(page,()=>window.lofiViewer.music().status==='paused');
@@ -67,7 +69,7 @@ test('hud fits a phone screen',async({browser,request})=>{
  const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  const page=await ctx.newPage();
  await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.ready()&&window.lofiViewer.music()?.tracks>0,null,60000);
- await page.locator('.hud-now').tap();await until(page,()=>window.lofiViewer.music().status==='playing');
+ await page.locator('.hud-now').tap();await until(page,()=>window.lofiViewer.music().status==='playing');await page.waitForSelector('.hud.powered');
  await page.locator('#stage').tap();
  await expect(page.locator('.hud-ctl')).toBeVisible();
  await expect(page.locator('.hud-tc')).toBeHidden();               // the counter makes way on narrow screens
@@ -81,7 +83,7 @@ test('hud fits a phone screen',async({browser,request})=>{
 test('space on a focused HUD button presses only that button',async({page,request})=>{
  test.skip(!(await hasMusic(request)),'music not prepared on this machine');
  await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.ready()&&window.lofiViewer.music()?.tracks>0,null,60000);
- await page.locator('.hud-now').click();await until(page,()=>window.lofiViewer.music().status==='playing');
+ await page.locator('.hud-now').click();await until(page,()=>window.lofiViewer.music().status==='playing');await page.waitForSelector('.hud.powered');
  await page.mouse.move(300,860);await page.mouse.move(310,862);
  await page.getByRole('button',{name:'mute'}).focus();
  await page.keyboard.press(' ');

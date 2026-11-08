@@ -5,8 +5,8 @@ import './intro.css';
 
 export const INTRO=Object.freeze({
  focusMs:3200,     // the focus pull
- hudAtMs:900,      // the camera display powers on this far into the focus pull
- musicDelay:1.6,   // seconds of silence before the music rises, so it arrives as the picture sharpens
+ hudAtMs:900,      // the camera display powers on (with its beep) this far into the focus pull
+ musicDelay:1.8,   // seconds of silence before the music rises, so it arrives as the picture sharpens
  musicFadeIn:4,    // seconds for the music to rise to full volume
 });
 const START_KEYS=new Set(['Enter',' ']);
@@ -14,7 +14,7 @@ const START_KEYS=new Set(['Enter',' ']);
 /** @returns {{started:()=>boolean,dispose:()=>void}} */
 export function mountIntro({onStart,parent=document.body,stage=document.getElementById('stage')}={}){
  const body=document.body;
- body.classList.add('is-intro');body.style.setProperty('--focus-ms',`${INTRO.focusMs}ms`);body.style.setProperty('--hud-at',`${INTRO.hudAtMs}ms`);
+ body.classList.add('is-intro');body.style.setProperty('--focus-ms',`${INTRO.focusMs}ms`);
  const root=document.createElement('div');root.className='intro';
  const button=document.createElement('button');button.type='button';button.textContent='start';button.setAttribute('aria-label','start');
  root.append(button);parent.append(root);

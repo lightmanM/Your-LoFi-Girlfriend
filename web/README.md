@@ -17,7 +17,9 @@ Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?
 `?wind=0`, `?plantgain=<n>`, `?seat=0`, `?music=0`, `?musicstall=<seconds>`, `?hud=0`, `?intro=0`; `window.lofiViewer` reports state.
 
 The page opens out of focus with a "start" button. Pressing it (or Enter) pulls the camera into focus over about 3
-seconds; the music rises in behind it and the camera frame appears (`?intro=0` skips this; then the first click or tap
+seconds. Part-way through, the camera display powers on with a soft synthesised beep and an exposure flash: corners,
+"rec", counter and music line wake one after another; the controls show for a couple of seconds, then fold. The music
+rises in behind it (`?intro=0` skips this; then the first click or tap
 starts the music). The frame is light: corner marks, a blinking "rec", a counter since start, and the music line bottom-left ("tap for music", then level bars and "song · artist"). Moving the mouse,
 tapping or pressing a key unfolds pause, next, mute, volume and credits (ⓘ, every track's artist and licence) for 3
 seconds. Space plays or pauses, N skips, M mutes; phones and media keys also get the browser's own controls.
@@ -41,7 +43,7 @@ be credited and played unedited (no trims, loops or baked-in mixes, and no recor
 - `src/music/`: background music: `player.js` (two audio decks through Web Audio: shuffle without repeats, 6 s
   equal-power crossfades, per-track loudness gain, preloading, skipping broken or stalled tracks, Media Session),
   `playlist.js` and `fades.js` (pure logic), `controls.js` (the stand-in keys and tap-to-start).
-- `src/intro/`: the opening shot (blur, start button, focus pull).
+- `src/intro/`: the opening shot (blur, start button, focus pull) and the power-on beep (`beep.js`, Web Audio).
 - `src/hud/`: the camera-frame overlay: `camera-frame.js` (corners, rec, counter), `music-line.js` (music line,
   controls, credits), `format.js` (pure helpers), `hud.css`, mounted by `hud.js`. Font: DM Mono (OFL, self-hosted).
 - `src/companion/life.js` (breathing and idle life), `source-motion.js` (curve sampling).

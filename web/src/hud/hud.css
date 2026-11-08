@@ -3,14 +3,25 @@
  --ink:rgba(255,246,232,.92);--soft:rgba(255,246,232,.75);--line:rgba(255,246,232,.5);
  --shadow:0 0 7px rgba(30,15,5,.55),0 1px 2px rgba(30,15,5,.6);
  --edge:28px;--inset:48px;--top:44px;--bottom:44px;--hit:32px;
- position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;
+ position:fixed;inset:0;pointer-events:none;z-index:2;
  font:400 18px/1 'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;
  color:var(--ink);text-shadow:var(--shadow);-webkit-font-smoothing:antialiased;user-select:none;
 }
-/* the display powers on like a camera: a quick flicker, not a fade */
-#stage.ready~.hud{opacity:1;animation:hud-power .45s steps(1,end) .2s both}
-@keyframes hud-power{0%{opacity:0}14%{opacity:1}26%{opacity:.12}38%{opacity:1}52%{opacity:.45}64%,100%{opacity:1}}
-.hud-corner{position:absolute;width:26px;height:26px;border:0 solid var(--line)}
+/* Power-on (class .power, added once by hud.js): the exposure jumps and settles, the corners stutter on and lock in,
+   then "rec", the counter and the music line wake one after another (delays --p-* come from POWER in hud.js). */
+.hud:not(.power) :is(.hud-corner,.hud-rec,.hud-tc,.hud-music){visibility:hidden}
+.hud-exposure{position:absolute;inset:0;background:rgba(255,244,228,.34);mix-blend-mode:screen;opacity:0}
+.hud.power .hud-exposure{animation:hud-exposure .8s cubic-bezier(.1,.6,.3,1) both}
+.hud.power .hud-corner{animation:hud-stutter .55s steps(1,end) both,hud-settle .55s cubic-bezier(.2,.8,.2,1) both}
+.hud.power .hud-rec{animation:hud-stutter-short .35s steps(1,end) var(--p-rec,500ms) both}
+.hud.power .hud-tc{animation:hud-stutter-short .3s steps(1,end) var(--p-counter,700ms) both}
+.hud.power .hud-music{animation:hud-stutter-short .35s steps(1,end) var(--p-music,900ms) both}
+@keyframes hud-exposure{0%{opacity:0}7%{opacity:1}100%{opacity:0}}
+@keyframes hud-stutter{0%{opacity:0}9%{opacity:.9}17%{opacity:0}29%{opacity:.6}36%{opacity:0}50%{opacity:1}58%{opacity:.3}68%,100%{opacity:1}}
+@keyframes hud-stutter-short{0%{opacity:0}15%{opacity:1}30%{opacity:.15}48%{opacity:1}62%{opacity:.5}75%,100%{opacity:1}}
+@keyframes hud-settle{from{translate:var(--dx) var(--dy)}to{translate:0 0}}
+.hud-corner{position:absolute;width:26px;height:26px;border:0 solid var(--line);--dx:0px;--dy:0px}
+.hud-corner.tl{--dx:-7px;--dy:-7px}.hud-corner.tr{--dx:7px;--dy:-7px}.hud-corner.bl{--dx:-7px;--dy:7px}.hud-corner.br{--dx:7px;--dy:7px}
 .hud-corner.tl{top:max(var(--edge),env(safe-area-inset-top));left:max(var(--edge),env(safe-area-inset-left));border-top-width:1.5px;border-left-width:1.5px}
 .hud-corner.tr{top:max(var(--edge),env(safe-area-inset-top));right:max(var(--edge),env(safe-area-inset-right));border-top-width:1.5px;border-right-width:1.5px}
 .hud-corner.bl{bottom:max(var(--edge),env(safe-area-inset-bottom));left:max(var(--edge),env(safe-area-inset-left));border-bottom-width:1.5px;border-left-width:1.5px}
@@ -65,4 +76,4 @@
  .hud-ctl{margin-left:0;padding-left:0;border-left:0;width:100%}
 }
 @media (max-width:480px){.hud-tc{display:none}}
-@media (prefers-reduced-motion:reduce){.hud-rec i{animation:none}#stage.ready~.hud{animation:none}.hud .hud-ctl,.hud.awake .hud-ctl.ready{transition:none}}
+@media (prefers-reduced-motion:reduce){.hud-rec i{animation:none}.hud.power :is(.hud-corner,.hud-rec,.hud-tc,.hud-music,.hud-exposure){animation:none}.hud .hud-ctl,.hud.awake .hud-ctl.ready{transition:none}}
