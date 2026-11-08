@@ -3,11 +3,13 @@
  --ink:rgba(255,246,232,.92);--soft:rgba(255,246,232,.75);--line:rgba(255,246,232,.5);
  --shadow:0 0 7px rgba(30,15,5,.55),0 1px 2px rgba(30,15,5,.6);
  --edge:28px;--inset:48px;--top:44px;--bottom:44px;--hit:32px;
- position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity 1.6s ease;
+ position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;
  font:400 18px/1 'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;
  color:var(--ink);text-shadow:var(--shadow);-webkit-font-smoothing:antialiased;user-select:none;
 }
-#stage.ready~.hud{opacity:1}
+/* the display powers on like a camera: a quick flicker, not a fade */
+#stage.ready~.hud{opacity:1;animation:hud-power .45s steps(1,end) .2s both}
+@keyframes hud-power{0%{opacity:0}14%{opacity:1}26%{opacity:.12}38%{opacity:1}52%{opacity:.45}64%,100%{opacity:1}}
 .hud-corner{position:absolute;width:26px;height:26px;border:0 solid var(--line)}
 .hud-corner.tl{top:max(var(--edge),env(safe-area-inset-top));left:max(var(--edge),env(safe-area-inset-left));border-top-width:1.5px;border-left-width:1.5px}
 .hud-corner.tr{top:max(var(--edge),env(safe-area-inset-top));right:max(var(--edge),env(safe-area-inset-right));border-top-width:1.5px;border-right-width:1.5px}
@@ -63,4 +65,4 @@
  .hud-ctl{margin-left:0;padding-left:0;border-left:0;width:100%}
 }
 @media (max-width:480px){.hud-tc{display:none}}
-@media (prefers-reduced-motion:reduce){.hud-rec i{animation:none}.hud,.hud .hud-ctl,.hud.awake .hud-ctl.ready{transition:none}}
+@media (prefers-reduced-motion:reduce){.hud-rec i{animation:none}#stage.ready~.hud{animation:none}.hud .hud-ctl,.hud.awake .hud-ctl.ready{transition:none}}

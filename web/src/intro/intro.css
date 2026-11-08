@@ -8,8 +8,10 @@ body.is-focusing #stage canvas{animation:intro-focus var(--focus-ms,3200ms) cubi
  68%{filter:blur(3.2px) saturate(.98);transform:scale(1.016)}   /* the lens hunts once, like a camera finding focus */
  100%{filter:blur(0) saturate(1);transform:scale(1)}
 }
-/* the camera HUD appears once the picture is sharp */
-body:is(.is-intro,.is-focusing) #stage~.hud{opacity:0;visibility:hidden}
+/* the camera display is off until start, then powers on part-way through the focus pull */
+body.is-intro #stage~.hud{opacity:0;visibility:hidden;animation:none}
+/* same animation name as the plain power-on in hud.css, so it does not replay when the intro classes go away */
+body.is-focusing #stage.ready~.hud{animation:hud-power .45s steps(1,end) var(--hud-at,900ms) both}
 
 .intro{position:fixed;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
 #stage.ready~.intro{opacity:1}
@@ -24,6 +26,7 @@ body:is(.is-intro,.is-focusing) #stage~.hud{opacity:0;visibility:hidden}
 .intro.leaving button{pointer-events:none}
 @media (prefers-reduced-motion:reduce){
  body.is-focusing #stage canvas{animation:intro-fade .8s ease forwards}
+ body.is-focusing #stage.ready~.hud{animation:none}
  .intro button{transition:none}
 }
 @keyframes intro-fade{0%{filter:blur(16px);transform:scale(1.06)}100%{filter:blur(0);transform:scale(1)}}

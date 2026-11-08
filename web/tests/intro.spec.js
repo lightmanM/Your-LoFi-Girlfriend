@@ -21,7 +21,9 @@ test('start pulls focus, then the music flows in and the camera frame appears',a
  await page.goto('/');await page.waitForFunction(()=>window.lofiViewer?.ready(),null,{timeout:60000});
  await page.getByRole('button',{name:'start'}).click();
  await page.waitForFunction(()=>window.lofiViewer.music().status==='playing',null,{timeout:15000});
- const mid=await canvasFilter(page);expect(mid).not.toBe('none');      // still pulling focus
+ // the camera display flashes on while the picture is still pulling focus
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('.hud')).opacity==='1'&&document.body.classList.contains('is-focusing'),null,{timeout:4000});
+ expect(await canvasFilter(page)).not.toBe('none');
  await page.waitForFunction(()=>getComputedStyle(document.querySelector('#stage canvas')).filter==='none',null,{timeout:8000});
  await expect(page.getByRole('button',{name:'start'})).toHaveCount(0);
  await expect(page.locator('.hud')).toBeVisible();
