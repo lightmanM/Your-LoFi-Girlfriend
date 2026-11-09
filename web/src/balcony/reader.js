@@ -1,24 +1,21 @@
 // The reading character as one unit: the static reading pose with breathing and sway, the reading layer (eyes, head,
-// page turns, look-ups, legs), the book in her hands, and the occasional stretch break. Both the Balcony development
-// page and the viewer drive it with update(dt) once per frame, before vrm.update().
+// page turns, look-ups, legs), the book in her hands, and an occasional short break (unwind.js). The viewer drives it
+// with update(dt) once per frame, before vrm.update().
 import * as THREE from 'three';
 import {lifeSignals,applyLife} from '../companion/life.js';
 import {ReadingMotion,BookGrip,READING} from './reading.js';
 import {reachArm} from './arm-ik.js';
-import {ClipEvent} from './clip-player.js';
-import {shoulderRhythm,torsoFollow} from './body-coupling.js';
+import {aimTurn} from './head-aim.js';
+import {Unwind} from './unwind.js';
 
 const V=()=>new THREE.Vector3(),Q=()=>new THREE.Quaternion();
 const smoothstep=THREE.MathUtils.smoothstep;
 
-// Stretch break: every 4 to 8 minutes of reading, never during a page turn or a look-up. The clip's two-arm overhead
-// stretch: from 10.4 s (hands resting on the lap) until the arms come down (19.4 s). Two moments play slower: the
-// swing up with a forearm snap (10.85 to 11.7 s) and the quick drop at the end (18.3 to 19.4 s). pre/post: both hands
-// carry the book down to her lap and back up; easeIn/easeOut: they let go of it and move into (and out of) the clip.
-export const STRETCH={clip:'stretchRokokoIk',every:[240,480],options:{pre:2.3,easeIn:1.2,easeOut:1.2,post:1.7,start:10.4,end:19.4,
- slow:[[10.85,11.7,.4],[18.3,19.4,.35]]}};
+// Her break from reading (unwind.js: book down to her lap, shoulder rolls, head tilts, book up): every 4 to 8 minutes,
+// never during a page turn, a look-up or a line she is saying. (It replaced an overhead stretch from motion capture.)
+export const STRETCH={every:[240,480]};
 const LIFE={breathDepth:2.8,headDepth:.8,swayDepth:2.2};
-// Head during the stretch: she looks up before the book lands (neck first, the head a beat later, a little overshoot)
+// Head during the break: she looks up before the book lands (neck first, the head a beat later, a little overshoot)
 // and back down as she takes hold of it again.
 const LIFT={pitch:24,roll:5,neckShare:.4};
 // Holding the book low (on her lap): wrists this far from the spine (m, past the page edge at about .14) and this high
@@ -27,10 +24,14 @@ const EDGE={out:.19,height:.5};
 // While the book lies on her lap, a hand that comes low over it is kept out past its side edge (m from the spine),
 // fully below `low` and not at all above `high` (m above the pages), so the hands come down beside it, not over it.
 const KEEP_OUT={side:.24,low:.10,high:.45};
-// Below shoulder height during a stretch break the arms never lock straight: no hand reaches farther from the shoulder
-// than this share of the arm's length (about 140 degrees at the elbow); fades out as the hand rises past the shoulder.
-const SOFT_ARMS={reach:.94,below:-.10,above:.10};
+// A hand reaching for the book low on her lap never locks the arm straight: no farther from the shoulder than this share
+// of the arm's length (about 140 degrees at the elbow).
+const SOFT_ARMS={reach:.94};
 const READING_TEXT=READING.text;
+// Looking at someone (greet): the head makes this share of the turn toward them, the eyes the rest, within these
+// limits (degrees on the normalized head; negative pitch is up).
+// how her neck and head share the turn toward something she attends to (ReadingMotion then aims her face exactly)
+export const ATTEND=Object.freeze({headShare:1,yaw:[-60,60],pitch:[-30,12]});
 const backOut=u=>{u=Math.min(1,Math.max(0,u));const c=1.7;return 1+(c+1)*(u-1)**3+c*(u-1)**2;};
 // path through points, s 0..1, each leg eased; the legs' shares of s are given
 function path(pts,shares,s,out){
@@ -44,18 +45,19 @@ export class Reader{
   * @param {THREE.Object3D} book the book's root (its first child holds the pages)
   * @param {{tracks:object[],blink?:number}} pose the static reading pose (absolute normalized-bone rotations)
   * @param {THREE.Object3D} look the gaze target the VRM's lookAt follows
-  * @param {{seed?:number,eventScale?:number,authored?:object,stretchAt?:number,lines?:number,shoulders?:boolean,torso?:boolean,random?:()=>number}} o
+  * @param {{seed?:number,eventScale?:number,stretchAt?:number,lines?:number,random?:()=>number}} o
   */
  constructor(vrm,book,pose,look,o={}){
-  this.vrm=vrm;this.pose=pose;this.look=look;this.o={shoulders:true,torso:true,eventScale:1,random:Math.random,...o};this.time=0;
+  this.vrm=vrm;this.pose=pose;this.look=look;this.o={eventScale:1,random:Math.random,...o};this.time=0;
   this.grip=new BookGrip(vrm,book);
   this.reading=new ReadingMotion(vrm,book.children[0],{seed:o.seed??7,eventScale:this.o.eventScale});
   if(o.lines)this.reading.linesPerPage=Math.max(1,o.lines);
-  const clip=o.authored?.clips?.[STRETCH.clip];
-  this.stretch=clip?new ClipEvent(clip,STRETCH.options):null;
-  this.nextStretch=this.stretch?(o.stretchAt??this.stretchGap()):Infinity;
+  this.stretch=new Unwind();   // her break from reading (named stretch for the hooks and ?stretch=N that start it)
+  this.nextStretch=o.stretchAt??this.stretchGap();
+  this.lids=0;          // 0..1: eyes half-closed while she says something (small talk), on top of blinking
+  this.talking=false;   // while she talks, her break does not start
   this.lap={local:[new THREE.Matrix4(),new THREE.Matrix4()],legs:['leftUpperLeg','rightUpperLeg'],meshes:null,m:new THREE.Matrix4()};
-  this.baseShoulders={left:Q(),right:Q()};this.turnRest={offset:V(),active:false};
+  this.turnRest={offset:V(),active:false};
   this.tmp={grip:V(),target:V(),gL:V(),pa:V(),pb:V(),p2:V(),cL:V(),left:V(),toLocal:new THREE.Matrix4(),edge:new THREE.Matrix4()};
  }
  bone(n){return this.vrm.humanoid.getNormalizedBoneNode(n);}
@@ -71,20 +73,15 @@ export class Reader{
  }
  update(dt){
   this.time+=dt;this.applyPose();
+  if(this.pendingAttend){this.reading.lookUpAt(this.attendAngles(this.pendingAttend));this.pendingAttend=null;}
   const st=this.stretch,r0=this.reading,busy=r0.turn||r0.lookUp;
-  if(st&&!st.active&&this.time>=this.nextStretch&&!busy){this.grip.setLap(this.bookLapPose());st.begin();}
+  if(st&&!st.active&&this.time>=this.nextStretch&&!busy&&!this.talking){this.grip.setLap(this.bookLapPose());st.begin();}
   const was=st?.active;st?.advance(dt);if(was&&!st.active)this.nextStretch=this.stretchGap();
   const sw=st?.weight()??0;
-  if(sw>0){
-   this.baseShoulders.left.copy(this.bone('leftShoulder').quaternion);this.baseShoulders.right.copy(this.bone('rightShoulder').quaternion);
-   st.apply(this.vrm,sw);
-   if(this.o.shoulders)shoulderRhythm(this.vrm,this.baseShoulders,sw);
-   if(this.o.torso)torsoFollow(this.vrm,sw,{left:st.armWeight('left'),right:st.armWeight('right')});
-   for(const side of ['left','right'])this.softArm(side,sw);
-  }
+  if(sw>0)st.apply(this.vrm,sw);
   const lift=this.headLift(st),r=r0.update(dt,this.look,Math.max(sw,Math.min(1,lift.head)));   // reading stops as she looks up
   this.applyHeadLift(lift,sw);
-  // the book: in her left hand, or on its way to (or resting on) her lap during a stretch
+  // the book: in her left hand, or on its way to (or resting on) her lap during her break
   if(st?.active)this.grip.setLap(this.lapNow());
   this.grip.update(st?.carry()??0);
   // low on her lap the hands hold the book by its side edges, not under the back cover (they would pass through it)
@@ -92,8 +89,32 @@ export class Reader{
   if(st?.active)this.leftHand(1-sw*st.armWeight('left'),edge);
   this.rightHand(st?.active?null:r?.turn,1-sw*(st?.armWeight('right')??1),edge);
   const em=this.vrm.expressionManager;
-  if(em)em.setValue('blink',Math.max(this.pose.blink??0,r0.blink(),st?.face('eyeBlinkLeft')??0));
+  if(em)em.setValue('blink',Math.max(this.pose.blink??0,r0.blink(),st?.face('eyeBlinkLeft')??0,this.lids));
   return r;
+ }
+ /** Her break, a page turn, any look-up or a pending attend: she is in the middle of something. */
+ busy(){return !!(this.stretch?.active||this.reading.turn||this.reading.lookUp||this.pendingAttend);}
+ /**
+  * Look up from the book at a point (world space) for `hold` seconds, e.g. the camera when she greets you. Takes
+  * effect on the next update(), aimed from her head as the reading pose holds it. Not during her break.
+  * @param {{at:THREE.Vector3,hold:number,ease?:number,tilt?:number,share?:number}} o  tilt: most sideways head tilt seen
+  *  from `at` (degrees); share < 1: the head turns only that share of the way sideways (it still lifts fully) and her
+  *  eyes, widened, do the rest
+  * @returns {boolean} whether she will look
+  */
+ attend(o){if(this.stretch?.active)return false;this.pendingAttend={...o,at:o.at.clone()};return true;}
+ /** Stop attending: she eases back to her book now. */
+ cancelAttend(){this.pendingAttend=null;this.reading.endLookUpAt();}
+ /** True while she is looking at something she was asked to attend to. */
+ attending(){return !!(this.pendingAttend||this.reading.lookUp?.gaze);}
+ // Head angles (degrees, as ReadingMotion applies them) that turn her face toward a point; call after applyPose().
+ attendAngles({at,hold,ease,tilt,share=1}){
+  const head=this.bone('head'),t=aimTurn(head.getWorldQuaternion(Q()),head.getWorldPosition(V()),at);
+  const A=ATTEND,clamp=THREE.MathUtils.clamp;
+  // a smaller look takes its share of the turn sideways only: she still lifts her head fully, since looking up from a
+  // lowered head hides her eyes under her lids (from the camera they read as closed)
+  return {gaze:at,yaw:clamp(t.yaw*A.headShare*share,...A.yaw),pitch:clamp(t.pitch*A.headShare,...A.pitch),tilt,hold,ease,
+   aim:share>=1,widen:share<1};
  }
  headLift(st){
   if(!st?.active)return {neck:0,head:0};
@@ -124,13 +145,7 @@ export class Reader{
   const a=this.arm(side),d=p.distanceTo(a.s),max=a.length*SOFT_ARMS.reach;
   return d>max?p.sub(a.s).multiplyScalar(max/d).add(a.s):p;
  }
- // While the clip holds her hands low, keep her elbows from locking straight (weight w: the clip's weight).
- softArm(side,w){
-  const a=this.arm(side),A=SOFT_ARMS,k=w*(1-smoothstep(a.w.y-a.s.y,A.below,A.above)),max=a.length*A.reach,d=a.w.distanceTo(a.s);
-  if(k<=0||d<=max)return;
-  reachArm(this.vrm,side,a.w.sub(a.s).multiplyScalar(max/d).add(a.s),k);
- }
- // With the book low (edge > 0), move the wrist (as the clip has it) out past the book's side edge where it is low
+ // With the book low (edge > 0), move the wrist (as the pose holds it) out past the book's side edge where it is low
  // over the pages; the grip reach that follows blends from there, so the hand never travels across the book.
  keepOut(side,edge){
   if(edge<=0)return;

@@ -14,10 +14,32 @@ test('signals stay bounded and continuous',()=>{
   previous=s;
  }
 });
-test('breath rises and falls once per period',()=>{
- const samples=[];for(let t=0;t<4.6;t+=.01)samples.push(lifeSignals(t).breath);
- assert.ok(Math.max(...samples)>.99&&Math.min(...samples)<.01);
- assert.ok(samples.indexOf(Math.max(...samples))<samples.length*.5,'inhale is the shorter half');
+// breaths over a stretch of time: the times of each bottom (start of an inhale) and top, and the top's height
+const breaths=(seconds,dt=1/240)=>{
+ const b=[];for(let t=0;t<seconds;t+=dt)b.push([t,lifeSignals(t).breath]);
+ const bottoms=[],tops=[];
+ for(let i=1;i<b.length-1;i++){if(b[i][1]<=b[i-1][1]&&b[i][1]<b[i+1][1])bottoms.push(b[i][0]);if(b[i][1]>=b[i-1][1]&&b[i][1]>b[i+1][1])tops.push(b[i]);}
+ return {b,bottoms,tops};
+};
+test('she breathes about every 4.6 s, inhaling quicker than she exhales',()=>{
+ const {bottoms,tops}=breaths(46);
+ assert.ok(bottoms.length>=9&&bottoms.length<=11,`${bottoms.length} breaths in 46 s`);
+ let inhale=0,exhale=0,n=0;
+ for(let i=0;i+1<bottoms.length;i++){const top=tops.find(x=>x[0]>bottoms[i]&&x[0]<bottoms[i+1]);if(!top)continue;inhale+=top[0]-bottoms[i];exhale+=bottoms[i+1]-top[0];n++;}
+ assert.ok(n>5&&inhale<exhale,`inhale ${inhale/n} s, exhale ${exhale/n} s`);
+});
+test('each breath turns around softly, at the top and at the bottom: no sudden reversal',()=>{
+ const {b}=breaths(60),dt=1/240,v=b.map((x,i)=>i?(x[1]-b[i-1][1])/dt:0);
+ const peak=Math.max(...v.map(Math.abs));let jump=0;
+ for(let i=2;i<v.length;i++)jump=Math.max(jump,Math.abs(v[i]-v[i-1]));
+ assert.ok(jump<.05*peak,`speed changed by ${(jump/peak*100).toFixed(0)}% of its peak in 1/240 s`);
+});
+test('breaths vary a little in length and depth, like a person\'s',()=>{
+ const {bottoms,tops}=breaths(120),len=bottoms.slice(1).map((t,i)=>t-bottoms[i]),depth=tops.map(x=>x[1]);
+ const spread=a=>(Math.max(...a)-Math.min(...a));
+ const mean=len.reduce((s,x)=>s+x,0)/len.length;
+ assert.ok(spread(len)/mean>.05&&spread(len)/mean<.35,`lengths ${len.map(x=>x.toFixed(2)).join(' ')}`);
+ assert.ok(spread(depth)>.05&&spread(depth)<.3&&Math.max(...depth)<=1,`depths ${depth.map(x=>x.toFixed(2)).join(' ')}`);
 });
 test('depth options scale the signals',()=>{
  const s=lifeSignals(7.3,{headDepth:0,gazeDepth:.5});

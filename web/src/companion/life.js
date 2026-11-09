@@ -8,14 +8,27 @@ const deg=MathUtils.DEG2RAD;
 const drift=(t,a,b,c)=>(Math.sin(t*TAU/a)+.6*Math.sin(t*TAU/b+1.3)+.35*Math.sin(t*TAU/c+2.1))/1.95;
 
 export const LIFE_DEFAULTS={breathPeriod:4.6,breathDepth:1,swayDepth:1,headDepth:1,gazeDepth:1};
+// Breaths are not all alike: their length drifts by up to about ±12% (two slow, incommensurate swells in the breathing
+// rate) and their depth by up to 15% (never deeper than breathDepth).
+export const BREATH=Object.freeze({inhale:.42,rate:Object.freeze([[.07,37],[.05,23]]),depthVary:.15});
+const ease=x=>(1-Math.cos(Math.PI*x))/2;   // 0 -> 1, starting and stopping at rest
+
+/** How far through her breathing she is (breaths, rising steadily but at a slowly varying rate). */
+export function breathPhase(time,period=LIFE_DEFAULTS.breathPeriod){
+ let p=time/period;
+ for(const [v,T] of BREATH.rate)p+=v*T/(TAU*period)*Math.sin(TAU*time/T);   // the rate is (1+v cos) / period
+ return p;
+}
 
 export function lifeSignals(time,options={}){
  const o={...LIFE_DEFAULTS,...options};
- const breathPhase=(time/o.breathPeriod)%1;
- // Inhale is quicker than the exhale: asymmetric ease.
- const breath=breathPhase<.42?Math.sin(breathPhase/.42*Math.PI/2):Math.cos((breathPhase-.42)/.58*Math.PI/2);
+ // Inhale is quicker than the exhale; both ease in and out, so the chest (and the book in her hands) turns around
+ // softly at the top and the bottom of each breath instead of bouncing.
+ const phase=breathPhase(time,o.breathPeriod)%1,I=BREATH.inhale;
+ const breath=phase<I?ease(phase/I):1-ease((phase-I)/(1-I));
+ const depth=1-BREATH.depthVary*(.5+.5*drift(time+11,17,29,43));
  return {
-  breath:breath*o.breathDepth,                        // 0..1, chest rise
+  breath:breath*depth*o.breathDepth,                  // 0..1, chest rise
   swayRoll:drift(time,23,37,61)*o.swayDepth,           // -1..1, slow weight shift
   swayYaw:drift(time+9,31,47,73)*o.swayDepth,
   headYaw:drift(time+3,11,17,29)*o.headDepth,          // -1..1, idle looking

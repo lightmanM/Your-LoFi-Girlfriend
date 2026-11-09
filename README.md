@@ -4,8 +4,10 @@ Original anime character for a frontend-only lofi experience, with reusable outf
 
 ## Current: balcony scene
 
-One web page: Marycia reading on a sunny balcony in a toon afternoon look, with page turns, look-ups, a stretch break
-every 4 to 8 minutes, and plants moving in the wind. No controls, fixed camera.
+One web page: Marycia reading on a sunny balcony in a toon afternoon look, with page turns, look-ups, a short break
+(shoulder rolls and head tilts with the book on her lap) every 4 to 8 minutes, and plants moving in the wind. When you press start she looks up and greets you with one of five
+lines at random ("おかえりなさい", welcome back, and others), lip-synced to a VOICEVOX voice (冥鳴ひまり), with subtitles; while she reads she
+says something now and then, to you or to herself. No controls, fixed camera.
 
 - [Run it](web/README.md) — local URL: http://127.0.0.1:5173/
 - [Viewer design notes](docs/design/viewer/README.md) · [reading motion](docs/design/reading-motion/README.md) · [toon look](docs/design/balcony-toon/README.md)

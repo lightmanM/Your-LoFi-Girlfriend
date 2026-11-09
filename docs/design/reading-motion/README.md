@@ -159,3 +159,25 @@ and torso layers. It lasts about 18.6 s; peak hand speed 0.7 m/s; no forearm ove
 [stretch-v6-sequence.png](stretch-v6-sequence.png). Clips: [stretch-v6-closeup.mp4](stretch-v6-closeup.mp4),
 [stretch-v6-full.mp4](stretch-v6-full.mp4).
 
+## Break from reading (replaces the stretch, 2026-11-09)
+
+The overhead stretch is gone. Played whole (all 19.4 s of `stretchRokokoIk`), the capture showed its single-camera
+limits: a hand over her head in the first swing up, a forearm through her chest in the seated twist, shoulders dipping,
+an untracked wrist bent like a claw, and hard stops at the drop and the pick-up; the passes above had hidden these with
+slowed spans and body layers, and the owner judged neither version natural. The stretch-exports of the IK pipeline
+(v8 to v10 with firmer fists, v19 = the stored clip) are kept in the private `assets/characters/marycia/stretch-exports/`.
+
+In its place, `web/src/balcony/unwind.js`, procedural and on the same schedule (every 4 to 8 minutes, never during a
+page turn, a look-up or a line she is saying), about 16 s:
+
+- the book goes down to her lap with the same put-down timing as before, and comes back up the same way; her hands
+  stay on it throughout (no reach, nothing near her head);
+- her head comes up from the book (24°, as when she looks up);
+- two slow backward shoulder rolls (1.9 s each: forward and up, over the top, back and down; up to about 2 cm of rise
+  at the shoulder joints, never below their reading height), with a breath in;
+- her head tilts 15° to one side, holds with her eyes closed, comes back, and does the other side; then she settles.
+
+Tests: `web/tests/unwind.test.js` (timing, hands on the book, both tilts, eyes, motion only with weight) and the break
+test in `web/tests/viewer.spec.js` (hands within 3 cm of their grip, shoulders never below reading height, the old clip
+not downloaded, reading resumes). The overhead stretch's code (`clip-player.js`, `body-coupling.js`) is removed.
+

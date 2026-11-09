@@ -1,0 +1,366 @@
+{
+  "engine": "http://127.0.0.1:50021",
+  "voice": {
+    "speaker": "冥鳴ひまり",
+    "style": "ノーマル",
+    "credit": "VOICEVOX:冥鳴ひまり",
+    "terms": "https://meimeihimari.wixsite.com/himari/terms-of-use"
+  },
+  "lines": [
+    {
+      "id": "okaeri",
+      "kind": "greeting",
+      "text": "おかえりなさい",
+      "subtitle": {"ja": "おかえりなさい", "en": "Welcome back."},
+      "query": {"speedScale": 0.85, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "otsukare",
+      "kind": "greeting",
+      "text": "おかえり。今日もおつかれさま",
+      "subtitle": {"ja": "おかえり。今日もおつかれさま", "en": "Welcome back. You did great today."},
+      "query": {"speedScale": 0.85, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "kitekureta",
+      "kind": "greeting",
+      "text": "あ、来てくれたんだ。うれしいな",
+      "subtitle": {"ja": "あ、来てくれたんだ。うれしいな", "en": "Oh, you came. I'm so glad."},
+      "query": {"speedScale": 0.85, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "iitokoro",
+      "kind": "greeting",
+      "text": "おかえり。ちょうど、いいところだったの",
+      "subtitle": {"ja": "おかえり。ちょうど、いいところだったの", "en": "Welcome back. I'm just at a good part."},
+      "query": {"speedScale": 0.85, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "yukkuri",
+      "kind": "greeting",
+      "text": "いらっしゃい。ゆっくりしていってね",
+      "subtitle": {"ja": "いらっしゃい。ゆっくりしていってね", "en": "Come on in. Stay as long as you like."},
+      "query": {"speedScale": 0.85, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "basil",
+      "kind": "talk",
+      "to": "you",
+      "about": "life",
+      "mood": "light",
+      "text": "ベランダのバジル、やっと芽が出たの。待ってるあいだも、ちゃんと育ってたんだね",
+      "subtitle": {"ja": ["ベランダのバジル、やっと芽が出たの。", "待ってるあいだも、ちゃんと育ってたんだね"], "en": ["The basil on the balcony finally sprouted.", "It was growing the whole time I was waiting."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "nothing",
+      "kind": "talk",
+      "to": "you",
+      "about": "thought",
+      "mood": "light",
+      "text": "今日ね、なにもしなかったの。でも、いい一日だった気がする",
+      "subtitle": {"ja": "今日ね、なにもしなかったの。でも、いい一日だった気がする", "en": "I didn't do anything today. But it feels like it was a good day."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "clouds",
+      "kind": "talk",
+      "to": "you",
+      "about": "thought",
+      "mood": "light",
+      "text": "ねえ、雲ってずっと形を変えてるのに、いつも雲だよね",
+      "subtitle": {"ja": "ねえ、雲ってずっと形を変えてるのに、いつも雲だよね", "en": "Hey, clouds keep changing shape, but they're always clouds."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "sparrows",
+      "kind": "talk",
+      "to": "you",
+      "about": "life",
+      "mood": "light",
+      "text": "今朝ね、すずめが二羽、手すりに並んでたの。なに話してたんだろうね",
+      "subtitle": {"ja": ["今朝ね、すずめが二羽、手すりに並んでたの。", "なに話してたんだろうね"], "en": ["This morning two sparrows sat side by side on the railing.", "I wonder what they were talking about."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "tea-cool",
+      "kind": "talk",
+      "to": "you",
+      "about": "life",
+      "mood": "light",
+      "text": "お茶って、冷めるのを待つ時間も、おいしさのうちだと思うんだ",
+      "subtitle": {"ja": "お茶って、冷めるのを待つ時間も、おいしさのうちだと思うんだ", "en": "I think waiting for tea to cool is part of what makes it good."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "seasons",
+      "kind": "talk",
+      "to": "you",
+      "about": "thought",
+      "mood": "light",
+      "text": "急がなくても、季節はちゃんと来るんだよね",
+      "subtitle": {"ja": "急がなくても、季節はちゃんと来るんだよね", "en": "Even if you don't hurry, the seasons still come."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "train",
+      "kind": "talk",
+      "to": "you",
+      "about": "life",
+      "mood": "light",
+      "text": "さっき、遠くで電車の音がしてね。どこかへ行く人がいるんだなって思ったの",
+      "subtitle": {"ja": ["さっき、遠くで電車の音がしてね。", "どこかへ行く人がいるんだなって思ったの"], "en": ["Earlier I heard a train far away.", "It made me think someone out there is going somewhere."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "shadows",
+      "kind": "talk",
+      "to": "you",
+      "about": "thought",
+      "mood": "light",
+      "text": "影って、光があるから生まれるんだよね。なんか、ちょっと好き",
+      "subtitle": {"ja": "影って、光があるから生まれるんだよね。なんか、ちょっと好き", "en": "Shadows only exist because there's light. I kind of like that."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "river",
+      "kind": "talk",
+      "to": "you",
+      "about": "book",
+      "mood": "light",
+      "text": "この本にね、同じ川には二度入れないって書いてあるの。このお茶も、二度と同じ味じゃないのかな",
+      "subtitle": {"ja": ["この本にね、同じ川には二度入れないって書いてあるの。", "このお茶も、二度と同じ味じゃないのかな"], "en": ["This book says you can't step into the same river twice.", "Maybe this tea never tastes the same twice either."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "short-life",
+      "kind": "talk",
+      "to": "you",
+      "about": "book",
+      "mood": "light",
+      "text": "人生は短いんじゃなくて、短くしちゃってるんだって。ちょっと耳が痛いな",
+      "subtitle": {"ja": ["人生は短いんじゃなくて、短くしちゃってるんだって。", "ちょっと耳が痛いな"], "en": ["It says life isn't short; we're the ones who make it short.", "That one stings a little."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "woods",
+      "kind": "talk",
+      "to": "you",
+      "about": "book",
+      "mood": "light",
+      "text": "森で暮らした人がね、持ち物が少ないほど自由なんだって。この本だけは、手放せないけど",
+      "subtitle": {"ja": ["森で暮らした人がね、持ち物が少ないほど自由なんだって。", "この本だけは、手放せないけど"], "en": ["A man who lived in the woods says the less you own, the freer you are.", "I couldn't give up this book, though."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "enough",
+      "kind": "talk",
+      "to": "you",
+      "about": "book",
+      "mood": "light",
+      "text": "しあわせには、友だちと、自由と、考える時間があればいいんだって。けっこう足りてるかも",
+      "subtitle": {"ja": ["しあわせには、友だちと、自由と、考える時間があればいいんだって。", "けっこう足りてるかも"], "en": ["It says all happiness needs is friends, freedom, and time to think.", "We might have enough already."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "last-thing",
+      "kind": "talk",
+      "to": "you",
+      "about": "book",
+      "mood": "light",
+      "text": "最後のことみたいに、ていねいにやりなさいだって。じゃあ、もう一ページ、ていねいに読もうかな",
+      "subtitle": {"ja": ["最後のことみたいに、ていねいにやりなさいだって。", "じゃあ、もう一ページ、ていねいに読もうかな"], "en": ["It says to do each thing as if it were the last.", "Then I'll read one more page, carefully."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "wither",
+      "kind": "talk",
+      "to": "you",
+      "about": "thought",
+      "mood": "dark",
+      "text": "芽が出たってことは、いつか枯れるってことなんだよね",
+      "subtitle": {"ja": "芽が出たってことは、いつか枯れるってことなんだよね", "en": "If it sprouted, it means someday it will wither."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "stars",
+      "kind": "talk",
+      "to": "you",
+      "about": "thought",
+      "mood": "dark",
+      "text": "星から見たら、わたしたちの悩みなんて、ほこりより小さいんだろうね",
+      "subtitle": {"ja": "星から見たら、わたしたちの悩みなんて、ほこりより小さいんだろうね", "en": "From the stars, our worries are probably smaller than dust."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "forgotten",
+      "kind": "talk",
+      "to": "you",
+      "about": "book",
+      "mood": "dark",
+      "text": "いつか、だれもわたしたちのことを覚えていない日が来るんだって。それでも、今日のお茶はおいしいね",
+      "subtitle": {"ja": ["いつか、だれもわたしたちのことを覚えていない日が来るんだって。", "それでも、今日のお茶はおいしいね"], "en": ["It says a day will come when no one remembers us.", "Still, today's tea is good."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "warmth",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "light",
+      "text": "しあわせって、たぶんこれくらいの温度なんだろうな",
+      "subtitle": {"ja": "しあわせって、たぶんこれくらいの温度なんだろうな", "en": "Happiness is probably about this warm."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "wind",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "light",
+      "text": "風って、どこから来て、どこへ行くんだろ",
+      "subtitle": {"ja": "風って、どこから来て、どこへ行くんだろ", "en": "Where does the wind come from, and where does it go…"},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "waiting",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "light",
+      "text": "なにかを待ってる時間も、ちゃんと自分の時間なんだよね",
+      "subtitle": {"ja": "なにかを待ってる時間も、ちゃんと自分の時間なんだよね", "en": "Time spent waiting for something is still my own time."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "chatting",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "light",
+      "text": "考えるって、ひとりでするおしゃべりみたいだね",
+      "subtitle": {"ja": "考えるって、ひとりでするおしゃべりみたいだね", "en": "Thinking is like having a chat with yourself."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "taller",
+      "kind": "talk",
+      "to": "self",
+      "about": "life",
+      "mood": "light",
+      "text": "バジル、明日はもう少し伸びてるかな",
+      "subtitle": {"ja": "バジル、明日はもう少し伸びてるかな", "en": "I wonder if the basil will be a little taller tomorrow."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "quiet",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "light",
+      "text": "静かなのって、音がないことじゃなくて、急がないことなのかも",
+      "subtitle": {"ja": "静かなのって、音がないことじゃなくて、急がないことなのかも", "en": "Maybe quiet isn't the absence of sound. Maybe it's not being in a hurry."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "sky",
+      "kind": "talk",
+      "to": "self",
+      "about": "life",
+      "mood": "light",
+      "text": "今日の空、ちょっとだけ昨日とちがう色",
+      "subtitle": {"ja": "今日の空、ちょっとだけ昨日とちがう色", "en": "Today's sky is a slightly different colour from yesterday's."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "unknown",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "light",
+      "text": "わからないことがあるって、まだ考えられるってことだよね",
+      "subtitle": {"ja": "わからないことがあるって、まだ考えられるってことだよね", "en": "Not understanding something just means there's still more to think about."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "butterfly",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "light",
+      "text": "蝶になった夢を見た人の話。どっちが夢だったんだろうね",
+      "subtitle": {"ja": "蝶になった夢を見た人の話。どっちが夢だったんだろうね", "en": "The man who dreamed he was a butterfly. Which one was the dream?"},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "not-enough",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "light",
+      "text": "足りないって思ってると、ずっと足りないままなんだって",
+      "subtitle": {"ja": "足りないって思ってると、ずっと足りないままなんだって", "en": "If you keep feeling you don't have enough, you'll never have enough."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "useless-tree",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "light",
+      "text": "役に立たない木だから、切られずに大きくなれたんだって。ふふ",
+      "subtitle": {"ja": "役に立たない木だから、切られずに大きくなれたんだって。ふふ", "en": "The tree grew big because it was useless, so no one ever cut it down. Heh."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "change",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "light",
+      "text": "変わらないものは、変わることだけ、か",
+      "subtitle": {"ja": "変わらないものは、変わることだけ、か", "en": "The only thing that never changes is change itself, huh."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "afternoon",
+      "kind": "talk",
+      "to": "self",
+      "about": "thought",
+      "mood": "dark",
+      "text": "この午後も、もう二度と来ないんだな。だから、もう少しここにいよう",
+      "subtitle": {"ja": ["この午後も、もう二度と来ないんだな。", "だから、もう少しここにいよう"], "en": ["This afternoon will never come again.", "So I'll stay here a little longer."]},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "pages",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "dark",
+      "text": "ページをめくるたびに、残りが減っていく。人生みたい",
+      "subtitle": {"ja": "ページをめくるたびに、残りが減っていく。人生みたい", "en": "Every page I turn, there's less left. Like life."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "stone",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "dark",
+      "text": "岩を山の上まで押して、また転がり落ちて。わたしたちも、そうなのかな",
+      "subtitle": {"ja": ["岩を山の上まで押して、また転がり落ちて。", "わたしたちも、そうなのかな"], "en": ["Pushing a rock up the mountain, and it rolls back down.", "Are we like that too?"]},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "alone-room",
+      "kind": "talk",
+      "to": "self",
+      "about": "book",
+      "mood": "dark",
+      "text": "人はひとりで部屋にじっとしていられないから、不幸になるんだって",
+      "subtitle": {"ja": "人はひとりで部屋にじっとしていられないから、不幸になるんだって", "en": "It says people are unhappy because they can't sit quietly alone in a room."},
+      "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    }
+  ]
+}

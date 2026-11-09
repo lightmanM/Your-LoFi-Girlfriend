@@ -111,3 +111,18 @@ test('music gives up on a track that never starts and keeps playing',async({page
  const m=await music(page);expect(m.status).toBe('playing');expect(m.track.id).toBe(p.tracks[1].id);
  await until(page,t=>window.lofiViewer.music().time>t+.5,m.time);       // and music is still playing
 });
+
+test('music dips under her voice and comes back; muted stays silent',async({page,request})=>{
+ test.skip(!(await playlist(request)),'music not prepared on this machine');
+ await page.goto('/?intro=0&greet=0&talk=0');await until(page,()=>window.lofiViewer?.music()?.tracks>0);
+ await page.mouse.click(40,40);
+ await until(page,()=>window.lofiViewer.music().status==='playing');
+ const {volume}=await music(page);
+ await page.evaluate(()=>window.lofiViewer.musicDuck(true));
+ let m=await music(page);expect(m.ducked).toBe(true);expect(m.level).toBeCloseTo(volume*.5,5);
+ await page.evaluate(()=>window.lofiViewer.musicDuck(false));
+ m=await music(page);expect(m.ducked).toBe(false);expect(m.level).toBeCloseTo(volume,5);
+ await page.keyboard.press('m');await page.evaluate(()=>window.lofiViewer.musicDuck(true));
+ expect((await music(page)).level).toBe(0);
+});
+

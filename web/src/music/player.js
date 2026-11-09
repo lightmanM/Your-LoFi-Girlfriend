@@ -15,6 +15,8 @@ export const MUSIC=Object.freeze({
  startTimeout:8,   // a track that has not started playing by then counts as a failed attempt
  maxStrikes:2,     // network failures allowed per track before it is dropped (decode errors drop it at once)
  volume:.7,
+ duck:.5,          // the music's share while she speaks (about -6 dB)
+ duckFade:.4,
  album:'Your LoFi Girlfriend',
  curveSteps:16,
  bands:[[1,4],[4,16],[16,48]],   // analyser bins (of 128) for the three level bars: lows, mids, highs
@@ -37,8 +39,8 @@ export function createMusic(options={}){
  const rng=cfg.random??Math.random,base=cfg.url.slice(0,cfg.url.lastIndexOf('/')+1);
  let tracks=null,loadError=null,ready=loadPlaylist();
 
- let ctx=null,master=null,analyser=null,spectrum=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0,chosen=-1,retryTimer=0;
- let status='idle',error=null,muted=false,volume=cfg.volume,entrance={fadeIn:cfg.fadeIn,delay:0};
+ let ctx=null,master=null,dip=null,analyser=null,spectrum=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0,chosen=-1,retryTimer=0;
+ let status='idle',error=null,muted=false,ducked=false,volume=cfg.volume,entrance={fadeIn:cfg.fadeIn,delay:0};
  const failed=new Set(),strikes=new Map(),session=typeof navigator!=='undefined'?navigator.mediaSession:undefined;
  const onVisible=()=>{if(document.visibilityState==='visible'&&status==='playing')resumeContext();};
  document.addEventListener('visibilitychange',onVisible);
@@ -70,7 +72,7 @@ export function createMusic(options={}){
   for(let i=1;i<curve.length;i++)param.linearRampToValueAtTime(curve[i],t+len*i/(curve.length-1));
  }
  const toLevel=(param,target,len)=>ramp(param,Float32Array.of(param.value,target),len);
- const audible=()=>muted?0:volume;
+ const audible=()=>muted?0:volume;   // the music's own level; the dip under her voice is a separate gain (dip)
 
  function load(deck){
   // a track the visitor picked plays next; otherwise the shuffle decides (and avoids repeating the picked one)
@@ -236,9 +238,9 @@ export function createMusic(options={}){
   if(!ctx){
    const AC=window.AudioContext??window.webkitAudioContext;
    if(!AC){status='error';error='Web Audio is not supported';return;}
-   ctx=new AC();master=ctx.createGain();master.gain.value=0;
+   ctx=new AC();master=ctx.createGain();master.gain.value=0;dip=ctx.createGain();dip.gain.value=ducked?cfg.duck:1;
    analyser=ctx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.8;spectrum=new Uint8Array(analyser.frequencyBinCount);
-   master.connect(analyser).connect(ctx.destination);   // after the master gain: muted or paused reads as silence
+   master.connect(dip).connect(analyser).connect(ctx.destination);   // after both gains: muted or paused reads as silence
    decks=[makeDeck(),makeDeck()];
    bindSession({play:()=>start(),pause:()=>pause(),nexttrack:()=>next()});
   }
@@ -295,7 +297,13 @@ export function createMusic(options={}){
  }
  function setVolume(v){
   volume=Math.min(1,Math.max(0,Number(v)||0));
-  if(ctx&&status==='playing'&&!muted)toLevel(master.gain,volume,.15);
+  if(ctx&&status==='playing'&&!muted)toLevel(master.gain,audible(),.15);
+ }
+ /** Dip the music while she speaks, and bring it back after. */
+ function duck(on){
+  if(!!on===ducked)return;
+  ducked=!!on;
+  if(dip)toLevel(dip.gain,ducked?cfg.duck:1,cfg.duckFade);   // its own gain: the music's fades run on undisturbed
  }
  function toggleMute(){
   muted=!muted;
@@ -303,7 +311,8 @@ export function createMusic(options={}){
  }
  function state(){
   const d=decks?.[cur],t=d?.track;
-  return {status,error:error??loadError,tracks:tracks?.length??0,failed:failed.size,volume,muted,
+  return {status,error:error??loadError,tracks:tracks?.length??0,failed:failed.size,volume,muted,ducked,level:audible()*(ducked?cfg.duck:1),
+   gain:master?+master.gain.value.toFixed(4):0,   // the music's own level now (its fades), for checks
    track:t?{id:t.id,title:t.title,artist:t.artist,license:t.license.name}:null,
    time:d?+d.el.currentTime.toFixed(2):0,duration:t?.duration??0,fading:fade!==null,context:ctx?.state??null};
  }
@@ -327,7 +336,7 @@ export function createMusic(options={}){
   clearTimeout(pauseTimer);clearTimeout(retryTimer);stopDecks();status='idle';
   document.removeEventListener('visibilitychange',onVisible);
   bindSession({play:null,pause:null,nexttrack:null});
-  ctx?.close().catch(()=>{});ctx=null;decks=null;analyser=null;
+  ctx?.close().catch(()=>{});ctx=null;decks=null;analyser=null;dip=null;
  }
- return Object.freeze({wake,start,toggle,pause,next,playTrack,setVolume,toggleMute,state,levels,playlist,seekToEnd,dispose});
+ return Object.freeze({wake,start,toggle,pause,next,playTrack,setVolume,toggleMute,duck,state,levels,playlist,seekToEnd,dispose});
 }

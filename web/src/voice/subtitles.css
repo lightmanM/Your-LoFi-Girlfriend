@@ -1,0 +1,19 @@
+/* Subtitles: her line in Japanese with the English beneath, bottom centre above the music line (src/voice/subtitles.js). */
+.subtitles{
+ --ink:rgba(255,248,236,.96);--soft:rgba(255,246,232,.8);
+ position:fixed;left:50%;bottom:max(104px,calc(env(safe-area-inset-bottom) + 76px));z-index:2;
+ width:min(86vw,720px);transform:translate(-50%,6px);text-align:center;pointer-events:none;user-select:none;
+ opacity:0;transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.2,1);
+ text-shadow:0 0 10px rgba(30,15,5,.6),0 1px 3px rgba(30,15,5,.75);-webkit-font-smoothing:antialiased;
+}
+.subtitles.on{opacity:1;transform:translate(-50%,0)}
+.subtitles p{margin:0}
+.subtitles .ja{font:500 clamp(21px,2.3vw,30px)/1.35 'Hiragino Maru Gothic ProN','Hiragino Sans','Noto Sans JP','Yu Gothic',system-ui,sans-serif;
+ letter-spacing:.12em;color:var(--ink);
+ word-break:auto-phrase;text-wrap:balance}   /* long lines wrap between phrases, in even rows (where supported) */
+.subtitles .en{margin-top:7px;font:400 clamp(13px,1.15vw,15px)/1.3 'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+ letter-spacing:.08em;color:var(--soft);text-wrap:balance}
+/* murmur (something she says to herself) is styled like what she says to you: the owner found the smaller, dimmer
+   murmur hard to read. The class stays so it can be styled again without touching the code. */
+@media (max-width:600px){.subtitles{bottom:max(136px,calc(env(safe-area-inset-bottom) + 108px))}}   /* the music line takes two rows */
+@media (prefers-reduced-motion:reduce){.subtitles,.subtitles.on{transform:translate(-50%,0);transition:opacity .3s ease}}

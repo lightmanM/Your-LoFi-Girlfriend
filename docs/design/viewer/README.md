@@ -2,7 +2,8 @@
 
 The page a visitor opens, `web/index.html` (the root URL). A fullscreen still camera on the warm afternoon balcony,
 no buttons or text; it fades in once loaded. She reads most of the time (eyes along the lines, page turns, looking up,
-shifting in her seat, legs drifting) and every 4 to 8 minutes puts the book down for the overhead stretch. Each visit
+shifting in her seat, legs drifting) and every 4 to 8 minutes puts the book down for a short break (since 2026-11-09:
+shoulder rolls and head tilts; it was an overhead stretch, see [reading motion](../reading-motion/README.md)). Each visit
 uses a new random seed, so no two sessions match. Clip: [viewer-v1.mp4](viewer-v1.mp4) (stretch triggered early).
 
 The old character studio moved from `index.html` to `studio.html`; the room and Balcony development pages are unchanged.
@@ -16,7 +17,8 @@ The old character studio moved from `index.html` to `studio.html`; the room and 
   Light and a colour grade on her and the book (`web/src/viewer/grade.js`) were matched to the Blender picture by colour
   samples on her face, legs, sleeves, hair and shorts (average difference about 18 on a 0 to 255 scale).
 - **Screens:** wider than 16:9 crops top and bottom; narrower (phones) crops the sides around her.
-- **Stretch clip:** only the played part ships (`stretch-break.json`, 0.39 MB instead of 1.6 MB).
+- **Stretch clip:** only the played part shipped (`stretch-break.json`, 0.39 MB instead of 1.6 MB). Since 2026-11-09
+  the break is procedural and the page no longer downloads it.
 
 ## Numbers (headless Chrome, M2 Max, 1280x720)
 

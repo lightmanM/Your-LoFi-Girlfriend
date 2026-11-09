@@ -1,6 +1,6 @@
 // The viewer: what a visitor sees. A warm afternoon on the balcony, rendered once in Blender as a toon picture, with
 // Marycia live in front of it: reading most of the time (page turns, looking up, shifting in her seat) and now and
-// then putting the book down to stretch. No controls; the camera stays still, like a video that never repeats.
+// then putting the book down for a short break. No controls; the camera stays still, like a video that never repeats.
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
@@ -14,6 +14,13 @@ import {bindMusicControls} from '../music/controls.js';
 import {mountHud} from '../hud/hud.js';
 import {mountIntro,INTRO} from '../intro/intro.js';
 import {cameraBeep} from '../intro/beep.js';
+import {createVoice} from '../voice/speech.js';
+import {startGreeting} from '../voice/greeting.js';
+import {GREET} from '../voice/greeting-plan.js';
+import {voiceLevel} from '../voice/level.js';
+import {createSmallTalk} from '../voice/small-talk.js';
+import {mountSubtitles} from '../voice/subtitles.js';
+import {pickLine,lastLine,rememberLine} from '../voice/pick-line.js';
 import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
 const BASE='/environment/balcony-toon/';
@@ -70,10 +77,9 @@ async function load(){
  if(F.leaves_pivot_shift)PLANTS.leaves.pivots=PLANTS.leaves.pivots.map(([x,y])=>[x+F.leaves_pivot_shift[0],y+F.leaves_pivot_shift[1]]);
  camera.position.fromArray(d.camera.position);camera.quaternion.fromArray(d.camera.quaternion);fit();new ResizeObserver(fit).observe(host);
  const tex=new THREE.TextureLoader();
- const [plate,leaves,chair,book,pose,vrmBuffer,authored,clean,field,plantMask,plants,cover,plantsFull,palmFull]=await Promise.all([
+ const [plate,leaves,chair,book,pose,vrmBuffer,clean,field,plantMask,plants,cover,plantsFull,palmFull]=await Promise.all([
   tex.loadAsync(BASE+d.plate),tex.loadAsync(BASE+d.leaves),loader.loadAsync(VISIBLE_CHAIR),loader.loadAsync(BASE+d.book),json(d.pose),
   fetch(character(d)).then(r=>{if(!r.ok)throw Error('character: HTTP '+r.status);return r.arrayBuffer();}),
-  fetch(d.authored).then(r=>r.ok?r.json():null).catch(()=>null),
   tex.loadAsync(BASE+d.wind.clean),tex.loadAsync(BASE+d.wind.field),tex.loadAsync(BASE+d.wind.mask),loader.loadAsync(BASE+d.wind.plants),
   tex.loadAsync(BASE+d.wind.cover),tex.loadAsync(BASE+d.wind.full),tex.loadAsync(BASE+d.wind.palm_full),
  ]);
@@ -109,9 +115,9 @@ async function load(){
  const sun=new THREE.DirectionalLight(new THREE.Color().fromArray(LIGHT.sunColor??d.sun.color),LIGHT.sunIntensity);
  sun.position.copy(hips).addScaledVector(new THREE.Vector3().fromArray(d.sun.direction),10);sun.target.position.copy(hips);enableChairShadows(renderer,scene,hips,d.sun.direction);
  scene.add(sun,sun.target,new THREE.HemisphereLight(new THREE.Color().fromArray(LIGHT.sky),new THREE.Color().fromArray(LIGHT.ground),LIGHT.fill));
- state.reader=new Reader(vrm,book.scene,pose,look,{authored,seed:params.has('seed')?+params.get('seed'):(Math.random()*1e9)|0,
+ state.reader=new Reader(vrm,book.scene,pose,look,{seed:params.has('seed')?+params.get('seed'):(Math.random()*1e9)|0,
   random:params.has('seed')?()=>.5:Math.random,
-  eventScale:+(params.get('events')??1),shoulders:params.get('shoulders')!=='0',stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
+  eventScale:+(params.get('events')??1),stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
  state.ready=true;requestAnimationFrame(()=>host.classList.add('ready'));
 }
@@ -127,7 +133,8 @@ function frame(now){
    {ivy:w.activity('ivy'),roses:w.activity('roses'),pots:w.activity('balcony')});
   l.ang.value=w.angle('leaves');l.act.value=w.activity('leaves');
  }
- if(state.reader&&!state.frozen){state.reader.update(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
+ soundFrame();
+ if(state.reader&&!state.frozen&&!state.held){state.reader.update(dt);greetingFrame();talkFrame(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
@@ -140,15 +147,73 @@ const music=params.get('music')==='0'?null:createMusic({startTimeout:params.has(
 const withIntro=params.get('intro')!=='0';
 const hud=params.get('hud')==='0'?null:mountHud(music,{autoPower:!withIntro});
 let unbindMusic=null,beeps=0;
+// Her greeting: as the start button pulls focus she looks up at you and says one of her greetings, with subtitles:
+// picked at random each visit, never last visit's. Lines and voice: public/voice/ (scripts/voice/generate_lines.py).
+// ?line=<id> picks one (e.g. ?line=otsukare); ?greet=0 turns the greeting off.
+const greetOn=params.get('greet')!=='0',talkOn=params.get('talk')!=='0';   // the greeting and small talk share her voice
+const voice=greetOn||talkOn?createVoice():null;
+const subtitles=voice?mountSubtitles():null;
+const store=(()=>{try{return window.localStorage;}catch{return undefined;}})();   // blocked site data: no memory
+const GREET_LATE=4;   // s: if her lines arrive later than this after start, the moment has passed and she skips it
+let greetingLine=null,greetingPicked=false;   // picked: chosen at random (remembered), not asked for with ?line=
+const voiceReady=voice?.load().then(()=>{
+ const want=params.get('line'),ids=voice.ids(l=>l.kind==='greeting');
+ if(want&&!ids.includes(want))console.warn(`voice: no line "${want}"; she picks one. Lines: ${ids.join(', ')}`);
+ greetingLine=pickLine(ids,{want,last:lastLine(store)});greetingPicked=!!greetingLine&&greetingLine!==want;
+ if(greetingLine)voice.prefetch(greetingLine);   // only this visit's line is downloaded
+}).catch(e=>console.warn('voice: lines unavailable, she will not speak',e.message));
+function greet({line=greetingLine,...options}={}){
+ if(!voice||!greetOn||!line||!state.reader||state.frozen||(state.greeting&&!state.greetingDone()))return false;
+ smallTalk?.stop();   // the greeting comes first: never two voices at once
+ state.greeting=startGreeting({reader:state.reader,vrm:state.vrm,voice,lineId:line,target:camera.position,subtitles,options});
+ if(state.greeting&&greetingPicked&&line===greetingLine)rememberLine(store,line);
+ return !!state.greeting;
+}
+// From the start button: her voice is unlocked in the click, and if her lines are still downloading she greets as soon
+// as they arrive, looking up that much sooner so the line lands where it would have.
+function greetOnStart(){
+ voice?.unlock();
+ if(greet()||!voice||greetingLine)return;
+ const t0=performance.now();
+ voiceReady.then(()=>{const late=(performance.now()-t0)/1000;if(late<=GREET_LATE)greet({notice:Math.max(.2,GREET.notice-late)});});
+}
+// Her voice follows the music's volume and mute, and the music dips while she speaks.
+let heardLevel=null,dipped=false;
+function soundFrame(){
+ const level=voiceLevel(music?.state()??null);if(level!==heardLevel){heardLevel=level;voice?.setLevel(level);}
+ const speaking=state.greeting?.speech?.status()==='speaking'||!!smallTalk?.speaking();if(speaking!==dipped){dipped=speaking;music?.duck(speaking);}
+}
+// Small talk while she reads (src/voice/small-talk.js): a line every 1 to 2 minutes, to you or to herself. ?talk=0
+// turns it off; ?talkevery=<s> makes her talk every <s> seconds instead, to check it.
+const talkEvery=params.has('talkevery')?[1,1].map(()=>Math.max(1,+params.get('talkevery')||1)):undefined;
+let smallTalk=null,talkBroken=false,talkStarted=!withIntro;   // she may talk once the page has started
+function talkFrame(dt){
+ if(talkBroken)return;
+ try{
+  if(!smallTalk&&voice&&talkOn&&state.reader)
+  {smallTalk=createSmallTalk({voice,reader:state.reader,vrm:state.vrm,subtitles,target:camera.position,music,store,every:talkEvery});if(talkStarted)smallTalk.start();}
+  smallTalk?.update(dt,{greeting:!!state.greeting&&!state.greetingDone()});
+ }catch(e){   // a failure in small talk ends it for this visit, never the page
+  console.error('small talk failed',e);talkBroken=true;try{smallTalk?.dispose();}catch{/* already broken */}smallTalk=null;
+ }
+}
+// sound is allowed only after a click or key press: her voice is unlocked by the first one (the start button does too)
+for(const type of ['pointerdown','keydown'])addEventListener(type,()=>voice?.unlock(),{once:true,capture:true});
+setInterval(soundFrame,250);   // also without frames (a hidden tab): the music comes back up when she has finished
+state.greetingDone=()=>!state.greeting||state.greeting.state().finished;
+// a failure in the greeting ends it, never the page
+function greetingFrame(){try{state.greeting?.update();}catch(e){console.error('greeting failed',e);try{state.greeting?.stop();}catch{/* already broken */}state.greeting=null;}}
 const bindControls=()=>{if(music&&!unbindMusic)unbindMusic=bindMusicControls(music);};
 const intro=withIntro?mountIntro({onStart:()=>{
  music?.start({delay:INTRO.musicDelay,fadeIn:INTRO.musicFadeIn});
  if(cameraBeep(INTRO.hudAtMs/1000))beeps++;
+ greetOnStart();
+ talkStarted=true;smallTalk?.start();
  hud?.powerOn(INTRO.hudAtMs);
  bindControls();
 }}):null;
 if(!intro)bindControls();
-import.meta.hot?.dispose(()=>{intro?.dispose();hud?.unmount();unbindMusic?.();music?.dispose();});
+import.meta.hot?.dispose(()=>{intro?.dispose();hud?.unmount();unbindMusic?.();music?.dispose();state.greeting?.stop();smallTalk?.dispose();voice?.dispose();subtitles?.unmount();});
 // For automated checks only; nothing here is shown to visitors.
 window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state.wind.force(state.wind.t).toFixed(2),palmDeg:+(state.wind.angle('palm')*57.3).toFixed(2),leavesDeg:+(state.wind.angle('leaves')*57.3).toFixed(2),gusts:state.wind.gusts?.length??0,next:+(state.wind.next-state.wind.t).toFixed(1)},pose:()=>{const h=state.vrm.humanoid,P=n=>h.getNormalizedBoneNode(n).getWorldPosition(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3));
  const out=Object.fromEntries(['neck','chest','leftShoulder','rightShoulder','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm','leftHand','rightHand','head'].map(n=>[n,P(n)]));
@@ -157,6 +222,9 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
  out.shoulderQ=['leftShoulder','rightShoulder'].map(n=>h.getNormalizedBoneNode(n).quaternion.toArray().map(x=>+x.toFixed(3)));out.stretch=state.reader.stretch&&{active:state.reader.stretch.active,w:+state.reader.stretch.weight().toFixed(2),t:+state.reader.stretch.t.toFixed(2)};return out;},seat:()=>({drop:+(state.seat?.drop??0).toFixed(3),contactRadii:state.contactRadii}),ready:()=>state.ready,error:()=>state.error,
  chair:()=>{const meshes=[];state.chair?.traverse(o=>{if(o.isMesh)meshes.push(o);});return {meshes:meshes.length,visible:meshes.every(o=>o.visible&&[o.material].flat().every(m=>m.colorWrite)),receivesShadows:meshes.some(o=>o.receiveShadow),shadowMap:renderer.shadowMap.enabled};},
  stats:()=>{const f=[...state.frames].sort((a,b)=>a-b),i=renderer.info;return {calls:i.render.calls,triangles:i.render.triangles,textures:i.memory.textures,medianFrameMs:f[f.length>>1]??null,p95FrameMs:f[Math.floor(f.length*.95)]??null};},
- grips:()=>state.reader?.gripsLocal(),hands:()=>state.reader?.handsLocal(),music:()=>music?.state()??null,beeps:()=>beeps,musicSeekEnd:s=>music?.seekToEnd(s),
- reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1)};}};
+ greet:o=>greet(o),talk:(id,o)=>smallTalk?.say(id,o)??false,smallTalk:()=>smallTalk?.state()??null,greeting:()=>voice&&{line:greetingLine,ids:voice.ids(l=>l.kind==='greeting'),...voice.state()},hush:()=>state.greeting?.stop(),voice:()=>state.greeting?.state()??null,hold:on=>{state.held=!!on;},
+ grips:()=>state.reader?.gripsLocal(),hands:()=>state.reader?.handsLocal(),music:()=>music?.state()??null,beeps:()=>beeps,musicSeekEnd:s=>music?.seekToEnd(s),musicDuck:on=>music?.duck(on),
+ reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1),
+  busy:r.busy(),away:+r.reading.away.toFixed(3),eyeScale:state.vrm.lookAt?.applier?.rangeMapHorizontalOuter?.outputScale??null,head:{yaw:+r.reading.head.yaw.toFixed(2),pitch:+r.reading.head.pitch.toFixed(2)}};},
+ glance:o=>state.reader?.reading.glance(o),holdReading:on=>state.reader?.reading.holdReading(on),talking:on=>{if(state.reader)state.reader.talking=!!on;}};
 load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';console.error(e);});
