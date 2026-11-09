@@ -23,6 +23,17 @@ function button(cls,label,iconName,onClick){
 const gesture=music=>{const s=music.state().status;if(s==='playing'||s==='paused')music.wake();};
 function link(text,href,cls=null){const a=el('a',cls,text);a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a;}
 
+// Credits shown under the playlist. Her voice's terms require "VOICEVOX:冥鳴ひまり" wherever it is heard.
+const CREDITS=Object.freeze([
+ Object.freeze({role:'VOICE',name:'VOICEVOX:冥鳴ひまり',href:'https://voicevox.hiroshiba.jp/'}),
+ Object.freeze({role:'CHARACTER',name:'Marycia ©BeroarN',href:'https://booth.pm/ja/items/6305948'}),
+]);
+function creditsFooter(){
+ const foot=el('div','hud-credits');
+ for(const c of CREDITS){const line=el('p');line.append(el('span','hud-credit-role',`${c.role} · `),link(c.name,c.href));foot.append(line);}
+ return foot;
+}
+
 /** The playlist panel: every track; pick one to play it, "source" opens its page on Free Music Archive. */
 function playlistPanel(music){
  const panel=el('div','hud-playlist');panel.hidden=true;panel.tabIndex=-1;panel.id='hud-playlist';
@@ -46,7 +57,7 @@ function playlistPanel(music){
    list.append(li);
    return {id:t.id,li,pick};
   });
-  panel.replaceChildren(el('h2',null,'PLAYLIST · FREE MUSIC ARCHIVE'),list);
+  panel.replaceChildren(el('h2',null,'PLAYLIST · FREE MUSIC ARCHIVE'),list,creditsFooter());
  };
  /** Highlight the playing track. */
  function mark(id){

@@ -72,6 +72,18 @@ test('music line: buttons pause, skip, mute, set volume and open the playlist',a
  expect((await music(page)).status).toBe('playing');               // HUD clicks did not count as "tap anywhere"
 });
 
+test('the playlist panel credits her voice and the character',async({page,request})=>{
+ test.skip(!(await hasMusic(request)),'music not prepared on this machine');
+ await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.ready()&&window.lofiViewer.music()?.tracks>0,null,60000);
+ await page.locator('.hud-now').click();await until(page,()=>window.lofiViewer.music().status==='playing');await page.waitForSelector('.hud.powered');
+ await page.mouse.move(300,860);await page.mouse.move(310,862);
+ await page.getByRole('button',{name:'playlist'}).click();
+ const credits=page.getByRole('dialog',{name:'playlist'}).locator('.hud-credits');
+ await expect(credits).toBeVisible();
+ await expect(credits).toContainText('VOICEVOX:冥鳴ひまり');   // required wherever her voice is heard
+ await expect(credits).toContainText('Marycia ©BeroarN');
+});
+
 test('hud fits a phone screen',async({browser,request})=>{
  test.skip(!(await hasMusic(request)),'music not prepared on this machine');
  const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
