@@ -1,21 +1,21 @@
 """Rebuild the toon look test and render it, from the live Blender via MCP:
-  exec(open('spike/balcony-toon/render_toon.py').read(), {'OUT': '<png path>', 'ROOT': '<repo root>'})
+  exec(open('scripts/balcony-toon/render_toon.py').read(), {'OUT': '<png path>', 'ROOT': '<repo root>'})
 Steps run on timers (bake, then render) and report to <png>.progress.json, so the MCP call returns at once."""
 import bpy, json, time, pathlib
 ROOT = pathlib.Path(globals().get('ROOT', '.')); OUT = pathlib.Path(globals()['OUT'])
 # painted without ink: curtains, the palm, the near leaves, ivy and potted plants (source object names)
 NO_LINES = {'窗帘', 'moxing0035', 'moxing0035_1', 'moxing0042', 'moxing0043', 'moxing1015', 'moxing1016', 'moxing1064', 'moxing1066', 'moxing1090'}
 prog = OUT.with_suffix('.progress.json')
-ns = {'__name__': 'toon'}; exec((ROOT / 'spike/balcony-toon/build_toon.py').read_text(), ns); info = ns['build']()
+ns = {'__name__': 'toon'}; exec((ROOT / 'scripts/balcony-toon/build_toon.py').read_text(), ns); info = ns['build']()
 T = bpy.data.scenes[ns['NAME']]
-cs = {}; exec((ROOT / 'spike/balcony-toon/compositor.py').read_text(), cs)
+cs = {}; exec((ROOT / 'scripts/balcony-toon/compositor.py').read_text(), cs)
 env = bpy.data.collections[ns['ENV']]; ch = bpy.data.collections[ns['CHAR']]
 VARIANT = globals().get('VARIANT', 'day')
 LOOK = {'day': dict(paint=5.0),
         'dusk': dict(ink_env=0.4, ink_her=0.85, ink=(0.36, 0.22, 0.15, 1.0), warm=(1.0, 0.97, 0.92, 1.0), sat=1.12, contrast=8.0,
                      bloom=0.7, bloom_threshold=0.75, bloom_size=0.7, vignette=0.35)}[VARIANT]
 if VARIANT == 'dusk':
-    ds = {'ROOT': str(ROOT)}; exec((ROOT / 'spike/balcony-toon/dusk.py').read_text(), ds)
+    ds = {'ROOT': str(ROOT)}; exec((ROOT / 'scripts/balcony-toon/dusk.py').read_text(), ds)
     group = bpy.data.node_groups[ns['GROUP']]
     info.update(ds['apply'](T, env, lambda m: ns['toon'](m, group), group))
 cs['build'](T, p=LOOK, no_lines=[o.name for o in env.objects if o.get('source_name') in NO_LINES], character=[o.name for o in ch.objects if o.type == 'MESH'])

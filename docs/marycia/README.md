@@ -62,7 +62,7 @@ Requires Blender 5.2 and the privately extracted purchased package from the earl
 ```sh
 /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --disable-autoexec \
   --python scripts/marycia/export_blender.py -- \
-  --source ~/Library/Caches/lofi-asset-review/marycia-c8b312ba/extracted/Assets/BeroarN/bn0010_Marycia \
+  --source <extracted package>/Assets/BeroarN/bn0010_Marycia \
   --output assets/characters/marycia
 python3 scripts/marycia/package_vrm.py \
   assets/characters/marycia/marycia-working.glb \

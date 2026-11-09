@@ -2,7 +2,7 @@
 
 Revision of the Codex pose in Blender scene `Balcony • Reading by the window`, made on a copy
 (`Balcony • Reading v2 (Claude)`, side check `Balcony • Reading v2 side (Claude)`). The Codex scene and pose are unchanged.
-Scripts: `spike/balcony-pose/setup_v2.py` (copy scene, cameras) then `spike/balcony-pose/pose_v2.py` (re-runnable; resets
+Scripts: `scripts/balcony-pose/setup_v2.py` (copy scene, cameras) then `scripts/balcony-pose/pose_v2.py` (re-runnable; resets
 to the Codex pose each run). Private checkpoint: `assets/characters/marycia/balcony-study/marycia-reading-v2.blend` (git-ignored).
 
 [reading-before-after.png](reading-before-after.png): Codex main, revision main, Codex side, revision side.

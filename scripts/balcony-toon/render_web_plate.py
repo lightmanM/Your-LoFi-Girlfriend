@@ -1,5 +1,5 @@
 """Render the afternoon toon look as web layers, from the live Blender via MCP:
-  exec(open('spike/balcony-toon/render_web_plate.py').read(), {'ROOT': '<repo root>', 'OUT': '<folder>'})
+  exec(open('scripts/balcony-toon/render_web_plate.py').read(), {'ROOT': '<repo root>', 'OUT': '<folder>'})
 Writes <OUT>/plate.png (scene without her, the book and the near leaves), <OUT>/leaves.png (the near leaves alone, on
 transparent), and <OUT>/scene.json (camera, light for the live character). 2560x1440, the display camera's framing.
 For the wind (STEPS includes 'wind'): <OUT>/plate-clean.png (the swaying plants removed, their shadows kept),
@@ -22,14 +22,14 @@ NO_LINES = {'窗帘', 'moxing0035', 'moxing0035_1', 'moxing0042', 'moxing0043', 
 prog = OUT / 'progress.json'
 def report(**k): prog.write_text(json.dumps(k))
 
-ns = {'__name__': 'toon'}; exec((ROOT / 'spike/balcony-toon/build_toon.py').read_text(), ns); info = ns['build']()
+ns = {'__name__': 'toon'}; exec((ROOT / 'scripts/balcony-toon/build_toon.py').read_text(), ns); info = ns['build']()
 T = bpy.data.scenes[ns['NAME']]; env = bpy.data.collections[ns['ENV']]; ch = bpy.data.collections[ns['CHAR']]
 group = bpy.data.node_groups[ns['GROUP']]
-af = {'ROOT': str(ROOT)}; exec((ROOT / 'spike/balcony-toon/afternoon.py').read_text(), af); info.update(af['apply'](T, env, lambda m: ns['toon'](m, group), group))
-os_ = {}; exec((ROOT / 'spike/balcony-toon/outside.py').read_text(), os_); feats = {'facade', 'dapple', 'rim'}
+af = {'ROOT': str(ROOT)}; exec((ROOT / 'scripts/balcony-toon/afternoon.py').read_text(), af); info.update(af['apply'](T, env, lambda m: ns['toon'](m, group), group))
+os_ = {}; exec((ROOT / 'scripts/balcony-toon/outside.py').read_text(), os_); feats = {'facade', 'dapple', 'rim'}
 info.update(os_['apply'](T, env, group, feats))
-# framing (spike/balcony-toon/framing.json): camera, near leaves moved with it, chair and her moved along the floor
-FRAMING = json.loads((ROOT / 'spike/balcony-toon/framing.json').read_text()) if (ROOT / 'spike/balcony-toon/framing.json').exists() else None
+# framing (scripts/balcony-toon/framing.json): camera, near leaves moved with it, chair and her moved along the floor
+FRAMING = json.loads((ROOT / 'scripts/balcony-toon/framing.json').read_text()) if (ROOT / 'scripts/balcony-toon/framing.json').exists() else None
 cam_old = T.camera.matrix_world.copy()
 leaves = [o for o in env.objects if o.get('source_name') in LEAVES]
 from bpy_extras.object_utils import world_to_camera_view as w2c
@@ -78,7 +78,7 @@ if FRAMING:      # the facade's shade line: through the same two points on the f
     shade['through'] = (pa.x, pa.y); shade['slope'] = (pb2.y - pa.y) / (pb2.x - pa.x)
     extra['facade_line'] = [round(pa.x, 1), round(pa.y, 1), round(shade['slope'], 3)]
 look['facade_shade'] = shade
-cs = {}; exec((ROOT / 'spike/balcony-toon/compositor.py').read_text(), cs)
+cs = {}; exec((ROOT / 'scripts/balcony-toon/compositor.py').read_text(), cs)
 cs['build'](T, p=look, no_lines=[o.name for o in env.objects if o.get('source_name') in NO_LINES], character=[])
 T.render.resolution_x, T.render.resolution_y, T.render.resolution_percentage = W, H, 100
 # her and the book stay out of the picture (she is drawn live); her shadow is not baked, since she moves

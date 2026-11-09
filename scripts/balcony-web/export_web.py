@@ -4,7 +4,7 @@ Coordinates: Blender (x, y, z) -> three.js (x, z, -y)."""
 import bpy, json, math, sys, importlib
 from pathlib import Path
 from mathutils import Matrix, Vector, Quaternion
-MINE = Path('<checkout>/.claude/worktrees/yourlofigirlriend-planning-c5484e')
+MINE = Path(globals().get('ROOT', '.'))   # the repo root (pass ROOT when running from elsewhere)
 WEB = MINE / 'web/public/environment/balcony-plate'; POSE = MINE / 'web/public/models/marycia/reading-balcony.json'
 sys.path.insert(0, str(MINE / 'scripts/motion')); import blender_bridge as br; importlib.reload(br)
 C = Matrix(((1, 0, 0), (0, 0, 1), (0, -1, 0)))
@@ -27,7 +27,7 @@ tracks = [{'bone': b, 'rotations': [round(v, 7) for v in d]} for b, d in deltas.
 face = next(o for o in bpy.data.collections['Balcony • reading v2 character (Claude)'].objects if 'Face' in o.name)
 blink = face.data.shape_keys.key_blocks['eyeBlinkLeft'].value
 POSE.write_text(json.dumps({'name': 'readingBalcony', 'duration': 0, 'times': [0], 'tracks': tracks, 'face': {}, 'blink': round(blink, 3),
-                            'source': 'Blender scene Balcony • Reading v2 (Claude), spike/balcony-pose/pose_v2.py'}, separators=(',', ':')))
+                            'source': 'Blender scene Balcony • Reading v2 (Claude), scripts/balcony-pose/pose_v2.py'}, separators=(',', ':')))
 book = bpy.data.objects['Reading v2 • book']; look = book.matrix_world @ Vector((0, 0.02, 0))
 sun = next(o for o in P.objects if o.type == 'LIGHT' and o.data.type == 'SUN')
 to_sun = (sun.matrix_world.to_3x3().normalized() @ Vector((0, 0, 1))).normalized()
@@ -69,6 +69,6 @@ data = {
     'character': {'hips': pt(Mw @ a.pose.bones['Hips'].head), 'yaw_deg': round(yaw, 3), 'scale': round(Mw.to_scale().x, 4)},
     'look_target': pt(look),
     'light': {'direction': [round(v, 4) for v in (C @ to_sun)], 'color': [1.0, 0.9, 0.78], 'intensity': 2.2, 'sky': [0.95, 0.9, 0.82], 'ground': [0.55, 0.42, 0.32], 'ambient': 1.1},
-    'source': 'Blender scene Balcony • Plate (Claude); spike/balcony-web/build_plate.py, export_web.py'}
+    'source': 'Blender scene Balcony • Plate (Claude); scripts/balcony-web/build_plate.py, export_web.py'}
 (WEB / 'balcony.json').write_text(json.dumps(data, indent=1))
 print(json.dumps({'tracks': len(tracks), 'yaw': round(yaw, 2), 'armature_tilt_deg': round(tilt, 3), 'occluder_tris': occ_tris, 'blink': blink, 'hips': data['character']['hips'], 'camera': data['camera']}))

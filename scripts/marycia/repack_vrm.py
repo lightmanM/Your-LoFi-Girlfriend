@@ -1,6 +1,6 @@
 """Write a copy of a VRM (glTF binary) with its texture images replaced, e.g. by WebP files. Everything else (mesh,
 skin, expressions, VRM and MToon extensions) is copied byte for byte. The original file is only read.
-  python3 spike/compress/repack_vrm.py in.vrm out.vrm image0.webp image1.webp ...   (one file per image, in order)
+  python3 scripts/marycia/repack_vrm.py in.vrm out.vrm image0.webp image1.webp ...   (one file per image, in order)
 Images are declared through EXT_texture_webp (supported by three.js GLTFLoader)."""
 import json, struct, sys
 

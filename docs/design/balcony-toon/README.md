@@ -9,7 +9,7 @@ reading pose as the plate, made to judge the style before any web work.
 
 ## How it is made
 
-`spike/balcony-toon/render_toon.py` rebuilds and renders everything in the live Blender (scene `Balcony • Toon test
+`scripts/balcony-toon/render_toon.py` rebuilds and renders everything in the live Blender (scene `Balcony • Toon test
 (Claude)`, copied from the plate scene; mesh data shared, every original material untouched):
 
 - **Cel shading** (`build_toon.py`): every material becomes an object-level copy whose own colour chain feeds one shared
@@ -44,7 +44,7 @@ reading pose as the plate, made to judge the style before any web work.
 
 The day test read as a game, not lofi. Against the study concept (`visual-targets/room-concept-04/01-study`) the gap was
 light and colour: lofi is a warm lit room against a cool dusk outside, soft gradients, thin warm lines, glowing lights.
-`render_toon.py` with `VARIANT='dusk'` applies `spike/balcony-toon/dusk.py` on top of the toon build:
+`render_toon.py` with `VARIANT='dusk'` applies `scripts/balcony-toon/dusk.py` on top of the toon build:
 
 - Blue-hour sky fill, the sun off; outdoor shade tinted blue, her skin shadow warm rose.
 - A warm floor lamp beside her (Kenney CC0 `lampRoundFloor`, glowing shade, warm point light).
@@ -65,7 +65,7 @@ later time-of-day theme. Its floor lamp is not meant to stay.
 
 ## Warm afternoon variant (day, no lamp)
 
-`VARIANT='afternoon'` applies `spike/balcony-toon/afternoon.py`: the warmth comes from the light itself, not a prop.
+`VARIANT='afternoon'` applies `scripts/balcony-toon/afternoon.py`: the warmth comes from the light itself, not a prop.
 
 - A golden sun 38° up from the balcony side, through the door onto her from above and to the side.
 - A bright sky fill (blue above, neutral below), so the balcony and the street are the bright part of the frame and the
@@ -103,7 +103,7 @@ The palm on the left uses darker greens than the other plants, since it stands o
 
 ## Outdoor light options (switchable)
 
-`render_toon.py` takes `OUTSIDE={...}` with any of four features from `spike/balcony-toon/outside.py`;
+`render_toon.py` takes `OUTSIDE={...}` with any of four features from `scripts/balcony-toon/outside.py`;
 [outside/outside-compare.png](outside/outside-compare.png) shows each alone and all four (doorway crop), full frames in [outside/](outside/).
 
 | Feature | How | Browser equivalent |

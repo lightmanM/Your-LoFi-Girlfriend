@@ -11,7 +11,7 @@ The old character studio moved from `index.html` to `studio.html`; the room and 
 ## How it is built
 
 - **Background:** the saved Afternoon v1 toon look rendered in Blender at 2560x1440 without her
-  (`spike/balcony-toon/render_web_plate.py`): `plate.webp` (0.56 MB) and the blurry near leaves as a transparent layer
+  (`scripts/balcony-toon/render_web_plate.py`): `plate.webp` (0.56 MB) and the blurry near leaves as a transparent layer
   over her (`leaves.webp`, 52 KB), plus a depth-only chair so the chair can pass in front of her.
 - **Her:** the live VRM with `web/src/balcony/reader.js`, the motion layer shared with the Balcony development page.
   Light and a colour grade on her and the book (`web/src/viewer/grade.js`) were matched to the Blender picture by colour
@@ -46,7 +46,7 @@ copies them, so it must not be deployed anywhere public until the licences are c
 
 ## The chair and how she sits (2026-11-06)
 
-Codex replaced the chair in the picture with the real 3D chair (`spike/balcony-web/export_visible_chair.py`,
+Codex replaced the chair in the picture with the real 3D chair (`scripts/balcony-web/export_visible_chair.py`,
 `chair-visible.glb`) so she has something to contact. It was lit by the web lights, which made it darker than the
 picture, dropped its red frame, and drew streaks across the backrest. Now (`web/src/balcony/visible-chair.js`):
 
@@ -98,7 +98,7 @@ up to about 6.5°; frame time unchanged. Clip: [wind-v2.mp4](wind-v2.mp4).
 
 ### Wind, third version: roses, balcony plants and ivy as live 3D
 
-At the owner's request these are no longer parts of the picture. `spike/balcony-toon/export_plants.py` exports light
+At the owner's request these are no longer parts of the picture. `scripts/balcony-toon/export_plants.py` exports light
 copies of the Blender plants (collapse decimation: roses 20 %, ivy 11 %, balcony plants 7 % with at least 5,000
 triangles per object; about 520,000 triangles in all, 7.6 MB, 5.9 MB gzip; the originals are about 4 million).
 `web/src/viewer/plants.js` draws them: each point is coloured from the rendered toon picture at its rest position
@@ -129,7 +129,7 @@ behind the frames, and plants seen through the sheer at rest stay as they were.
 
 Chosen from the stills in `docs/design/framing/`: camera 30 % closer to her (1.94 m) and turned 3° left, the near
 leaf branch moved with the camera and 2.5 cm to its right, the chair and her 15 cm left along the floor. All of it is in
-`spike/balcony-toon/framing.json`, which `render_web_plate.py` applies after building the toon scene (it also redraws
+`scripts/balcony-toon/framing.json`, which `render_web_plate.py` applies after building the toon scene (it also redraws
 the facade's shade line through the same points on the facade, and writes the palm's new bend point, the leaves'
 shift and the character offset into `scene.json` under `framing`). Re-rendered: picture, leaves, plant-free picture,
 plant masks, flex, depth; then `wind_fields.py` (which now also widens the depth) and the WebP encodes. The viewer moves

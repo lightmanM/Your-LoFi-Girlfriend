@@ -1,7 +1,7 @@
 # Character compression test (2026-11-06)
 
 Test copies of Marycia's model with the three 2048×2048 PNG textures replaced; mesh, skin, expressions and the VRM
-and toon-material data are copied byte for byte (`spike/compress/repack_vrm.py`, textures declared through
+and toon-material data are copied byte for byte (`scripts/marycia/repack_vrm.py`, textures declared through
 `EXT_texture_webp`). The original `marycia.vrm` is unchanged (checksum verified); the copies sit next to it as
 `test-*.vrm`, git-ignored like the original.
 
@@ -35,5 +35,5 @@ gzip already roughly halves it. Mesh compression would need a tool that keeps th
 
 **Adopted (2026-11-06):** the viewer loads `marycia-web.vrm` (the WebP 95 full-size copy) through
 `web/public/environment/balcony-toon/scene.json`. The original `marycia.vrm` stays for the development pages and as the
-source for any future re-encode: `python3 spike/compress/repack_vrm.py marycia.vrm marycia-web.vrm t0.webp t1.webp t2.webp`
+source for any future re-encode: `python3 scripts/marycia/repack_vrm.py marycia.vrm marycia-web.vrm t0.webp t1.webp t2.webp`
 with textures encoded by `cwebp -q 95 -m 6 -alpha_q 100 -exact`.

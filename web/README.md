@@ -33,7 +33,7 @@ sometimes only partway through the line) or to herself (softer, with a murmur su
 the page, a glance aside, a look up into space, a small tilt or half-closed eyes). 32 lines: her small days on the
 balcony, quiet thoughts, the philosophy book she is reading, and a few dark ones that sometimes turn back to calm. No
 line repeats until she has said them all (remembered in the browser), and never two dark lines in a row. She waits for
-anything else she is doing (the greeting, a stretch, a page turn, a glance) and skips when the tab is hidden, the music
+anything else she is doing (the greeting, her break, a page turn, a glance) and skips when the tab is hidden, the music
 is paused or sound is not yet allowed. To check it without waiting, open `?talkevery=20` (a line every 20 s); `?talk=0`
 turns it off. The music dips a little while she speaks, and her voice follows the volume control and mute. Design:
 [small talk](../docs/superpowers/specs/2026-11-08-small-talk-design.md).
@@ -46,7 +46,7 @@ seconds. Space plays or pauses, N skips, M mutes; phones and media keys also get
 
 The page needs local, git-ignored files that are never committed: `public/models/marycia/` (`marycia-web.vrm`,
 `reading-balcony.json`) and `public/environment/balcony-toon/` (rendered from the Balcony scene
-with `spike/balcony-toon/render_web_plate.py`, `wind_fields.py` and `export_plants.py`).
+with `scripts/balcony-toon/render_web_plate.py`, `wind_fields.py` and `export_plants.py`).
 
 Her voice lives in `public/voice/`: `lines.json` (each line's subtitle, mora timing and loudness), the WAV clips and
 `CREDITS.md`, all tracked. Each line is a start greeting or small talk (`kind`; small talk also has `to`, `about`,
@@ -92,4 +92,10 @@ npm run test:browser
 npm run build
 ```
 
-The build (`dist/`) contains the purchased character and the unlicensed scene files: keep it local, do not deploy it.
+## Deploy
+
+`npm run build` in a checkout that has the local files writes a static site to `dist/`; upload that folder to any
+static host. Everything in `public/` is copied into it, so before building check that `public/` holds only what the
+page loads: `models/marycia/` (`marycia-web.vrm`, `reading-balcony.json`, `CREDITS.md`), `environment/balcony-toon/`,
+`environment/CREDITS.md`, `music/` and `voice/`. The build contains the purchased character and the balcony files,
+served to visitors under the owner's licences: never commit `dist/` or those files.

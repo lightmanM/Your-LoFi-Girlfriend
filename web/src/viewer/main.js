@@ -69,7 +69,7 @@ const character=d=>{const c=params.get('character');return c&&/^[\w.-]+\.vrm$/.t
 const json=async url=>{const r=await fetch(url);if(!r.ok)throw Error(`${url}: HTTP ${r.status}`);return r.json();};
 async function load(){
  const d=state.data=await json(BASE+'scene.json');
- // framing (spike/balcony-toon/framing.json): the chair and she sit offset along the floor; palm and leaves bend points
+ // framing (scripts/balcony-toon/framing.json): the chair and she sit offset along the floor; palm and leaves bend points
  const F=d.framing??{},off=new THREE.Vector3().fromArray(F.character_offset??[0,0,0]);
  d.character={...d.character,hips:new THREE.Vector3().fromArray(d.character.hips).add(off).toArray()};
  d.look_target=new THREE.Vector3().fromArray(d.look_target).add(off).toArray();

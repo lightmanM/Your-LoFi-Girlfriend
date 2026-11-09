@@ -15,7 +15,7 @@ try:
   obj.data.validate(verbose=False);obj.data.update()
   oldmat=old.data.materials[0];image=next(n.image for n in oldmat.node_tree.nodes if n.type=='TEX_IMAGE' and n.image)
   # Load the user-supplied albedo into an owned, bounded copy; don't resize source textures.
-  path=Path('<checkout>/assets/environment/Balcony/tex')/image.name
+  path=ROOT/'assets/environment/Balcony/tex'/image.name
   tex=bpy.data.images.load(str(path),check_existing=False);tex.name='Visible chair • '+image.name
   w,h=tex.size;tex.scale(1024,max(1,round(h*1024/w)));tex.pack();images.append(tex)
   mat=bpy.data.materials.new('Visible chair • '+old.get('source_name',old.name));mat.use_nodes=True;materials.append(mat)

@@ -1,6 +1,6 @@
 """Export the swaying balcony plants as light 3D meshes for the web (positions only; their colour comes from the
 rendered picture at their rest position, by camera projection). Live Blender via MCP:
-  exec(open('spike/balcony-toon/export_plants.py').read(), {'OUT': '<balcony-toon folder>', 'RATIO': {...}})
+  exec(open('scripts/balcony-toon/export_plants.py').read(), {'OUT': '<balcony-toon folder>', 'RATIO': {...}})
 Writes <OUT>/plants.glb with one node per object, named '<group>:<source name>'. Source meshes are never edited."""
 import bpy, json, pathlib
 OUT = pathlib.Path(globals()['OUT'])

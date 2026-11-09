@@ -1,37 +1,37 @@
-# Your-LoFi-Girlfriend
+# Your LoFi Girlfriend
 
-Original anime character for a frontend-only lofi experience, with reusable outfits and scripted scenes.
+A lofi web page that plays like a video that never repeats: Marycia reads on a sunny balcony in a toon afternoon look,
+the plants move in the wind, and the music plays on. She turns pages, looks up, and every 4 to 8 minutes rests from her
+book (shoulder rolls, a head tilt each way with her eyes closed). When you press start she looks up and greets you
+with one of five lines, lip-synced to a VOICEVOX voice (冥鳴ひまり) with subtitles; while she reads she says something
+now and then, to you or to herself. No controls but the music; the camera stays still.
 
-## Current: balcony scene
+Front end only: three.js and three-vrm, no server.
 
-One web page: Marycia reading on a sunny balcony in a toon afternoon look, with page turns, look-ups, a short break
-(shoulder rolls and head tilts with the book on her lap) every 4 to 8 minutes, and plants moving in the wind. When you press start she looks up and greets you with one of five
-lines at random ("おかえりなさい", welcome back, and others), lip-synced to a VOICEVOX voice (冥鳴ひまり), with subtitles; while she reads she
-says something now and then, to you or to herself. No controls, fixed camera.
+## Layout
 
-- [Run it](web/README.md) — local URL: http://127.0.0.1:5173/
-- [Viewer design notes](docs/design/viewer/README.md) · [reading motion](docs/design/reading-motion/README.md) · [toon look](docs/design/balcony-toon/README.md)
-- The character and the balcony scene are purchased or not yet licensed for the web: their files stay local, and the
-  build must not be deployed.
+| Path | What |
+| --- | --- |
+| [`web/`](web/README.md) | The page: run, test, build, deploy |
+| [`scripts/voice/`](scripts/voice/) | Her lines (`lines.json`) and the VOICEVOX generator for `web/public/voice/` |
+| [`scripts/music/`](scripts/music/) | Track list with licences, and the encoder for `web/public/music/` |
+| [`scripts/marycia/`](docs/marycia/README.md) | Converting the purchased character package to the web VRM |
+| `scripts/balcony-pose/`, `scripts/balcony-web/`, `scripts/balcony-toon/` | Blender scripts that pose her on the chair and render and export the balcony plate, chair, book, plants and wind |
+| `scripts/motion/` | Blender bridge and motion-retargeting tools used by the exports |
+| [`docs/`](docs/README.md) | Design notes, specs and plans |
 
-Earlier pages (the furnished room MVP, the character studio and the Vivi sample character) were removed on
-2026-11-07; their notes remain in [docs/scene-mvp](docs/scene-mvp/README.md) and [docs/character-baseline](docs/character-baseline/README.md).
+## Run
 
-## Earlier Blender studies
+```sh
+cd web
+npm ci
+npm run dev
+```
 
-- [First editable head study and limitations](docs/head-study-v004.md)
-- [Three-quarter render](renders/head-study-v004/three-quarter.png) · [Front](renders/head-study-v004/front.png) · [Profile](renders/head-study-v004/profile.png)
-- [Blender source](assets/character/head-study-v004.blend)
-- [Character reference and modeling brief](references/character-v1/brief.md)
-- [Original reference image](references/character-v1/target.jpg)
-- [Verified Blender setup](docs/blender-setup.md)
+The page needs local files that are not in this repository (the purchased character and the balcony scene's exports;
+see [CREDITS.md](CREDITS.md)); without them it cannot load her or the scene. With them, open http://127.0.0.1:5173/.
 
-These are rough head-and-hair visual prototypes. The original character likeness remains unfinished; browser development now uses the rigged placeholder above.
+## Credits and licence
 
-## Alternative: video companion spike
-
-- [Measured findings and limitations](docs/video-spike-findings.md)
-- [Standalone playback lab and run instructions](spikes/video-companion/README.md)
-- [Actual-character AI video quality test brief](docs/video-generation-test.md)
-
-The lab tests lazy loading, cached reactions and transitions using attributed animation footage. It does not yet establish AI-generated quality for our character.
+Code: [MIT](LICENSE). Character: Marycia ©BeroarN. Voice: VOICEVOX:冥鳴ひまり. Music: Lao Ban (CC0) and VibeDepot
+(CC BY-ND 4.0) via Free Music Archive. Those keep their own terms: see [CREDITS.md](CREDITS.md).

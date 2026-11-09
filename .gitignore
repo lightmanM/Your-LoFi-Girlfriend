@@ -1,63 +1,31 @@
+# Tooling
+.DS_Store
 __pycache__/
 *.pyc
 *.blend1
 *.blend2
-.DS_Store
-# Purchased character source and generated binaries remain local.
-assets/characters/marycia/
-# Room/pose checkpoints embed the same private purchased character.
-assets/poses/*.blend
-assets/environment/base-option/room-base-option.blend
-assets/environment/room-refresh/room-seated-preview.blend
-assets/environment/room-refresh/room-rest-*.blend
-# User-provided pose photograph remains a local working reference.
-docs/room-refresh/references/sofa-lounge-user.jpg
-web/public/models/marycia/*.vrm
-web/public/models/marycia/*.glb
 
-web/public/models/marycia/source-motions.json
-scripts/marycia/.godot/
-# Original purchased archive in the main checkout.
-/6305948Marycia_ver1.5.1.zip
-# Keep compact final MP4 demos in Git; raw browser captures stay local.
-docs/**/raw-video/
-docs/**/*.webm
-web/public/models/marycia/authored-motions.json
-web/public/models/marycia/stretch-break.json
-
-# Spike scratch: dependencies, renders and sample models stay local
-spike/**/node_modules/
-spike/**/out/
-spike/render-pass/public/models/
-spike/render-pass/shots/
-
-# Balcony source and Blender/bake intermediates remain local.
-/assets/environment/Balcony/
-/assets/environment/balcony-web-exploration/*.blend
-/assets/environment/balcony-web-exploration/*.exr
-/assets/environment/balcony-web-exploration/*-raw.glb
-/assets/environment/balcony-web-exploration/*-webp.glb
-/assets/environment/balcony-web-exploration/*-joined.glb
-/assets/environment/balcony-web-exploration/*-meshopt.glb
-/assets/environment/balcony-web-exploration/balcony-web.glb
-
-# Balcony plate: rendered from purchased archviz textures; stays local until the licence is cleared
-web/public/environment/balcony-plate/
-web/public/environment/balcony-toon/
-web/public/models/marycia/reading-balcony.json
-
-# Renders of the purchased Balcony scene, and clips filmed in it, stay local until the licence is cleared
-/docs/design/balcony-*/**/*.png
-/docs/design/balcony-*/**/*.mp4
-/docs/design/framing/**/*.png
-/docs/design/framing/**/*.mp4
-/docs/design/viewer/**/*.png
-/docs/design/viewer/**/*.mp4
-/docs/design/reading-motion/**/*.png
-/docs/design/reading-motion/**/*.mp4
-/docs/design/compression/**/*.png
-
-# Music: source downloads and encoded tracks stay local (regenerate with scripts/music/prepare_music.py);
-# the manifest, playlist and credits are tracked.
-/assets/music/
+# Third-party source assets stay local (see CREDITS.md): the purchased Marycia package and its conversions, the
+# balcony scene and everything exported from it, and the music downloads. Scripts in scripts/ rebuild the web files.
+/assets/
+/*.zip
+web/public/models/marycia/*
+!web/public/models/marycia/CREDITS.md
+web/public/environment/*
+!web/public/environment/CREDITS.md
 web/public/music/*.mp3
+
+# Renders and clips made from those assets (linked from the design notes) stay local too
+/docs/**/*.png
+/docs/**/*.jpg
+/docs/**/*.webp
+/docs/**/*.gif
+/docs/**/*.mp4
+/docs/**/*.webm
+
+# Earlier explorations, kept only in the private archive
+/spike/
+/spikes/
+/renders/
+/references/
+/visual-targets/

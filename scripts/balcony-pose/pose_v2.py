@@ -4,8 +4,8 @@ Fixes, in order: spine hinge, head droop, wrist twist (forearm takes the roll), 
 import bpy, math, json
 from pathlib import Path
 from mathutils import Vector, Matrix, Quaternion
-CODEX = Path('<checkout>')
-h = (CODEX / 'scripts/room-refresh/refine_rest_poses.py').read_text(); exec(h[h.index('def update():'):h.index('def clone_collection(')])
+ROOT = Path(globals().get('ROOT', '.'))   # the repo root (pass ROOT when running from elsewhere)
+h = (ROOT / 'scripts/balcony-pose/refine_rest_poses.py').read_text(); exec(h[h.index('def update():'):h.index('def clone_collection(')])
 P = dict(spine=10.0, chest=-3.0, gaze=45.0, dist=0.35, book_lat=0.0, book_roll=-4.0, head_share=0.62, neck_share=0.35, head_tilt=4.0,
          W=0.145, H=0.21, T=0.010, alpha=12.0, grip_y=-0.04, dorsal_front=45.0, finger_back=20.0, hand_in=0.15, hand_off=0.012, hand_back=0.012,
          palm_len=0.05, max_roll=75.0, eye_max=25.0, blink=0.2, shoulder_drop=3.0, close=0.75, drop=0.0, slide=0.0, tilt=0.0, seat_only=False)

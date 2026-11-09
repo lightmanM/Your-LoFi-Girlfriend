@@ -57,7 +57,7 @@ Headless Chrome caps at 60 Hz, so the frame time shows no drops, not maximum thr
   (`plate-reading.webp`, `foreground.webp`, `chair-occluder.glb`, `book.glb`, `balcony.json`), pose
   `web/public/models/marycia/reading-balcony.json`.
 - Blender, live session (scenes `Balcony • Plate (Claude)`, `Balcony • Reading v2 (Claude)`; not saved into the file):
-  rebuild with `spike/balcony-pose/setup_v2.py`, `pose_v2.py`, then `spike/balcony-web/build_plate.py`, the render
+  rebuild with `scripts/balcony-pose/setup_v2.py`, `pose_v2.py`, then `scripts/balcony-web/build_plate.py`, the render
   passes, and `export_web.py`. The pose checkpoint is `assets/characters/marycia/balcony-study/marycia-reading-v2.blend`.
 
 ## Limits
