@@ -361,6 +361,547 @@
       "text": "人はひとりで部屋にじっとしていられないから、不幸になるんだって",
       "subtitle": {"ja": "人はひとりで部屋にじっとしていられないから、不幸になるんだって", "en": "It says people are unhappy because they can't sit quietly alone in a room."},
       "query": {"speedScale": 0.75, "volumeScale": 0.75, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-meal",
+      "kind": "ask",
+      "mood": "light",
+      "answers": [
+        {"label": {"ja": "食べたよ", "en": "I did"}, "reply": "q-meal-a"},
+        {"label": {"ja": "まだ", "en": "Not yet"}, "reply": "q-meal-b"},
+        {"label": {"ja": "お菓子だけ", "en": "Just snacks"}, "reply": "q-meal-c"}
+      ],
+      "text": "ねえ、ちゃんとごはん食べた？",
+      "subtitle": {"ja": "ねえ、ちゃんとごはん食べた？", "en": "Hey, did you eat properly?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-meal-a",
+      "kind": "reply",
+      "of": "q-meal",
+      "mood": "light",
+      "text": "えらいね。それだけで、今日はもう十分だよ",
+      "subtitle": {"ja": ["えらいね。", "それだけで、今日はもう十分だよ"], "en": ["Good.", "That alone is enough for today."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-meal-b",
+      "kind": "reply",
+      "of": "q-meal",
+      "mood": "light",
+      "text": "少しでいいから、何か食べてきて。待ってるから",
+      "subtitle": {"ja": ["少しでいいから、何か食べてきて。", "待ってるから"], "en": ["Even a little. Go eat something.", "I'll be here."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-meal-c",
+      "kind": "reply",
+      "of": "q-meal",
+      "mood": "light",
+      "text": "ふふ、それもごはんってことにしよう。次はちゃんとね",
+      "subtitle": {"ja": ["ふふ、それもごはんってことにしよう。", "次はちゃんとね"], "en": ["Let's count that.", "Properly next time, okay?"]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-shoulders",
+      "kind": "ask",
+      "mood": "light",
+      "answers": [
+        {"label": {"ja": "少し", "en": "A little"}, "reply": "q-shoulders-a"},
+        {"label": {"ja": "平気", "en": "I'm fine"}, "reply": "q-shoulders-b"}
+      ],
+      "text": "肩、かたくなってない？ずっと画面見てたでしょう",
+      "subtitle": {"ja": "肩、かたくなってない？ずっと画面見てたでしょう", "en": "Are your shoulders stiff? You've been staring at a screen all day."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-shoulders-a",
+      "kind": "reply",
+      "of": "q-shoulders",
+      "mood": "light",
+      "text": "一緒に回そうか。ゆっくり、後ろに",
+      "subtitle": {"ja": ["一緒に回そうか。", "ゆっくり、後ろに"], "en": ["Let's roll them together.", "Slowly, backwards."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-shoulders-b",
+      "kind": "reply",
+      "of": "q-shoulders",
+      "mood": "light",
+      "text": "ならよかった。でも、無理はしないでね",
+      "subtitle": {"ja": ["ならよかった。", "でも、無理はしないでね"], "en": ["Good.", "Just don't push yourself."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-laugh",
+      "kind": "ask",
+      "mood": "dark",
+      "answers": [
+        {"label": {"ja": "うん", "en": "Yes"}, "reply": "q-laugh-a"},
+        {"label": {"ja": "あんまり", "en": "Not really"}, "reply": "q-laugh-b"}
+      ],
+      "text": "最近、ちゃんと笑えてる？",
+      "subtitle": {"ja": "最近、ちゃんと笑えてる？", "en": "Have you been able to laugh lately?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-laugh-a",
+      "kind": "reply",
+      "of": "q-laugh",
+      "mood": "light",
+      "text": "よかった。その顔、ちょっと見てみたいな",
+      "subtitle": {"ja": ["よかった。", "その顔、ちょっと見てみたいな"], "en": ["I'm glad.", "I'd like to see that face."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-laugh-b",
+      "kind": "reply",
+      "of": "q-laugh",
+      "mood": "soft",
+      "text": "そういう時期もあるよ。笑えない日の自分も、ちゃんと自分だからね",
+      "subtitle": {"ja": ["そういう時期もあるよ。", "笑えない日の自分も、ちゃんと自分だからね"], "en": ["There are seasons like that.", "The you who can't laugh is still you."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-sleep",
+      "kind": "ask",
+      "mood": "light",
+      "answers": [
+        {"label": {"ja": "ぐっすり", "en": "Like a log"}, "reply": "q-sleep-a"},
+        {"label": {"ja": "あんまり", "en": "Not really"}, "reply": "q-sleep-b"},
+        {"label": {"ja": "寝てない", "en": "I didn't"}, "reply": "q-sleep-c"}
+      ],
+      "text": "昨日は、よく眠れた？",
+      "subtitle": {"ja": "昨日は、よく眠れた？", "en": "Did you sleep well last night?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-sleep-a",
+      "kind": "reply",
+      "of": "q-sleep",
+      "mood": "light",
+      "text": "いいなあ。眠れた夜は、それだけで小さな勝ちだよ",
+      "subtitle": {"ja": ["いいなあ。", "眠れた夜は、それだけで小さな勝ちだよ"], "en": ["Lucky.", "A night of good sleep is a small win all on its own."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-sleep-b",
+      "kind": "reply",
+      "of": "q-sleep",
+      "mood": "soft",
+      "text": "そっか。今夜は、少し早めに目を閉じてみて",
+      "subtitle": {"ja": ["そっか。", "今夜は、少し早めに目を閉じてみて"], "en": ["I see.", "Tonight, try closing your eyes a little early."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-sleep-c",
+      "kind": "reply",
+      "of": "q-sleep",
+      "mood": "soft",
+      "text": "…だめだよ。ここで少し、目を休めていって。私、静かにしてるから",
+      "subtitle": {"ja": ["…だめだよ。", "ここで少し、目を休めていって。", "私、静かにしてるから"], "en": ["Hey.", "Rest your eyes here a while.", "I'll stay quiet."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-day",
+      "kind": "ask",
+      "mood": "light",
+      "answers": [
+        {"label": {"ja": "いい日", "en": "A good one"}, "reply": "q-day-a"},
+        {"label": {"ja": "ふつう", "en": "Ordinary"}, "reply": "q-day-b"},
+        {"label": {"ja": "しんどかった", "en": "A hard one"}, "reply": "q-day-c"}
+      ],
+      "text": "今日は、どんな一日だった？",
+      "subtitle": {"ja": "今日は、どんな一日だった？", "en": "What kind of day was it?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-day-a",
+      "kind": "reply",
+      "of": "q-day",
+      "mood": "light",
+      "text": "よかった。その感じ、少しだけ分けてね",
+      "subtitle": {"ja": ["よかった。", "その感じ、少しだけ分けてね"], "en": ["I'm glad.", "Share a little of it with me."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-day-b",
+      "kind": "reply",
+      "of": "q-day",
+      "mood": "light",
+      "text": "ふつうの日って、あとで一番なつかしくなるんだよ",
+      "subtitle": {"ja": "ふつうの日って、あとで一番なつかしくなるんだよ", "en": "Ordinary days are the ones you miss most, later."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-day-c",
+      "kind": "reply",
+      "of": "q-day",
+      "mood": "soft",
+      "text": "そっか。よく、ここまで来たね。今はもう、何もしなくていいよ",
+      "subtitle": {"ja": ["そっか。", "よく、ここまで来たね。", "今はもう、何もしなくていいよ"], "en": ["I see.", "You made it this far.", "You don't have to do anything now."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-mind",
+      "kind": "ask",
+      "mood": "dark",
+      "answers": [
+        {"label": {"ja": "ある", "en": "There is"}, "reply": "q-mind-a"},
+        {"label": {"ja": "特にない", "en": "Not really"}, "reply": "q-mind-b"}
+      ],
+      "text": "何か、心に引っかかってることある？",
+      "subtitle": {"ja": "何か、心に引っかかってることある？", "en": "Is something weighing on your mind?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-mind-a",
+      "kind": "reply",
+      "of": "q-mind",
+      "mood": "soft",
+      "text": "言わなくていいよ。でも、ひとりで持ってなくていいからね",
+      "subtitle": {"ja": ["言わなくていいよ。", "でも、ひとりで持ってなくていいからね"], "en": ["You don't have to say it.", "But you don't have to carry it alone."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-mind-b",
+      "kind": "reply",
+      "of": "q-mind",
+      "mood": "light",
+      "text": "なら、今日の心は軽いんだね。いいことだ",
+      "subtitle": {"ja": ["なら、今日の心は軽いんだね。", "いいことだ"], "en": ["Then your heart is light today.", "That's good."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-stay",
+      "kind": "ask",
+      "mood": "light",
+      "answers": [
+        {"label": {"ja": "いるよ", "en": "I'll stay"}, "reply": "q-stay-a"},
+        {"label": {"ja": "そろそろ行く", "en": "I have to go soon"}, "reply": "q-stay-b"}
+      ],
+      "text": "もう少し、ここにいられる？",
+      "subtitle": {"ja": "もう少し、ここにいられる？", "en": "Can you stay a little longer?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-stay-a",
+      "kind": "reply",
+      "of": "q-stay",
+      "mood": "light",
+      "text": "うれしい。じゃあ、もう一章だけ読もうかな",
+      "subtitle": {"ja": ["うれしい。", "じゃあ、もう一章だけ読もうかな"], "en": ["I'm glad.", "Then I'll read one more chapter."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-stay-b",
+      "kind": "reply",
+      "of": "q-stay",
+      "mood": "light",
+      "text": "そっか。いってらっしゃい。ここは、ずっとここにあるから",
+      "subtitle": {"ja": ["そっか。", "いってらっしゃい。", "ここは、ずっとここにあるから"], "en": ["Okay.", "Take care.", "This place will always be here."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-lonely",
+      "kind": "ask",
+      "mood": "dark",
+      "answers": [
+        {"label": {"ja": "大丈夫", "en": "I'm okay"}, "reply": "q-lonely-a"},
+        {"label": {"ja": "少しさびしい", "en": "A little"}, "reply": "q-lonely-b"}
+      ],
+      "text": "ひとりで、さびしくない？",
+      "subtitle": {"ja": "ひとりで、さびしくない？", "en": "Aren't you lonely, on your own?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-lonely-a",
+      "kind": "reply",
+      "of": "q-lonely",
+      "mood": "light",
+      "text": "そっか。でも、さびしくなったら、ここに来てね",
+      "subtitle": {"ja": ["そっか。", "でも、さびしくなったら、ここに来てね"], "en": ["Okay.", "But if you ever are, come here."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-lonely-b",
+      "kind": "reply",
+      "of": "q-lonely",
+      "mood": "soft",
+      "text": "私もね、ときどき。だから今、ここにいてくれてうれしいよ",
+      "subtitle": {"ja": ["私もね、ときどき。", "だから今、ここにいてくれてうれしいよ"], "en": ["Me too, sometimes.", "That's why I'm glad you're here now."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-like-yourself",
+      "kind": "ask",
+      "mood": "dark",
+      "answers": [
+        {"label": {"ja": "うん", "en": "Yes"}, "reply": "q-like-yourself-a"},
+        {"label": {"ja": "あんまり", "en": "Not really"}, "reply": "q-like-yourself-b"},
+        {"label": {"ja": "わからない", "en": "I don't know"}, "reply": "q-like-yourself-c"}
+      ],
+      "text": "最近、自分のこと、少しは好きでいられてる？",
+      "subtitle": {"ja": "最近、自分のこと、少しは好きでいられてる？", "en": "Lately, have you been able to like yourself, even a little?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-like-yourself-a",
+      "kind": "reply",
+      "of": "q-like-yourself",
+      "mood": "light",
+      "text": "よかった。それ、いちばん大事な仕事かもしれないね",
+      "subtitle": {"ja": ["よかった。", "それ、いちばん大事な仕事かもしれないね"], "en": ["I'm glad.", "That might be the most important job there is."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-like-yourself-b",
+      "kind": "reply",
+      "of": "q-like-yourself",
+      "mood": "soft",
+      "text": "そっか。じゃあ、その分、私が好きでいるね。今はそれで、いいことにしよう",
+      "subtitle": {"ja": ["そっか。", "じゃあ、その分、私が好きでいるね。", "今はそれで、いいことにしよう"], "en": ["I see.", "Then I'll like you for both of us.", "Let that be enough for now."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-like-yourself-c",
+      "kind": "reply",
+      "of": "q-like-yourself",
+      "mood": "soft",
+      "text": "わからなくて、いいんだよ。決めなくても、ちゃんと生きていけるから",
+      "subtitle": {"ja": ["わからなくて、いいんだよ。", "決めなくても、ちゃんと生きていけるから"], "en": ["That's okay.", "You can live just fine without deciding."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-set-down",
+      "kind": "ask",
+      "mood": "dark",
+      "answers": [
+        {"label": {"ja": "不安", "en": "Worry"}, "reply": "q-set-down-a"},
+        {"label": {"ja": "疲れ", "en": "Tiredness"}, "reply": "q-set-down-b"},
+        {"label": {"ja": "過去", "en": "The past"}, "reply": "q-set-down-c"}
+      ],
+      "text": "もし、抱えてるものをひとつ置いていけるなら、何にする？",
+      "subtitle": {"ja": "もし、抱えてるものをひとつ置いていけるなら、何にする？", "en": "If you could set down one thing you carry, what would it be?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-set-down-a",
+      "kind": "reply",
+      "of": "q-set-down",
+      "mood": "soft",
+      "text": "不安はね、未来を大事にしてる証拠なんだって。でも今は、少しだけここに置いていって",
+      "subtitle": {"ja": ["不安はね、未来を大事にしてる証拠なんだって。", "でも今は、少しだけここに置いていって"], "en": ["They say worry means you care about the future.", "But for now, leave a little of it here."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-set-down-b",
+      "kind": "reply",
+      "of": "q-set-down",
+      "mood": "soft",
+      "text": "じゃあ、ここに置いていって。本と一緒に、私が持っててあげる",
+      "subtitle": {"ja": ["じゃあ、ここに置いていって。", "本と一緒に、私が持っててあげる"], "en": ["Then leave it here.", "I'll hold it for you, with my book."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-set-down-c",
+      "kind": "reply",
+      "of": "q-set-down",
+      "mood": "soft",
+      "text": "過去は置いていけないけど、軽くはできるよ。少しずつ、ね",
+      "subtitle": {"ja": ["過去は置いていけないけど、軽くはできるよ。", "少しずつ、ね"], "en": ["You can't leave the past behind, but you can make it lighter.", "Little by little."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-childhood",
+      "kind": "ask",
+      "mood": "light",
+      "answers": [
+        {"label": {"ja": "覚えてる", "en": "I remember"}, "reply": "q-childhood-a"},
+        {"label": {"ja": "忘れちゃった", "en": "I forgot"}, "reply": "q-childhood-b"}
+      ],
+      "text": "子どものころ、何になりたかった？",
+      "subtitle": {"ja": "子どものころ、何になりたかった？", "en": "When you were little, what did you want to be?"},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-childhood-a",
+      "kind": "reply",
+      "of": "q-childhood",
+      "mood": "light",
+      "text": "その子、今もどこかにいるよ。たまには、思い出してあげてね",
+      "subtitle": {"ja": ["その子、今もどこかにいるよ。", "たまには、思い出してあげてね"], "en": ["That child is still in there somewhere.", "Remember them now and then."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "q-childhood-b",
+      "kind": "reply",
+      "of": "q-childhood",
+      "mood": "light",
+      "text": "いいよ。その子が見てた空は、たぶん今と同じだから",
+      "subtitle": {"ja": ["いいよ。", "その子が見てた空は、たぶん今と同じだから"], "en": ["That's okay.", "The sky that child looked at is probably the same one now."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-01",
+      "kind": "notice",
+      "text": "…あ、いたんだ。ううん、なんでもない。いてくれて、うれしいだけ",
+      "subtitle": {"ja": ["…あ、いたんだ。", "ううん、なんでもない。", "いてくれて、うれしいだけ"], "en": ["Oh, you're there.", "No, it's nothing.", "I'm just glad you're here."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-02",
+      "kind": "notice",
+      "text": "ん？なあに。顔、見たくなった？",
+      "subtitle": {"ja": ["ん？なあに。", "顔、見たくなった？"], "en": ["Hm? What is it?", "Wanted to see my face?"]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-03",
+      "kind": "notice",
+      "text": "この章、すごくいいの。読み終わったら、話してあげるね",
+      "subtitle": {"ja": ["この章、すごくいいの。", "読み終わったら、話してあげるね"], "en": ["This chapter is really good.", "I'll tell you about it when I'm done."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-04",
+      "kind": "notice",
+      "text": "ねえ、知ってた？何もしない時間も、ちゃんと時間なんだよ",
+      "subtitle": {"ja": "ねえ、知ってた？何もしない時間も、ちゃんと時間なんだよ", "en": "Hey, did you know? Time spent doing nothing is still time."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-05",
+      "kind": "notice",
+      "text": "来てくれてありがとう。それだけ、言いたかったの",
+      "subtitle": {"ja": ["来てくれてありがとう。", "それだけ、言いたかったの"], "en": ["Thank you for coming.", "That's all I wanted to say."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-06",
+      "kind": "notice",
+      "text": "今日の風、気持ちいいね。そっちにも、届いてるといいな",
+      "subtitle": {"ja": ["今日の風、気持ちいいね。", "そっちにも、届いてるといいな"], "en": ["The breeze is lovely today.", "I hope it reaches you too."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-07",
+      "kind": "notice",
+      "text": "無理しなくていいよ。ここでは、ただいるだけでいいから",
+      "subtitle": {"ja": ["無理しなくていいよ。", "ここでは、ただいるだけでいいから"], "en": ["You don't have to push.", "Here, just being is enough."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-08",
+      "kind": "notice",
+      "text": "…ふふ。ちょっと、目が合っちゃったね",
+      "subtitle": {"ja": ["…ふふ。", "ちょっと、目が合っちゃったね"], "en": ["Heh.", "Our eyes met, just now."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-09",
+      "kind": "notice",
+      "text": "…あ。ちょうど今、思い出してたところ。何をかは、ないしょ",
+      "subtitle": {"ja": ["…あ。", "ちょうど今、思い出してたところ。", "何をかは、ないしょ"], "en": ["Oh.", "I was just remembering something.", "What, is a secret."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-10",
+      "kind": "notice",
+      "text": "ここ、いい場所でしょう。いつでも来ていいからね",
+      "subtitle": {"ja": ["ここ、いい場所でしょう。", "いつでも来ていいからね"], "en": ["Nice spot, isn't it?", "You can come anytime."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-11",
+      "kind": "notice",
+      "text": "本の中の人もね、今ちょうど、休憩してるところなの",
+      "subtitle": {"ja": "本の中の人もね、今ちょうど、休憩してるところなの", "en": "The people in the book are taking a break right now too."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-12",
+      "kind": "notice",
+      "text": "ん…なんだか、眠くなってきちゃった。まだ読むけどね",
+      "subtitle": {"ja": ["ん…なんだか、眠くなってきちゃった。", "まだ読むけどね"], "en": ["Mm... I'm getting a little sleepy.", "I'll keep reading, though."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-13",
+      "kind": "notice",
+      "text": "ページの音、好きなんだ。紙が、ちゃんと生きてる感じがして",
+      "subtitle": {"ja": ["ページの音、好きなんだ。", "紙が、ちゃんと生きてる感じがして"], "en": ["I love the sound of pages.", "Like the paper is alive."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-14",
+      "kind": "notice",
+      "text": "静かだね。この静かさ、ふたりで分けてるみたい",
+      "subtitle": {"ja": ["静かだね。", "この静かさ、ふたりで分けてるみたい"], "en": ["It's quiet.", "Like we're sharing the quiet, the two of us."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-15",
+      "kind": "notice",
+      "text": "そばにいてくれるだけで、ちょっと安心するの。不思議だね",
+      "subtitle": {"ja": ["そばにいてくれるだけで、ちょっと安心するの。", "不思議だね"], "en": ["Just having you near makes me feel a little safer.", "Funny, isn't it?"]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-16",
+      "kind": "notice",
+      "text": "今日も、ちゃんとここにいるよ。だから、安心して",
+      "subtitle": {"ja": ["今日も、ちゃんとここにいるよ。", "だから、安心して"], "en": ["I'm here today too.", "So don't worry."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-17",
+      "kind": "notice",
+      "text": "ふふ、本に夢中で、気づかなかった。ごめんね",
+      "subtitle": {"ja": ["ふふ、本に夢中で、気づかなかった。", "ごめんね"], "en": ["Heh, I was so into my book I didn't notice you.", "Sorry."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-18",
+      "kind": "notice",
+      "text": "この本、読み終わるのが、ちょっともったいないな",
+      "subtitle": {"ja": "この本、読み終わるのが、ちょっともったいないな", "en": "I almost don't want this book to end."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-19",
+      "kind": "notice",
+      "text": "夕方になったら、光がもっとやさしくなるよ。それまで、いてくれたらうれしいな",
+      "subtitle": {"ja": ["夕方になったら、光がもっとやさしくなるよ。", "それまで、いてくれたらうれしいな"], "en": ["The light gets even softer toward evening.", "I'd be glad if you stayed till then."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "notice-20",
+      "kind": "notice",
+      "text": "髪、風でちょっとぐしゃぐしゃ。見なかったことにしてね",
+      "subtitle": {"ja": ["髪、風でちょっとぐしゃぐしゃ。", "見なかったことにしてね"], "en": ["My hair's a bit of a mess from the wind.", "Pretend you didn't see."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "letgo-1",
+      "kind": "letgo",
+      "text": "…ううん、いいの。また今度ね",
+      "subtitle": {"ja": ["…ううん、いいの。", "また今度ね"], "en": ["It's okay.", "Another time."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "letgo-2",
+      "kind": "letgo",
+      "text": "答えなくても、大丈夫。聞けただけで、うれしいから",
+      "subtitle": {"ja": ["答えなくても、大丈夫。", "聞けただけで、うれしいから"], "en": ["You don't have to answer.", "I'm glad I got to ask."]},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
+    },
+    {
+      "id": "letgo-3",
+      "kind": "letgo",
+      "text": "ふふ、考えちゃった？ゆっくりでいいよ",
+      "subtitle": {"ja": "ふふ、考えちゃった？ゆっくりでいいよ", "en": "Heh, got you thinking? Take your time."},
+      "query": {"speedScale": 0.78, "volumeScale": 1.0, "intonationScale": 1.15, "prePhonemeLength": 0.05, "postPhonemeLength": 0.2}
     }
   ]
 }

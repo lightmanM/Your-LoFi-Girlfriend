@@ -225,3 +225,110 @@ class SentencePauseTest(unittest.TestCase):
     def test_sentences_split_at_the_full_stop(self):
         self.assertEqual(gl.sentences("あ、い。う。"), ["あ、い。", "う。"])
         self.assertEqual(gl.sentences("あい"), ["あい"])
+
+
+def ask(i, answers, mood="light"):
+    return {"id": i, "kind": "ask", "mood": mood, "answers": answers}
+
+
+def answer(reply, ja="はい", en="Yes"):
+    return {"label": {"ja": ja, "en": en}, "reply": reply}
+
+
+def reply(i, of, mood="light"):
+    return {"id": i, "kind": "reply", "of": of, "mood": mood}
+
+
+class ClickLineKindTest(unittest.TestCase):
+    def test_check_line_accepts_click_kinds(self):
+        gl.check_line(ask("q", [answer("q-a"), answer("q-b")], mood="dark"))
+        gl.check_line(reply("q-a", "q", mood="soft"))
+        gl.check_line({"id": "n", "kind": "notice"})
+        gl.check_line({"id": "l", "kind": "letgo"})
+
+    def test_check_line_rejects_bad_click_lines(self):
+        bad = [ask("q", [answer("q-a")]),                                  # one answer
+               ask("q", [answer(f"q-{c}") for c in "abcd"]),               # four answers
+               reply("q-a", "q", mood="dark"),                             # replies are light or soft
+               ask("q", [{"label": {"ja": "はい"}, "reply": "q-a"}, answer("q-b")]),   # a label without English
+               ask("q", [answer("q-a"), {"label": {"ja": "はい", "en": "Yes"}}])]       # an answer without its reply
+        for line in bad:
+            with self.assertRaises(SystemExit, msg=line):
+                gl.check_line(line)
+
+    def test_check_links_rejects_missing_or_foreign_reply(self):
+        good = [ask("q", [answer("q-a"), answer("q-b")]), reply("q-a", "q"), reply("q-b", "q")]
+        gl.check_links(good)
+        for lines in ([ask("q", [answer("q-a"), answer("q-b")]), reply("q-a", "q")],                        # q-b missing
+                      [ask("q", [answer("q-a"), answer("q-b")]), reply("q-a", "q"), reply("q-b", "r")],     # q-b belongs to r
+                      good + [reply("q-c", "q")]):                                                           # q-c unused
+            with self.assertRaises(SystemExit, msg=lines):
+                gl.check_links(lines)
+
+    def test_new_keeps_voiced_lines_and_lists_the_rest(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d)
+            (out / "a.wav").write_bytes(b"x")   # b's audio is missing; c has no entry yet
+            index = {"a": {"id": "a", "audio": "a.wav"}, "b": {"id": "b", "audio": "b.wav"}}
+            todo, kept = gl.to_voice(["a", "b", "c"], index, out)
+            self.assertEqual(todo, ["b", "c"])
+            self.assertEqual(sorted(kept), ["a"])
+
+
+class ClickLinesManifest(unittest.TestCase):
+    """The click-to-talk lines in the manifest, as the design lists them."""
+    DARK = {"q-laugh", "q-mind", "q-lonely", "q-like-yourself", "q-set-down"}
+    SOFT = {"q-laugh-b", "q-sleep-b", "q-sleep-c", "q-day-c", "q-mind-a", "q-lonely-b", "q-like-yourself-b",
+            "q-like-yourself-c", "q-set-down-a", "q-set-down-b", "q-set-down-c"}
+
+    def setUp(self):
+        self.lines = json.loads((Path(__file__).parent / "lines.json").read_text())["lines"]
+        self.kind = lambda k: [x for x in self.lines if x["kind"] == k]
+
+    def test_click_lines_are_complete(self):
+        self.assertEqual([len(self.kind(k)) for k in ("ask", "reply", "notice", "letgo")], [11, 27, 20, 3])
+        for line in self.lines:
+            gl.check_line(line)
+        gl.check_links(self.lines)
+        self.assertEqual({x["id"] for x in self.kind("ask") if x["mood"] == "dark"}, self.DARK)
+        self.assertEqual({x["id"] for x in self.kind("reply") if x["mood"] == "soft"}, self.SOFT)
+        for x in self.kind("notice") + self.kind("letgo"):
+            self.assertNotIn("answers", x, x["id"])   # nothing to pick: a rhetorical ？ is fine, answer pills are not
+
+    def test_click_lines_speak_like_her_small_talk(self):
+        talk = next(x for x in self.lines if x["kind"] == "talk")["query"]
+        for x in self.kind("ask") + self.kind("reply") + self.kind("notice") + self.kind("letgo"):
+            self.assertEqual(x["query"], talk, x["id"])
+            if isinstance(x["subtitle"]["ja"], list):   # parts: one per sentence, matching the spoken text
+                self.assertEqual("".join(x["subtitle"]["ja"]), x["text"], x["id"])
+            else:
+                self.assertEqual(x["subtitle"]["ja"], x["text"], x["id"])
+
+
+class InterrogativeTimelineTest(unittest.TestCase):
+    """A question: the engine (0.26) adds a rising 0.15 s mora on the last vowel of an interrogative phrase whose last
+    mora is voiced, ん included (measured: ん？ 0.491 s without, 0.64 s with)."""
+    def query(self, last_vowel="a", interrogative=True, pitch=5.5):
+        return {"speedScale": 1.0, "prePhonemeLength": 0.0, "postPhonemeLength": 0.0, "pauseLength": None,
+                "pauseLengthScale": 1.0,
+                "accent_phrases": [{"moras": [{**mora("タ", "t", 0.05, last_vowel, 0.1), "pitch": pitch}],
+                                    "pause_mora": None, "is_interrogative": interrogative}]}
+
+    def test_interrogative_phrase_ends_with_its_rising_mora(self):
+        t = gl.timeline(self.query())
+        self.assertEqual([m["vowel"] for m in t["moras"]], ["a", "a"])
+        self.assertAlmostEqual(t["duration"], frames(0.05) + frames(0.1) + frames(0.15), places=3)
+
+    def test_a_question_rises_after_n_too(self):
+        self.assertEqual([m["vowel"] for m in gl.timeline(self.query(last_vowel="N"))["moras"]], ["N", "N"])
+
+    def test_no_rising_mora_after_a_whispered_mora_or_on_a_statement(self):
+        self.assertEqual(len(gl.timeline(self.query(pitch=0.0))["moras"]), 1)
+        self.assertEqual(len(gl.timeline(self.query(interrogative=False))["moras"]), 1)
+
+    def test_sentence_pauses_count_a_question_rising_mora(self):
+        q = {"speedScale": 1.0, "accent_phrases": [
+            {"moras": [mora("ナ", "n", 0.05, "a", 0.1)], "pause_mora": mora("、", None, None, "pau", 0.2)},
+            {"moras": [mora("タ", "t", 0.05, "a", 0.1)], "pause_mora": None, "is_interrogative": True}]}
+        out = gl.lengthen_sentence_pauses(q, [1, 2], 0.7)   # the second sentence counts its rising mora, as timeline does
+        self.assertEqual(out["accent_phrases"][0]["pause_mora"]["vowel_length"], 0.7)

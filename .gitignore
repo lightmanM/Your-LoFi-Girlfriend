@@ -29,3 +29,6 @@ web/public/music/*.mp3
 /renders/
 /references/
 /visual-targets/
+
+# Brainstorm and plan-execution scratch
+.superpowers/

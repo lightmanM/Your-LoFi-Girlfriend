@@ -15,10 +15,11 @@ npm run dev
 ```
 
 Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?stretch=<seconds>`, `?still=<seconds>`,
-`?wind=0`, `?plantgain=<n>`, `?seat=0`, `?music=0`, `?musicstall=<seconds>`, `?hud=0`, `?intro=0`, `?greet=0`, `?line=<id>`, `?talk=0`, `?talkevery=<seconds>`;
+`?wind=0`, `?plantgain=<n>`, `?seat=0`, `?music=0`, `?musicstall=<seconds>`, `?hud=0`, `?intro=0`, `?greet=0`, `?line=<id>`, `?talk=0`, `?talkevery=<seconds>`,
+`?chat=0`, `?ask=<id>`, `?notice=<id>`, `?chatwait=<seconds>`, `?chatcool=<seconds>`;
 `window.lofiViewer` reports state (`greeting()` this visit's line, `voice()` the greeting as it plays, `greet()` starts
-it, `hush()` stops it, `smallTalk()` her small talk, `talk(id?,{motion?})` says a line now, `hold(true)` freezes her for
-close inspection).
+it, `hush()` stops it, `smallTalk()` her small talk, `talk(id?,{motion?})` says a line now, `chat()` a conversation's state, `poke({ask|notice}?)` starts one as a
+click on her would, `answer(i)` picks an answer, `hold(true)` freezes her for close inspection).
 
 The page opens out of focus with a "start" button. Pressing it (or Enter) pulls the camera into focus over about 3
 seconds. Part-way through, the camera display powers on with a soft synthesised beep and an exposure flash: corners,
@@ -37,6 +38,17 @@ anything else she is doing (the greeting, her break, a page turn, a glance) and 
 is paused or sound is not yet allowed. To check it without waiting, open `?talkevery=20` (a line every 20 s); `?talk=0`
 turns it off. The music dips a little while she speaks, and her voice follows the volume control and mute. Design:
 [small talk](../docs/superpowers/specs/2026-11-08-small-talk-design.md).
+
+Click her while she quietly reads and she talks with you (click to talk). The pointer turns to a hand over her and she
+glows very faintly; she is not clickable while she greets, talks, turns a page, looks up, takes her break, or for 3 s
+after a conversation. About two clicks in three she just says something warm (20 lines); about one in three she asks
+how you are (11 questions), and two or three answers appear as soft pills under her words once she has finished (on a
+phone they take the subtitle's place; held sideways, they stand at the left, clear of her and the book). Pick one (click, tap, or Tab and Enter) and she replies to it (27 replies); if
+no answer comes within 15 s she lets it go gently. Never two questions in a row, never two heavier ones one after the
+other, no repeats until each set has been heard (remembered in the browser; answers are not stored or sent anywhere).
+Her next small talk waits a fresh while after a conversation. `?ask=q-meal` or `?notice=notice-05` picks the first
+one, `?chatwait=2` and `?chatcool=3` shorten the waits, `?chat=0` turns it off. Design:
+[click to talk](../docs/superpowers/specs/2026-11-09-click-to-talk-design.md).
 
 The music
 rises in behind it (`?intro=0` skips this; then the first click or tap
@@ -77,7 +89,9 @@ be credited and played unedited (no trims, loops or baked-in mixes, and no recor
   looks up, speaks, smiles and nods, pure), `greeting.js` (drives her head, face and the subtitle), `pick-line.js` (this
   visit's greeting, pure), `talk-plan.js` (small talk: when, which line, which motion, which subtitle part, pure),
   `talk.js` (one line with its motion), `small-talk.js` (the schedule), `face.js`, `gaze-report.js`, `level.js` (her
-  volume against the music controls, pure), `subtitles.js`. `src/balcony/head-aim.js` aims her face at you and keeps
+  volume against the music controls, pure), `subtitles.js`; click to talk: `chat-plan.js` (when she can be clicked, which
+  conversation, pure), `chat.js` (one conversation), `answers.js` (the answer pills), `reach.js` (is she under the
+  pointer), `glow.js` (her faint glow). `src/balcony/head-aim.js` aims her face at you and keeps
   her head from looking tilted as she looks at you (pure); `look-ease.js` the soft ease of every look away from the
   book (pure); `eye-range.js` widens her eye range for a moment.
 - `src/companion/life.js` (breathing and idle life), `source-motion.js` (curve sampling).

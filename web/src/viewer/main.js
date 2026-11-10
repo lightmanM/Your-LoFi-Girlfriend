@@ -20,6 +20,11 @@ import {GREET} from '../voice/greeting-plan.js';
 import {voiceLevel} from '../voice/level.js';
 import {createSmallTalk} from '../voice/small-talk.js';
 import {mountSubtitles} from '../voice/subtitles.js';
+import {createChat} from '../voice/chat.js';
+import {mountAnswers} from '../voice/answers.js';
+import {CHAT,canStart} from '../voice/chat-plan.js';
+import {createReach,herCapsules} from '../voice/reach.js';
+import {setGlow} from '../voice/glow.js';
 import {pickLine,lastLine,rememberLine} from '../voice/pick-line.js';
 import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
@@ -98,7 +103,7 @@ async function load(){
  chair.scene.position.add(off);chair.scene.updateMatrixWorld(true);
  state.chair=prepareChair(chair.scene,plate,pictureCamera(d.camera.position,d.camera.quaternion,d.camera.hfov_deg,d.camera.vfov_deg));scene.add(state.chair);
  book.scene.position.add(off);book.scene.updateMatrixWorld(true);   // the book was exported at her old seat: it moves with her
- book.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.castShadow=true;state.bookMesh??=o;}});scene.add(book.scene);
+ book.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.castShadow=true;state.bookMesh??=o;}});scene.add(book.scene);state.book=book.scene;
  const vrm=state.vrm=(await loader.parseAsync(vrmBuffer,'')).userData.vrm;
  VRMUtils.removeUnnecessaryVertices(vrm.scene);VRMUtils.combineSkeletons(vrm.scene);VRMUtils.rotateVRM0(vrm);
  vrm.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.frustumCulled=false;o.castShadow=true;}});
@@ -134,7 +139,7 @@ function frame(now){
   l.ang.value=w.angle('leaves');l.act.value=w.activity('leaves');
  }
  soundFrame();
- if(state.reader&&!state.frozen&&!state.held){state.reader.update(dt);greetingFrame();talkFrame(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
+ if(state.reader&&!state.frozen&&!state.held){state.reader.update(dt);greetingFrame();talkFrame(dt);chatFrame(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
@@ -150,9 +155,10 @@ let unbindMusic=null,beeps=0;
 // Her greeting: as the start button pulls focus she looks up at you and says one of her greetings, with subtitles:
 // picked at random each visit, never last visit's. Lines and voice: public/voice/ (scripts/voice/generate_lines.py).
 // ?line=<id> picks one (e.g. ?line=otsukare); ?greet=0 turns the greeting off.
-const greetOn=params.get('greet')!=='0',talkOn=params.get('talk')!=='0';   // the greeting and small talk share her voice
-const voice=greetOn||talkOn?createVoice():null;
+const greetOn=params.get('greet')!=='0',talkOn=params.get('talk')!=='0',chatOn=params.get('chat')!=='0';   // all share her voice
+const voice=greetOn||talkOn||chatOn?createVoice():null;
 const subtitles=voice?mountSubtitles():null;
+const answerPills=voice&&chatOn?mountAnswers():null;   // her question's answers (click to talk)
 const store=(()=>{try{return window.localStorage;}catch{return undefined;}})();   // blocked site data: no memory
 const GREET_LATE=4;   // s: if her lines arrive later than this after start, the moment has passed and she skips it
 let greetingLine=null,greetingPicked=false;   // picked: chosen at random (remembered), not asked for with ?line=
@@ -164,7 +170,7 @@ const voiceReady=voice?.load().then(()=>{
 }).catch(e=>console.warn('voice: lines unavailable, she will not speak',e.message));
 function greet({line=greetingLine,...options}={}){
  if(!voice||!greetOn||!line||!state.reader||state.frozen||(state.greeting&&!state.greetingDone()))return false;
- smallTalk?.stop();   // the greeting comes first: never two voices at once
+ smallTalk?.stop();chat?.stop();   // the greeting comes first: never two voices at once
  state.greeting=startGreeting({reader:state.reader,vrm:state.vrm,voice,lineId:line,target:camera.position,subtitles,options});
  if(state.greeting&&greetingPicked&&line===greetingLine)rememberLine(store,line);
  return !!state.greeting;
@@ -181,7 +187,7 @@ function greetOnStart(){
 let heardLevel=null,dipped=false;
 function soundFrame(){
  const level=voiceLevel(music?.state()??null);if(level!==heardLevel){heardLevel=level;voice?.setLevel(level);}
- const speaking=state.greeting?.speech?.status()==='speaking'||!!smallTalk?.speaking();if(speaking!==dipped){dipped=speaking;music?.duck(speaking);}
+ const speaking=state.greeting?.speech?.status()==='speaking'||!!smallTalk?.speaking()||!!chat?.speaking();if(speaking!==dipped){dipped=speaking;music?.duck(speaking);}
 }
 // Small talk while she reads (src/voice/small-talk.js): a line every 1 to 2 minutes, to you or to herself. ?talk=0
 // turns it off; ?talkevery=<s> makes her talk every <s> seconds instead, to check it.
@@ -192,10 +198,75 @@ function talkFrame(dt){
  try{
   if(!smallTalk&&voice&&talkOn&&state.reader)
   {smallTalk=createSmallTalk({voice,reader:state.reader,vrm:state.vrm,subtitles,target:camera.position,music,store,every:talkEvery});if(talkStarted)smallTalk.start();}
-  smallTalk?.update(dt,{greeting:!!state.greeting&&!state.greetingDone()});
+  smallTalk?.update(dt,{greeting:!!state.greeting&&!state.greetingDone(),chatting:!!chat?.active()});
  }catch(e){   // a failure in small talk ends it for this visit, never the page
   console.error('small talk failed',e);talkBroken=true;try{smallTalk?.dispose();}catch{/* already broken */}smallTalk=null;
  }
+}
+// Click to talk (src/voice/chat.js): clicking her while she quietly reads starts a conversation: usually a warm line,
+// about one time in three a question with answers to pick. ?chat=0 turns it off; ?ask=<id> or ?notice=<id> picks the
+// first one; ?chatwait=<s> shortens the wait for an answer and ?chatcool=<s> the cool-down after a conversation.
+const chatCool=params.has('chatcool')?+params.get('chatcool'):CHAT.cooldown;
+const NARROW='(max-width:600px),(max-height:500px)';   // a phone, upright or sideways: the answers take the subtitle's place (answers.css)
+let chat=null,chatBroken=false,chatFirstUsed=false;
+function chatFrame(dt){
+ if(chatBroken)return;
+ try{
+  if(!chat&&voice&&chatOn&&state.reader)chat=createChat({voice,reader:state.reader,vrm:state.vrm,subtitles,answers:answerPills,
+   target:camera.position,store,narrow:()=>matchMedia(NARROW).matches,wait:params.has('chatwait')?+params.get('chatwait'):undefined});
+  chat?.update(dt);
+  if(chat)reachFrame(dt);
+ }catch(e){   // a failure in a conversation ends click to talk for this visit, never the page
+  console.error('click to talk failed',e);chatBroken=true;try{chat?.dispose();}catch{/* already broken */}chat=null;
+ }
+}
+/** Whether a click on her starts a conversation now: she is only reading, past the cool-down (chat-plan.js). */
+const chatGates=()=>chat&&state.reader?{ready:chat.state().ready,started:talkStarted,greeting:!!state.greeting&&!state.greetingDone(),
+ talking:!!smallTalk?.state().active,chatting:chat.active(),busy:state.reader.busy(),frozen:!!(state.frozen||state.held),
+ since:performance.now()/1000-chat.endedAt()}:null;
+function chatFree(){const g=chatGates();return !!g&&canStart(g,chatCool);}
+function pokeChat(o){
+ if(!chatFree())return false;
+ voice.unlock();
+ const first=chatFirstUsed?null:{ask:params.get('ask')??undefined,notice:params.get('notice')??undefined};chatFirstUsed=true;
+ return chat.start(o??(first?.ask||first?.notice?first:undefined));
+}
+// The pointer over her: a hand cursor and a very faint warm glow while a click would start a conversation (glow.js);
+// the hit test (reach.js) runs at most once a frame, only when the pointer has moved. Touch has no hover: a tap is a click.
+let reach=null,pointer=null,hover=false,glow=0,glowShown=0;
+const canvas=renderer.domElement;
+canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch')pointer={x:e.clientX,y:e.clientY,moved:true};});
+canvas.addEventListener('pointerleave',()=>{pointer=null;hover=false;});
+canvas.addEventListener('click',e=>{if(chatFree()&&reach?.hit(e.clientX,e.clientY))pokeChat();});
+const bookBox=()=>state.book?new THREE.Box3().setFromObject(state.book):null;   // the whole book: covers and pages
+let wasFree=false;
+function reachFrame(dt){
+ reach??=createReach({dom:canvas,camera,capsules:()=>state.vrm?herCapsules(state.vrm):[],boxes:()=>[bookBox()]});
+ const free=chatFree();   // she is only tested for while a click would start a conversation
+ if(free&&pointer&&(pointer.moved||!wasFree)){hover=reach.hit(pointer.x,pointer.y);pointer.moved=false;}
+ wasFree=free;
+ const want=hover&&free;
+ if(canvas.style.cursor!==(want?'pointer':''))canvas.style.cursor=want?'pointer':'';
+ glow+=((want?1:0)-glow)*Math.min(1,dt/.25);if(glow<.005)glow=0;
+ if(Math.abs(glow-glowShown)>.005||(glow===0&&glowShown!==0)){setGlow(state.vrm,glow);glowShown=glow;}
+}
+// Her chest on screen (CSS px), for checks that click her.
+function chatPoint(){
+ const b=state.vrm?.humanoid.getRawBoneNode('chest');if(!b)return null;
+ const p=b.getWorldPosition(new THREE.Vector3()).project(camera),r=canvas.getBoundingClientRect();
+ return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height};
+}
+// The book's box on screen (CSS px), for checks: nothing of a conversation may cover it.
+function bookRect(){
+ const box=bookBox();if(!box)return null;
+ const r=renderer.domElement.getBoundingClientRect(),p=new THREE.Vector3();
+ let left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
+ for(let i=0;i<8;i++){
+  p.set(i&1?box.max.x:box.min.x,i&2?box.max.y:box.min.y,i&4?box.max.z:box.min.z).project(camera);
+  const x=r.left+(p.x+1)/2*r.width,y=r.top+(1-p.y)/2*r.height;
+  left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
+ }
+ return {left,top,right,bottom};
 }
 // sound is allowed only after a click or key press: her voice is unlocked by the first one (the start button does too)
 for(const type of ['pointerdown','keydown'])addEventListener(type,()=>voice?.unlock(),{once:true,capture:true});
@@ -227,4 +298,6 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
  reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1),
   busy:r.busy(),away:+r.reading.away.toFixed(3),eyeScale:state.vrm.lookAt?.applier?.rangeMapHorizontalOuter?.outputScale??null,head:{yaw:+r.reading.head.yaw.toFixed(2),pitch:+r.reading.head.pitch.toFixed(2)}};},
  glance:o=>state.reader?.reading.glance(o),holdReading:on=>state.reader?.reading.holdReading(on),talking:on=>{if(state.reader)state.reader.talking=!!on;}};
+// click to talk, for checks: its state, start one as if she were clicked, pick an answer, the book's box on screen
+Object.assign(window.lofiViewer,{chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
 load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';console.error(e);});

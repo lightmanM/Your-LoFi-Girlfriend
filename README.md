@@ -4,7 +4,8 @@ A lofi web page that plays like a video that never repeats: Marycia reads on a s
 the plants move in the wind, and the music plays on. She turns pages, looks up, and every 4 to 8 minutes rests from her
 book (shoulder rolls, a head tilt each way with her eyes closed). When you press start she looks up and greets you
 with one of five lines, lip-synced to a VOICEVOX voice (冥鳴ひまり) with subtitles; while she reads she says something
-now and then, to you or to herself. No controls but the music; the camera stays still.
+now and then, to you or to herself. Click her and she talks with you: usually a warm word, sometimes a caring question
+with answers to pick. No other controls but the music; the camera stays still.
 
 Front end only: three.js and three-vrm, no server.
 

@@ -44,6 +44,18 @@ def find_style_id(speakers: list[dict], speaker: str, style: str) -> int:
     raise SystemExit(f"voice {speaker} / {style} is not installed in VOICEVOX. Installed: {installed}")
 
 
+UPSPEAK = 0.15   # s the engine adds to an interrogative phrase (its "upspeak"), on the same vowel
+
+
+def phrase_moras(phrase: dict) -> list[dict]:
+    """A phrase's moras as the engine sounds them: a question rises on one more mora, on its last vowel, when that
+    last mora is voiced (ん included)."""
+    moras, last = phrase["moras"], (phrase["moras"] or [None])[-1]
+    if phrase.get("is_interrogative") and last and (last.get("pitch") or 0) > 0:
+        return [*moras, {"text": "ー", "consonant": None, "vowel": last["vowel"], "vowel_length": UPSPEAK}]
+    return moras
+
+
 def timeline(query: dict) -> dict:
     """Per-mora timing (s) of a VOICEVOX audio query, as the engine will render it.
 
@@ -68,7 +80,7 @@ def timeline(query: dict) -> dict:
         t += c + v
 
     for phrase in query["accent_phrases"]:
-        for m in phrase["moras"]:
+        for m in phrase_moras(phrase):
             add(m)
         pause = phrase.get("pause_mora")
         if pause:   # the engine uses a fixed pauseLength when given, otherwise the pause's own length times its scale
@@ -124,17 +136,47 @@ def read_wav(path: Path) -> tuple[array, int, float]:
         return samples, w.getframerate(), w.getnframes() / w.getframerate()
 
 
-KINDS = {"greeting": {}, "talk": {"to": {"you", "self"}, "about": {"life", "thought", "book"}, "mood": {"light", "dark"}}}
+# greeting: the start; talk: small talk; ask / reply / notice / letgo: when the visitor clicks her (a question with
+# answers, her reply to one answer, a line that asks nothing, and what she says when no answer comes).
+KINDS = {"greeting": {}, "talk": {"to": {"you", "self"}, "about": {"life", "thought", "book"}, "mood": {"light", "dark"}},
+         "ask": {"mood": {"light", "dark"}}, "reply": {"mood": {"light", "soft"}}, "notice": {}, "letgo": {}}
+ANSWERS = (2, 3)   # a question has two or three answers
 
 
 def check_line(line: dict) -> None:
-    """A line's kind, and for small talk who it is to, what it is about and its mood, must be known values."""
-    kind = line.get("kind")
+    """A line's kind and its kind's fields must be known values; a question's answers each need a two-language label
+    and the id of her reply."""
+    kind, name = line.get("kind"), line.get("id")
     if kind not in KINDS:
-        raise SystemExit(f"{line.get('id')}: kind must be one of {sorted(KINDS)}, not {kind!r}")
+        raise SystemExit(f"{name}: kind must be one of {sorted(KINDS)}, not {kind!r}")
     for field, allowed in KINDS[kind].items():
         if line.get(field) not in allowed:
-            raise SystemExit(f"{line.get('id')}: {field} must be one of {sorted(allowed)}, not {line.get(field)!r}")
+            raise SystemExit(f"{name}: {field} must be one of {sorted(allowed)}, not {line.get(field)!r}")
+    if kind == "ask":
+        answers = line.get("answers")
+        if not isinstance(answers, list) or not ANSWERS[0] <= len(answers) <= ANSWERS[1]:
+            raise SystemExit(f"{name}: a question needs {ANSWERS[0]} to {ANSWERS[1]} answers")
+        for a in answers:
+            label = a.get("label") or {}
+            if not label.get("ja") or not label.get("en") or not a.get("reply"):
+                raise SystemExit(f"{name}: every answer needs label.ja, label.en and reply: {a}")
+    if kind == "reply" and not line.get("of"):
+        raise SystemExit(f"{name}: a reply names its question (of)")
+
+
+def check_links(lines: list[dict]) -> None:
+    """Every answer points at a reply that answers that question, and every reply is some answer's."""
+    by_id = {x["id"]: x for x in lines}
+    used = set()
+    for q in (x for x in lines if x.get("kind") == "ask"):
+        for a in q["answers"]:
+            r = by_id.get(a["reply"])
+            if not r or r.get("kind") != "reply" or r.get("of") != q["id"]:
+                raise SystemExit(f"{q['id']}: answer {a['label']['en']!r} needs a reply {a['reply']!r} of {q['id']!r}")
+            used.add(r["id"])
+    stray = [x["id"] for x in lines if x.get("kind") == "reply" and x["id"] not in used]
+    if stray:
+        raise SystemExit(f"replies no answer uses: {stray}")
 
 
 def split_subtitle(subtitle: dict) -> tuple[dict, list[dict] | None]:
@@ -183,7 +225,7 @@ def lengthen_sentence_pauses(query: dict, counts: list[int], length: float) -> d
     q = copy.deepcopy(query)
     bounds, seen = set(itertools.accumulate(counts[:-1])), 0
     for phrase in q["accent_phrases"]:
-        seen += spoken_count(phrase["moras"])
+        seen += spoken_count(phrase_moras(phrase))
         pause = phrase.get("pause_mora")
         if pause and seen in bounds:
             pause["vowel_length"] = max(pause.get("vowel_length") or 0.0, length)
@@ -210,7 +252,7 @@ def generate(line: dict, style_id: int, engine: str, out: Path) -> dict:
     made = {"id": line["id"], "kind": line["kind"], "text": line["text"], "subtitle": subtitle, "audio": wav.name,
             "duration": round(seconds, 3), "kana": query.get("kana"), "moras": t["moras"],
             "envelope": {"fps": ENVELOPE_FPS, "values": envelope(samples, rate)}}
-    made.update({k: line[k] for k in ("to", "about", "mood") if k in line})
+    made.update({k: line[k] for k in ("to", "about", "mood", "answers", "of") if k in line})
     if parts:   # where each part starts: the spoken moras of each part's text, counted on its own
         counts = [spoken(x["ja"]) for x in parts]
         made["parts"] = [{**x, "start": s} for x, s in zip(parts, part_starts(t["moras"], counts))]
@@ -226,21 +268,39 @@ def previous_lines(index_path: Path, only: str | None) -> dict[str, dict]:
     return {x["id"]: x for x in json.loads(index_path.read_text())["lines"]}
 
 
+def to_voice(ids: list[str], index: dict[str, dict], out: Path) -> tuple[list[str], dict[str, dict]]:
+    """For --new: the lines still to voice (no entry yet, or their audio is missing) and the voiced ones to keep."""
+    kept = {i: index[i] for i in ids if i in index and (out / index[i]["audio"]).exists()}
+    return [i for i in ids if i not in kept], kept
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--manifest", type=Path, default=HERE / "lines.json")
     ap.add_argument("--out", type=Path, default=REPO / "web" / "public" / "voice")
     ap.add_argument("--only", help="regenerate one line id, keeping the others")
+    ap.add_argument("--new", action="store_true", help="voice only lines not voiced yet, keeping the others")
     args = ap.parse_args()
     manifest = json.loads(args.manifest.read_text())
+    for line in manifest["lines"]:
+        check_line(line)
+    check_links(manifest["lines"])
     engine, voice = manifest["engine"].rstrip("/"), manifest["voice"]
-    lines = [line for line in manifest["lines"] if not args.only or line["id"] == args.only]
-    if not lines:
-        raise SystemExit(f"no line with id {args.only}")
+    index_path = args.out / "lines.json"
+    if args.new:
+        voiced = previous_lines(index_path, "--new") if index_path.exists() else {}
+        todo, old = to_voice([x["id"] for x in manifest["lines"]], voiced, args.out)
+        lines = [line for line in manifest["lines"] if line["id"] in todo]
+        if not lines:
+            print("every line is voiced already")
+            return 0
+    else:
+        lines = [line for line in manifest["lines"] if not args.only or line["id"] == args.only]
+        if not lines:
+            raise SystemExit(f"no line with id {args.only}")
+        old = previous_lines(index_path, args.only)
     args.out.mkdir(parents=True, exist_ok=True)
     style_id = find_style_id(json.loads(call(engine, "/speakers")), voice["speaker"], voice["style"])
-    index_path = args.out / "lines.json"
-    old = previous_lines(index_path, args.only)
     made = {x["id"]: x for x in (generate(line, style_id, engine, args.out) for line in lines)}
     ordered = [made.get(line["id"]) or old.get(line["id"]) for line in manifest["lines"]]
     index = {"voice": {"credit": voice["credit"], "speaker": voice["speaker"], "style": voice["style"]},

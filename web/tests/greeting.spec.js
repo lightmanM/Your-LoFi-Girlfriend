@@ -41,7 +41,7 @@ test('after start she looks up and greets you, mouth on the voice, with subtitle
 
 test('the greeting can be turned off',async({page,request})=>{
  test.skip(!(await sceneReady(request)),'balcony layers not rendered on this machine');
- await page.goto('/?music=0&greet=0&talk=0');await ready(page);
+ await page.goto('/?music=0&greet=0&talk=0&chat=0');await ready(page);   // every use of her voice off
  await page.getByRole('button',{name:'start'}).click();
  await page.waitForTimeout(3500);
  expect(await page.evaluate(()=>window.lofiViewer.voice())).toBeNull();
