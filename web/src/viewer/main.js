@@ -29,6 +29,8 @@ import {standinChair} from '../standin/chair.js';
 import {plantCards,readTexture} from '../standin/plant-cards.js';
 import {withPoseFix} from '../standin/pose-fix.js';
 import {setGlow} from '../voice/glow.js';
+import {createProgress} from '../loading/progress.js';
+import {mountStandby} from '../loading/standby.js';
 import {pickLine,lastLine,rememberLine} from '../voice/pick-line.js';
 import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,chairPanels,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
@@ -41,6 +43,8 @@ if(new URLSearchParams(location.search).has('light')){const v=new URLSearchParam
 const FOCUS_X=.74;            // where she sits across the picture (0 left, 1 right): narrow screens crop around her
 const host=document.getElementById('stage'),note=document.getElementById('note');
 const params=new URLSearchParams(location.search);
+// first load: every file she needs goes through one counted download, shown on the stand-by display (src/loading)
+const standby=mountStandby(),progress=createProgress({onChange:s=>standby.update(s)});
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NeutralToneMapping;
 host.append(renderer.domElement);
@@ -79,12 +83,20 @@ function place(vrm,pose,c){
 // T seconds, stepped at a fixed rate so every run shows exactly the same pose.
 const character=d=>{const c=params.get('character');return c&&/^[\w.-]+\.vrm$/.test(c)?d.vrm.replace(/[^/]+$/,c):d.vrm;};
 const json=async url=>{const r=await fetch(url);if(!r.ok)throw Error(`${url}: HTTP ${r.status}`);return r.json();};
+// the counted downloads: a file, and the forms the loaders take it in
+const tracked=async(url,label=url)=>{const r=await progress.fetch(url);if(!r.ok)throw Error(`${label}: HTTP ${r.status}`);return r;};
+const trackedJson=async url=>(await tracked(url)).json();
+const model=async url=>loader.parseAsync(await (await tracked(url)).arrayBuffer(),THREE.LoaderUtils.extractUrlBase(url));
+const pictureWith=tex=>async url=>{const src=URL.createObjectURL(await (await tracked(url)).blob());try{return await tex.loadAsync(src);}finally{URL.revokeObjectURL(src);}};
 async function load(){
  // standin.json is only needed for a missing file, so the owner's page does not depend on it
  const [d,standin]=await Promise.all([json(BASE+'scene.json'),json('/standin/standin.json').catch(()=>null)]);
  state.data=d;
  // the owner's files when present, a stand-in for each missing one (src/standin/resolve.js); ?standin=1 forces them all
- const assets=state.assets=await resolveAssets(d,standin,{probe:probeFile,force:params.get('standin')==='1'});
+ const resolving=resolveAssets(d,standin,{probe:(url,kind)=>probeFile(url,kind,progress.fetch),force:params.get('standin')==='1'});
+ // the files every visitor needs start now, beside that check; the loaders below pick the same downloads up
+ for(const f of [d.plate,d.leaves,d.book,d.wind.clean,d.wind.field,d.wind.mask,d.wind.cover,d.wind.full,d.wind.palm_full])progress.fetch(BASE+f).catch(()=>{/* the loader below asks again and reports it */});
+ const assets=state.assets=await resolving;
  Object.assign(d,{vrm:assets.vrm,pose:assets.pose,character:assets.character});
  // framing (scripts/balcony-toon/framing.json): the chair and she sit offset along the floor; palm and leaves bend points
  const F=d.framing??{},off=new THREE.Vector3().fromArray(F.character_offset??[0,0,0]);
@@ -93,12 +105,12 @@ async function load(){
  if(F.palm_pivot)PLANTS.palm.pivots=[F.palm_pivot];
  if(F.leaves_pivot_shift)PLANTS.leaves.pivots=PLANTS.leaves.pivots.map(([x,y])=>[x+F.leaves_pivot_shift[0],y+F.leaves_pivot_shift[1]]);
  camera.position.fromArray(d.camera.position);camera.quaternion.fromArray(d.camera.quaternion);fit();new ResizeObserver(fit).observe(host);
- const tex=new THREE.TextureLoader();
+ const picture=pictureWith(new THREE.TextureLoader());
  const [plate,leaves,chair,book,pose,vrmBuffer,clean,field,plantMask,plants,cover,plantsFull,palmFull]=await Promise.all([
-  tex.loadAsync(BASE+d.plate),tex.loadAsync(BASE+d.leaves),(assets.chair.standin?json(assets.chair.url).then(c=>({scene:standinChair(c),standin:true})):loader.loadAsync(VISIBLE_CHAIR)),loader.loadAsync(BASE+d.book),json(d.pose).then(p=>withPoseFix(p,assets.poseFix)),
-  fetch(character(d)).then(r=>{if(!r.ok)throw Error('character: HTTP '+r.status);return r.arrayBuffer();}),
-  tex.loadAsync(BASE+d.wind.clean),tex.loadAsync(BASE+d.wind.field),tex.loadAsync(BASE+d.wind.mask),(assets.plants.standin?Promise.resolve(null):loader.loadAsync(assets.plants.url)),
-  tex.loadAsync(BASE+d.wind.cover),tex.loadAsync(BASE+d.wind.full),tex.loadAsync(BASE+d.wind.palm_full),
+  picture(BASE+d.plate),picture(BASE+d.leaves),(assets.chair.standin?trackedJson(assets.chair.url).then(c=>({scene:standinChair(c),standin:true})):model(VISIBLE_CHAIR)),model(BASE+d.book),trackedJson(d.pose).then(p=>withPoseFix(p,assets.poseFix)),
+  tracked(character(d),'character').then(r=>r.arrayBuffer()),
+  picture(BASE+d.wind.clean),picture(BASE+d.wind.field),picture(BASE+d.wind.mask),(assets.plants.standin?Promise.resolve(null):model(assets.plants.url)),
+  picture(BASE+d.wind.cover),picture(BASE+d.wind.full),picture(BASE+d.wind.palm_full),
  ]);
  // the picture and the near leaves sway in one wind (wind.js)
  state.wind=new Wind();const palm={full:palmFull,overscan:d.wind.overscan,cover,near:d.wind.palm_near,depthRange:d.wind.depth_range};
@@ -138,7 +150,7 @@ async function load(){
   random:params.has('seed')?()=>.5:Math.random,
   eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
- state.ready=true;requestAnimationFrame(()=>host.classList.add('ready'));
+ state.ready=true;progress.release();standby.ready();requestAnimationFrame(()=>host.classList.add('ready'));
 }
 let last=performance.now();
 function frame(now){
@@ -326,5 +338,5 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
   busy:r.busy(),away:+r.reading.away.toFixed(3),eyeScale:state.vrm.lookAt?.applier?.rangeMapHorizontalOuter?.outputScale??null,head:{yaw:+r.reading.head.yaw.toFixed(2),pitch:+r.reading.head.pitch.toFixed(2)}};},
  glance:o=>state.reader?.reading.glance(o),holdReading:on=>state.reader?.reading.holdReading(on),talking:on=>{if(state.reader)state.reader.talking=!!on;}};
 // click to talk, for checks: its state, start one as if she were clicked, pick an answer, the book's box on screen
-Object.assign(window.lofiViewer,{standin:()=>({using:state.assets?.using??[]}),eyes:()=>({front:state.vrm?.lookAt?.faceFront.toArray()??null,applierFront:state.vrm?.lookAt?.applier?.faceFront?.toArray()??null}),plants:plantsReport,chairPanels:()=>state.chair&&chairPanels(state.chair),chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
-load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';console.error(e);});
+Object.assign(window.lofiViewer,{progress:()=>progress.snapshot(),standin:()=>({using:state.assets?.using??[]}),eyes:()=>({front:state.vrm?.lookAt?.faceFront.toArray()??null,applierFront:state.vrm?.lookAt?.applier?.faceFront?.toArray()??null}),plants:plantsReport,chairPanels:()=>state.chair&&chairPanels(state.chair),chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
+load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';progress.release();standby.fail();console.error(e);});
