@@ -48,7 +48,7 @@ export function livePlants(root,picture,mask,cam,windDir,cover,full,depthRange=6
   for(let i=0;i<pos.count;i++){const f=(pos.getY(i)-lo)/Math.max(hi-lo,1e-4);flex[i]=p.hanging?1-f:f;}
   g.setAttribute('flex',new THREE.BufferAttribute(flex,1));
   const pivot=new THREE.Vector3((bb.min.x+bb.max.x)/2,p.hanging?hi:lo,(bb.min.z+bb.max.z)/2);
-  const m=new THREE.Mesh(g,plantMaterial(name,p,picture,mask,projView,axis,windDir,cover,full,depthRange,sheerNear,cam.matrixWorldInverse));   // one program per group, shared by three.js
+  const m=new THREE.Mesh(g,plantMaterial(name,p,picture,mask,projView,axis,windDir,cover,full,depthRange,sheerNear,cam.matrixWorldInverse,o.userData.card?o.userData.cardDepth:0,o.userData.cardNear??0));   // one program per group, shared by three.js
   m.material.uniforms.pivot.value.copy(pivot);m.userData.group=name;
   m.renderOrder=1.2;m.frustumCulled=false;group.add(m);
  }
@@ -57,11 +57,13 @@ export function livePlants(root,picture,mask,cam,windDir,cover,full,depthRange=6
  };
  return group;
 }
-function plantMaterial(name,p,picture,mask,projView,axis,windDir,cover,full,depthRange,sheerNear,camView){
+// cardDepth > 0: a stand-in card (standin/plant-cards.js), flat, so its depth is taken pixel by pixel (CARD below)
+function plantMaterial(name,p,picture,mask,projView,axis,windDir,cover,full,depthRange,sheerNear,camView,cardDepth=0,cardNear=0){
  return new THREE.ShaderMaterial({transparent:true,depthWrite:true,depthTest:true,toneMapped:false,side:THREE.DoubleSide,
   uniforms:{picture:{value:picture},mask:{value:mask},cover:{value:cover},full:{value:full},row:{value:p.channel-1},depthLog:{value:Math.log2(depthRange)},sheerNear:{value:sheerNear},
    camView:{value:camView},projView:{value:projView},axis:{value:axis},wind:{value:windDir.clone()},
-   pivot:{value:new THREE.Vector3()},angle:{value:0},act:{value:0},time:{value:0},clump:{value:p.clump}},
+   pivot:{value:new THREE.Vector3()},angle:{value:0},act:{value:0},time:{value:0},clump:{value:p.clump},cardDepth:{value:cardDepth},cardNear:{value:cardNear}},
+  defines:cardDepth>0?{CARD:''}:{},
   vertexShader:`${NOISE}
 attribute float flex;uniform mat4 projView,camView;uniform vec3 axis,wind,pivot;uniform float angle,act,time,clump;varying vec4 vRest,vCur;varying vec2 vDist;
 vec3 rotateAxis(vec3 v,vec3 k,float a){float c=cos(a),s=sin(a);return v*c+cross(k,v)*s+k*dot(k,v)*(1.-c);}
@@ -73,7 +75,7 @@ void main(){
  vCur=projView*vec4(p,1.);vDist=vec2(-(camView*vec4(position,1.)).z,-(camView*vec4(p,1.)).z);   // rest, now
  gl_Position=projectionMatrix*viewMatrix*vec4(p,1.);
 }`,
-  fragmentShader:`uniform sampler2D picture,mask,cover,full;uniform float depthLog,row,sheerNear;varying vec4 vRest,vCur;varying vec2 vDist;
+  fragmentShader:`uniform sampler2D picture,mask,cover,full;uniform float depthLog,row,sheerNear,cardDepth,cardNear;varying vec4 vRest,vCur;varying vec2 vDist;
 float dist(float v){return exp2(v*depthLog);}
 vec4 whole(vec2 uv){return texture2D(full,vec2(uv.x,(clamp(uv.y,.002,.998)+row)/3.));}   // this group alone, whole
 void main(){
@@ -81,10 +83,19 @@ void main(){
  vec4 w=whole(uv);
  if(w.a<.06)discard;
  vec3 cn=texture2D(cover,now).rgb,cr=texture2D(cover,uv).rgb;
- float m=.05+.012*vDist.y;                                          // the cover distance is 16-bit: a tight margin
- if(dist(cn.r+cn.g/255.)<vDist.y-m)discard;                         // behind a door frame, wall or furniture now
- float sheerNow=vDist.y>sheerNear?cn.b:0.;                          // seen through the sheer curtain now
- float hidRest=max(step(dist(cr.r+cr.g/255.),vDist.x-.05-.012*vDist.x),step(.05,vDist.x>sheerNear?cr.b:0.));
+ #ifdef CARD
+ // a flat card: where the plant shows at rest it stands just in front of what was behind it there, never behind the
+ // nearest surface behind the plant (so a leaf over a far gap stays in front of a railing bar it sways across);
+ // elsewhere (hidden at rest, its soft edge) at the card's own depth
+ float here=texture2D(mask,uv)[${p.channel}]>.5?min(dist(cr.r+cr.g/255.)*.97,cardNear):cardDepth;
+ vec2 vD=vec2(here);
+ #else
+ vec2 vD=vDist;
+ #endif
+ float m=.05+.012*vD.y;                                             // the cover distance is 16-bit: a tight margin
+ if(dist(cn.r+cn.g/255.)<vD.y-m)discard;                            // behind a door frame, wall or furniture now
+ float sheerNow=vD.y>sheerNear?cn.b:0.;                             // seen through the sheer curtain now
+ float hidRest=max(step(dist(cr.r+cr.g/255.),vD.x-.05-.012*vD.x),step(.05,vD.x>sheerNear?cr.b:0.));
  // at rest and in the open, the picture itself (exact match); where something hid it at rest, the plant alone
  float seen=texture2D(mask,uv)[${p.channel}]/max(w.a,.05);
  vec3 col=mix(w.rgb,texture2D(picture,uv).rgb,smoothstep(.6,.95,seen)*(1.-hidRest));

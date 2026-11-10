@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {ownerFiles} from './owner-files.js';
 import {readFileSync} from 'node:fs';
 // Small talk while she reads: lines to you (she looks at the camera) and to herself (a subtle motion, a murmur), the
 // scheduler, and every line playing through. Lines are said on demand with lofiViewer.talk(id,{motion}).
-const sceneReady=async request=>(await request.get('/environment/balcony-toon/scene.json')).ok();
+const sceneReady=async request=>(await ownerFiles(request));
 const ready=page=>page.waitForFunction(()=>window.lofiViewer?.ready()&&window.lofiViewer.smallTalk(),null,{timeout:60000});
 const LINES=JSON.parse(readFileSync(new URL('../public/voice/lines.json',import.meta.url),'utf8')).lines.filter(l=>l.kind==='talk');
 const line=id=>LINES.find(l=>l.id===id);

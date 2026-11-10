@@ -64,7 +64,7 @@ export class Reader{
  stretchGap(){const [a,b]=STRETCH.every;return this.time+(a+(b-a)*this.o.random())*this.o.eventScale;}
  /** The static reading pose plus breathing and sway. */
  applyPose(){
-  const v0=this.vrm.meta.metaVersion==='0';
+  const v0=this.vrm.meta.metaVersion==='0'&&this.o.mirrorV0!==false;   // false: a VRM 0.x file already turned to face +Z
   for(const t of this.pose.tracks){
    const node=this.bone(t.bone);if(!node)continue;
    node.quaternion.fromArray(t.rotations,0);if(v0){node.quaternion.x*=-1;node.quaternion.z*=-1;}

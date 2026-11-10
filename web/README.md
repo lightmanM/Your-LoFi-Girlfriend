@@ -16,7 +16,7 @@ npm run dev
 
 Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?stretch=<seconds>`, `?still=<seconds>`,
 `?wind=0`, `?plantgain=<n>`, `?seat=0`, `?music=0`, `?musicstall=<seconds>`, `?hud=0`, `?intro=0`, `?greet=0`, `?line=<id>`, `?talk=0`, `?talkevery=<seconds>`,
-`?chat=0`, `?ask=<id>`, `?notice=<id>`, `?chatwait=<seconds>`, `?chatcool=<seconds>`;
+`?chat=0`, `?ask=<id>`, `?notice=<id>`, `?chatwait=<seconds>`, `?chatcool=<seconds>`, `?standin=1`;
 `window.lofiViewer` reports state (`greeting()` this visit's line, `voice()` the greeting as it plays, `greet()` starts
 it, `hush()` stops it, `smallTalk()` her small talk, `talk(id?,{motion?})` says a line now, `chat()` a conversation's state, `poke({ask|notice}?)` starts one as a
 click on her would, `answer(i)` picks an answer, `hold(true)` freezes her for close inspection).
@@ -56,9 +56,13 @@ starts the music). The frame is light: corner marks, a blinking "rec", a counter
 tapping or pressing a key unfolds pause, next, mute, volume and the playlist (pick a track to play it; ⓘ opens its source page) for 3
 seconds. Space plays or pauses, N skips, M mutes; phones and media keys also get the browser's own controls.
 
-The page needs local, git-ignored files that are never committed: `public/models/marycia/` (`marycia-web.vrm`,
-`reading-balcony.json`) and `public/environment/balcony-toon/` (rendered from the Balcony scene
-with `scripts/balcony-toon/render_web_plate.py`, `wind_fields.py` and `export_plants.py`).
+A fresh clone runs with stand-ins (top-level README): the shared balcony renders and `scene.json`, our book and reading
+pose, and in `public/standin/` Vivi (CC0), a two-panel chair (`chair.json`, measured by
+`scripts/standins/fit_chair.mjs`) and plant cards cut at runtime from the plant mask (`src/standin/`). The full site
+also has local, git-ignored files: `public/models/marycia/marycia-web.vrm` and the scene's
+`public/environment/balcony-toon/chair-visible.glb` and `plants.glb` (exported from the Balcony scene with
+`scripts/balcony-web/` and `scripts/balcony-toon/export_plants.py`). Each missing one falls back to its stand-in;
+`?standin=1` forces all of them.
 
 Her voice lives in `public/voice/`: `lines.json` (each line's subtitle, mora timing and loudness), the WAV clips and
 `CREDITS.md`, all tracked. Each line is a start greeting or small talk (`kind`; small talk also has `to`, `about`,
@@ -104,12 +108,20 @@ Design notes: [docs/design/viewer](../docs/design/viewer/README.md), [reading mo
 npm test
 npm run test:browser
 npm run build
+python3 -m unittest discover -s ../scripts/voice -p 'test_*.py'
+python3 -m unittest discover -s ../scripts/standins -p 'test_*.py'
+../scripts/standins/clone_check.sh   # everything as a fresh clone would run it (no private files)
 ```
+
+The browser suites that need the owner's character or the music skip when those files are missing
+(`tests/owner-files.js`); `tests/standin.spec.js` covers the stand-in path everywhere.
 
 ## Deploy
 
-`npm run build` in a checkout that has the local files writes a static site to `dist/`; upload that folder to any
-static host. Everything in `public/` is copied into it, so before building check that `public/` holds only what the
-page loads: `models/marycia/` (`marycia-web.vrm`, `reading-balcony.json`, `CREDITS.md`), `environment/balcony-toon/`,
-`environment/CREDITS.md`, `music/` and `voice/`. The build contains the purchased character and the balcony files,
-served to visitors under the owner's licences: never commit `dist/` or those files.
+`npm run build` writes a static site to `dist/`. Everything in `public/` is copied into it, so check `public/` first
+and only publish what you may.
+
+On **Cloudflare Pages**: connecting the Git repository builds the stand-in version (root directory `web`, build
+command `npm ci && npm run build`, output `dist`, `NODE_VERSION=22`). The full site is built where the private files
+are and uploaded directly: `npm run build && npx wrangler pages deploy dist --project-name <project>`. Never commit
+`dist/` or the private files.

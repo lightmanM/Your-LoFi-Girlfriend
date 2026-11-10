@@ -1,14 +1,12 @@
 import {test,expect} from '@playwright/test';
+import {musicFiles} from './owner-files.js';
 // Background music in a real browser: real clicks and keys, real audio decoding. Needs the encoded tracks in
 // public/music (git-ignored; built by scripts/music/prepare_music.py); skipped when they are absent.
 const music=page=>page.evaluate(()=>window.lofiViewer?.music());
 const until=(page,fn,arg,timeout=15000)=>page.waitForFunction(fn,arg,{timeout,polling:100});
 
-async function playlist(request){
- const r=await request.get('/music/playlist.json');
- if(!r.ok())return null;
- const p=await r.json();
- return (await request.get(`/music/${p.tracks[0].file}`)).ok()?p:null;
+async function playlist(request){   // the playlist, when this copy has its tracks too (owner-files.js)
+ return await musicFiles(request)?(await request.get('/music/playlist.json')).json():null;
 }
 
 test('music waits for a gesture, then plays, skips, mutes and pauses',async({page,request})=>{
@@ -57,7 +55,9 @@ test('music skips a broken track and reports when nothing can play',async({page,
  await until(page,()=>window.lofiViewer.music().status==='playing'&&window.lofiViewer.music().failed===1);
  expect((await music(page)).track.id).toBe(p.tracks[1].id);
 
+ // a track that is there but cannot play (a missing file instead means this copy has no music: the next test)
  await page.unroute('**/music/playlist.json');
+ await page.route('**/music/missing-track.mp3',r=>r.fulfill({status:200,contentType:'audio/mpeg',body:'not audio'}));
  await page.route('**/music/playlist.json',r=>r.fulfill({json:{...p,tracks:[broken]}}));
  await page.goto('/?intro=0');await until(page,()=>window.lofiViewer?.music()?.tracks===1);
  await page.mouse.click(40,40);
@@ -126,3 +126,18 @@ test('music dips under her voice and comes back; muted stays silent',async({page
  expect((await music(page)).level).toBe(0);
 });
 
+
+test('with no tracks in this copy the music stays quiet and stops trying',async({page})=>{
+ const asked=[];page.on('request',r=>{if(r.url().includes('/music/')&&r.url().endsWith('.mp3'))asked.push(r.url());});
+ await page.route('**/music/*.mp3',r=>r.fulfill({status:404,body:''}));
+ await page.goto('/?intro=0&greet=0&talk=0&chat=0');
+ await page.waitForFunction(()=>window.lofiViewer?.ready()&&window.lofiViewer.music(),null,{timeout:60000});
+ await page.locator('.hud-now').click();
+ await page.waitForFunction(()=>window.lofiViewer.music().status==='unavailable',null,{timeout:10000});
+ await expect(page.locator('.hud-now')).toContainText('no music in this copy');
+ const before=asked.length;
+ const b=await page.locator('.hud-now').boundingBox();   // greyed out now: nothing to tap, so click where it is
+ for(let i=0;i<3;i++){await page.mouse.click(b.x+b.width/2,b.y+b.height/2);await page.mouse.click(60,300);await page.waitForTimeout(300);}
+ expect(asked.length,'no more tries').toBe(before);
+ expect((await page.evaluate(()=>window.lofiViewer.music())).status).toBe('unavailable');
+});

@@ -35,3 +35,7 @@ test('bars: ignore bad input',()=>{
  assert.deepEqual(barHeights(null),[BARS.min,BARS.min,BARS.min]);
  assert.deepEqual(barHeights([NaN,-1,4]),[BARS.min,BARS.min,BARS.max]);
 });
+
+test('a copy without the music says so and offers nothing to tap',()=>{
+ assert.deepEqual(musicLine({status:'unavailable'}),{title:'no music in this copy',artist:'',action:null});
+});

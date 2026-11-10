@@ -1,0 +1,86 @@
+{
+ "camera": {
+  "position": [
+   13.420382499694824,
+   1.32664954662323,
+   -25.059707641601562
+  ],
+  "quaternion": [
+   -0.013616238720715046,
+   0.707876443862915,
+   0.014794434420764446,
+   0.7060500383377075
+  ],
+  "hfov_deg": 30.075631807164502,
+  "vfov_deg": 17.186962047145407
+ },
+ "plate": "plate.webp",
+ "leaves": "leaves.webp",
+ "size": [
+  2560,
+  1440
+ ],
+ "sun": {
+  "direction": [
+   -0.506523609161377,
+   0.6156613230705261,
+   0.6036514043807983
+  ],
+  "color": [
+   1.0,
+   0.7400000095367432,
+   0.47999998927116394
+  ],
+  "blender_energy": 4.5
+ },
+ "character": {
+  "hips": [
+   8.9976,
+   0.723,
+   -25.7732
+  ],
+  "yaw_deg": 36.87,
+  "scale": 1.4
+ },
+ "look_target": [
+  9.12558,
+  1.03138,
+  -25.56818
+ ],
+ "vrm": "/models/marycia/marycia-web.vrm",
+ "pose": "/standin/reading-balcony.json",
+ "book": "book.glb",
+ "wind": {
+  "clean": "plate-clean.webp",
+  "field": "wind-field.webp",
+  "mask": "plant-mask.webp",
+  "plants": "plants.glb",
+  "depth_range": 64,
+  "cover": "cover.webp",
+  "full": "plants-full.webp",
+  "palm_full": "palm-full.webp",
+  "overscan": 1.08,
+  "palm_near": 2.9,
+  "sheer_near": 5.0
+ },
+ "framing": {
+  "palm_pivot": [
+   -176.5,
+   2002.9
+  ],
+  "leaves_pivot_shift": [
+   -348.7,
+   -71.9
+  ],
+  "character_offset": [
+   0.00039239489706233144,
+   0.0,
+   0.1499994993209839
+  ],
+  "facade_line": [
+   1016.2,
+   1122.9,
+   0.899
+  ]
+ }
+}

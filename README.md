@@ -1,38 +1,128 @@
 # Your LoFi Girlfriend
 
-A lofi web page that plays like a video that never repeats: Marycia reads on a sunny balcony in a toon afternoon look,
-the plants move in the wind, and the music plays on. She turns pages, looks up, and every 4 to 8 minutes rests from her
-book (shoulder rolls, a head tilt each way with her eyes closed). When you press start she looks up and greets you
-with one of five lines, lip-synced to a VOICEVOX voice (冥鳴ひまり) with subtitles; while she reads she says something
-now and then, to you or to herself. Click her and she talks with you: usually a warm word, sometimes a caring question
-with answers to pick. No other controls but the music; the camera stays still.
+![Marycia reading on the balcony, greeting you as the page opens](.github/readme/screenshot.jpg)
 
-Front end only: three.js and three-vrm, no server.
+**Live: https://yourlofigirl.com**
+
+A lofi web page that plays like a video that never repeats. A girl reads on a sunny balcony in a soft toon
+afternoon, the plants move in the wind, and the music plays on. She turns pages, looks up now and then, and every few
+minutes rests from her book. When you press start she looks up and greets you; while she reads she says something
+now and then, to you or to herself; click her and she talks with you, sometimes asking how you are and answering what
+you pick. Her voice is VOICEVOX's 冥鳴ひまり, lip-synced, with Japanese and English subtitles.
+
+Front end only: three.js and three-vrm, no server, no tracking.
+
+## Features
+
+- **Reading that never loops**: eyes along the lines, page turns, look-ups, glances, breathing, small posture shifts,
+  and a short break every 4 to 8 minutes (book on her lap, shoulder rolls, head tilts with her eyes closed).
+- **Greeting**: one of five lines at random as the picture comes into focus, never the same as last visit.
+- **Small talk** every 1 to 2 minutes: 32 lines about her small days, quiet thoughts and the philosophy book she is
+  reading, some to you, some murmured to herself with a glance aside.
+- **Click to talk**: usually a warm word, about one time in three a caring question with two or three answers to pick
+  and a reply to your pick; subtle motion (a curious tilt while she waits, a nod when you answer).
+- **Voice**: VOICEVOX 冥鳴ひまり, mouth on the sound, subtitles in Japanese and English, the music dipping while she speaks.
+- **Camera frame and music**: a quiet HUD with a counter, level bars, play, pause, skip, volume and a playlist of
+  CC-licensed lofi tracks; media keys and phone controls work.
+- **Wind**: the palm, near leaves and potted plants sway in one wind across the painted picture.
+- Works on phones; keyboard reachable; nothing is sent anywhere (her memory of what you heard stays in your browser).
+
+## Quick start
+
+With Node 22.12 or newer:
+
+```sh
+git clone https://github.com/lightmanM/Your-LoFi-Girlfriend.git
+cd Your-LoFi-Girlfriend/web
+npm ci
+npm run dev
+```
+
+Open http://127.0.0.1:5173/. A fresh clone runs with **stand-ins** (below): a free stand-in character in the same
+balcony, without music. Test switches such as `?intro=0`, `?ask=q-meal` or `?talkevery=20` are listed in
+[web/README.md](web/README.md).
+
+## Stand-ins: what this repository includes
+
+The full site uses a purchased character and 3D files from a purchased scene, which cannot be redistributed. So that
+anyone can run and develop the project, the repository carries stand-ins, and the page uses them automatically
+whenever the full files are missing (`?standin=1` forces them, to preview what a clone sees).
+
+| On the live site | In this repository | Why |
+| --- | --- | --- |
+| Marycia (©BeroarN, purchased) | **Vivi**, pixiv's free VRoid sample (CC0), fitted to the chair and book | Marycia's licence does not allow redistribution |
+| The balcony's rendered picture, layers and wind maps | **The same renders**, shared for this project only | See the terms below |
+| The balcony's chair and plant meshes | **Rebuilt**: a two-panel chair and flat plant cards cut from the plant mask | The meshes come from purchased libraries |
+| Lofi music | **Not included** (the page shows "no music in this copy") | Tracks are not redistributed; `scripts/music/` rebuilds them from their sources |
+
+**Need the full resources for serious contribution?** Email **lightman.miao@gmail.com**.
+
+## Deploy
+
+The page is a static site: `npm run build` (in `web/`) writes it to `web/dist/`. Everything in `web/public/` is
+published with it, so only deploy files you have the right to publish.
+
+**Cloudflare Pages** (where yourlofigirl.com runs):
+
+- **From Git** (the stand-in version, as in this repository): create a Pages project connected to this repository,
+  with root directory `web`, build command `npm ci && npm run build`, output directory `dist`, and the environment
+  variable `NODE_VERSION` = `22`.
+- **With your own files** (as the live site is published): build on the machine that has them, check `web/dist/`,
+  then upload it directly:
+
+  ```sh
+  cd web && npm ci && npm run build
+  npx wrangler login                                   # once
+  npx wrangler pages deploy dist --project-name <your-project>
+  ```
+
+Pages answers a missing file with the site itself; the page notices and falls back to its stand-ins, so a partial
+copy still runs.
+
+## Contributing
+
+Issues and pull requests are welcome. Some places to start:
+
+- **Characters**: bring your own VRM. `web/public/standin/standin.json` places a character (scale, seat, small pose
+  corrections); `scripts/standins/compress_vivi.py` shows how Vivi, a VRM 0.x model, was compressed and turned to face
+  forward like a VRM 1.0 model. A character switcher would be welcome.
+- **Motion and animation**: reading, page turns, looks and the break in `web/src/balcony/` (`reader.js`, `reading.js`,
+  `unwind.js`), breathing in `web/src/companion/life.js`, motion while she speaks in `web/src/voice/`. New gestures,
+  idle behaviours and transitions are all open.
+- **Conversations and voice**: lines live in `scripts/voice/lines.json` (greetings, small talk, questions, replies);
+  `scripts/voice/generate_lines.py` voices them with the VOICEVOX app. Please keep within
+  [冥鳴ひまり's terms](https://meimeihimari.wixsite.com/himari/terms-of-use).
+- **Scripts and pipelines**: Blender scripts that render the picture and export the scene (`scripts/balcony-*`), the
+  character conversion (`scripts/marycia/`), motion tools (`scripts/motion/`), the music encoder (`scripts/music/`).
+- **More scenes**: today one scene is described by `web/public/environment/balcony-toon/scene.json` (camera, picture
+  layers, wind maps, where she sits). Supporting a second scene means a folder like it and a way to choose between them
+  in `web/src/viewer/main.js`.
+- **Music, accessibility, performance, phones**: all fair game.
+
+Before a pull request, run the checks in [web/README.md](web/README.md#verify). `scripts/standins/clone_check.sh`
+runs everything as a fresh clone would (no private files): the stand-in suite should pass there.
+
+Design notes, specs and plans are in [docs/](docs/README.md).
 
 ## Layout
 
 | Path | What |
 | --- | --- |
-| [`web/`](web/README.md) | The page: run, test, build, deploy |
-| [`scripts/voice/`](scripts/voice/) | Her lines (`lines.json`) and the VOICEVOX generator for `web/public/voice/` |
-| [`scripts/music/`](scripts/music/) | Track list with licences, and the encoder for `web/public/music/` |
-| [`scripts/marycia/`](docs/marycia/README.md) | Converting the purchased character package to the web VRM |
-| `scripts/balcony-pose/`, `scripts/balcony-web/`, `scripts/balcony-toon/` | Blender scripts that pose her on the chair and render and export the balcony plate, chair, book, plants and wind |
-| `scripts/motion/` | Blender bridge and motion-retargeting tools used by the exports |
+| [`web/`](web/README.md) | The page: run, test, build, deploy, test switches |
+| `web/public/standin/` | The stand-ins: Vivi, her placement, the chair, the reading pose |
+| `scripts/voice/`, `scripts/music/` | Her lines and the VOICEVOX generator; the music list and encoder |
+| `scripts/standins/` | Vivi's compression, the chair measurement, the clone check |
+| `scripts/marycia/`, `scripts/balcony-*/`, `scripts/motion/` | Character conversion and the Blender scene scripts |
 | [`docs/`](docs/README.md) | Design notes, specs and plans |
-
-## Run
-
-```sh
-cd web
-npm ci
-npm run dev
-```
-
-The page needs local files that are not in this repository (the purchased character and the balcony scene's exports;
-see [CREDITS.md](CREDITS.md)); without them it cannot load her or the scene. With them, open http://127.0.0.1:5173/.
 
 ## Credits and licence
 
-Code: [MIT](LICENSE). Character: Marycia ©BeroarN. Voice: VOICEVOX:冥鳴ひまり. Music: Lao Ban (CC0) and VibeDepot
-(CC BY-ND 4.0) via Free Music Archive. Those keep their own terms: see [CREDITS.md](CREDITS.md).
+- **Code and docs**: [MIT](LICENSE).
+- **Balcony renders** (`web/public/environment/balcony-toon/*.webp`) and the screenshot above: © the project owner;
+  included so this project runs; you may use them to run and develop this project, not reuse them elsewhere or
+  redistribute them separately; not covered by the MIT licence.
+- **Stand-in character**: Vivi, pixiv Inc. (VRoid Project), CC0 ([record](web/public/standin/CREDITS.md)).
+- **Voice**: VOICEVOX:冥鳴ひまり. **Music**: Lao Ban (CC0) and VibeDepot (CC BY-ND 4.0) via Free Music Archive, credited
+  on the page. **Live site's character**: Marycia ©BeroarN.
+
+Full details: [CREDITS.md](CREDITS.md).

@@ -3,7 +3,10 @@ MIT License
 Copyright (c) 2026 LightmanM
 
 This licence covers the source code and documentation in this repository. It does not cover the third-party
-character, scene, voice or music, which keep their own terms and are not included; see CREDITS.md.
+character, scene, voice or music, which keep their own terms (see CREDITS.md), nor the balcony renders in
+web/public/environment/balcony-toon/ (the .webp files) and the README screenshot, which are included for this
+project only. The book (book.glb), the stand-in chair and plant cards and the reading pose were made for this project
+and are covered by this licence.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

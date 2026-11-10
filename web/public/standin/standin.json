@@ -1,0 +1,23 @@
+{
+ "vrm": "/standin/vivi.vrm",
+ "pose": "/standin/reading-balcony.json",
+ "character": {
+  "hips": [
+   8.9976,
+   0.723,
+   -25.7732
+  ],
+  "yaw_deg": 36.87,
+  "scale": 1.2
+ },
+ "poseFix": {},
+ "book": {
+  "offset": [
+   0,
+   0,
+   0
+  ]
+ },
+ "chair": "/standin/chair.json",
+ "facesForward": true
+}

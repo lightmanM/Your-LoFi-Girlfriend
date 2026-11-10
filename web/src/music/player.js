@@ -41,6 +41,7 @@ export function createMusic(options={}){
 
  let ctx=null,master=null,dip=null,analyser=null,spectrum=null,decks=null,cur=0,queue=EMPTY_QUEUE,fade=null,fadeId=0,pauseTimer=0,chosen=-1,retryTimer=0;
  let status='idle',error=null,muted=false,ducked=false,volume=cfg.volume,entrance={fadeIn:cfg.fadeIn,delay:0};
+ let availability=null;   // whether this copy has the tracks at all (a public clone ships the playlist, not the MP3s)
  const failed=new Set(),strikes=new Map(),session=typeof navigator!=='undefined'?navigator.mediaSession:undefined;
  const onVisible=()=>{if(document.visibilityState==='visible'&&status==='playing')resumeContext();};
  document.addEventListener('visibilitychange',onVisible);
@@ -154,6 +155,27 @@ export function createMusic(options={}){
   play(deck);announce();
  }
 
+ // Ask once whether this copy has any of the tracks (a public clone ships the playlist without the MP3s): track by
+ // track until one is there. A missing file, or a host's page answered in its place, is "not here"; a network failure
+ // or no answer within HEAD_WAIT is not an answer, so playback is tried as before.
+ const HEAD_WAIT=2000;
+ async function here(url){
+  const c=new AbortController(),timer=setTimeout(()=>c.abort(),HEAD_WAIT);
+  try{const r=await fetch(url,{method:'HEAD',signal:c.signal});return r.ok&&!(r.headers.get('content-type')??'').includes('text/html');}
+  catch{return true;}finally{clearTimeout(timer);}
+ }
+ function available(){
+  availability??=(async()=>{for(const t of tracks)if(await here(t.url))return true;return false;})();
+  return availability;
+ }
+ function beginIfAvailable(){
+  if(!tracks?.length){begin();return;}
+  available().then(ok=>{
+   if(status!=='loading')return;
+   if(ok){begin();return;}
+   stopDecks();status='unavailable';error='no music in this copy';syncSession();console.info('music: no tracks in this copy');
+  });
+ }
  function begin(){
   if(status!=='loading')return;
   const d=decks[cur];
@@ -229,6 +251,7 @@ export function createMusic(options={}){
   */
  function start({fadeIn=cfg.fadeIn,delay=0}={}){
   if(status==='paused'){resume();return;}
+  if(status==='unavailable')return;   // no tracks in this copy: taps do not try again
   if(status==='error'){   // a tap after a failure tries again from scratch
    failed.clear();strikes.clear();error=null;
    if(loadError){loadError=null;tracks=null;ready=loadPlaylist();}
@@ -250,8 +273,8 @@ export function createMusic(options={}){
   prime(decks[1-cur]);
   entrance={fadeIn:Math.max(0,Number(fadeIn)||0),delay:Math.max(0,Number(delay)||0)};
   status='loading';
-  if(tracks)begin();
-  else ready.then(begin,()=>{if(status==='loading'){status='error';error=loadError;}});
+  if(tracks)beginIfAvailable();
+  else ready.then(beginIfAvailable,()=>{if(status==='loading'){status='error';error=loadError;}});
  }
  function pause(){
   if(status==='loading'){stopDecks();status='idle';syncSession();return;}

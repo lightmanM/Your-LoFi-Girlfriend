@@ -1,9 +1,10 @@
 import {test,expect} from '@playwright/test';
+import {ownerFiles} from './owner-files.js';
 import {readFileSync} from 'node:fs';
 // Click to talk: a question with answers to pick and her reply, a notice, letting an unanswered question go, her face,
 // the pills by keyboard and on a phone, and the ways a conversation ends early. Conversations are started with
 // lofiViewer.poke({ask|notice}) here; clicking her is checked in the tests at the end.
-const sceneReady=async request=>(await request.get('/environment/balcony-toon/scene.json')).ok();
+const sceneReady=async request=>(await ownerFiles(request));
 const LINES=JSON.parse(readFileSync(new URL('../public/voice/lines.json',import.meta.url),'utf8')).lines;
 const line=id=>LINES.find(l=>l.id===id);
 const QUIET='/?intro=0&music=0&greet=0&talkevery=9999';

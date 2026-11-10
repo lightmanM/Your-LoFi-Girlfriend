@@ -22,6 +22,7 @@ export function musicLine(state){
   case 'paused':return {title:'paused',artist:lower(t?.title),action:'start'};
   case 'loading':return {title:'tuning in…',artist:'',action:null};
   case 'error':return {title:'music unavailable · tap to retry',artist:'',action:'start'};
+  case 'unavailable':return {title:'no music in this copy',artist:'',action:null};   // a copy without the tracks (README)
   default:return {title:'tap for music',artist:'',action:'start'};
  }
 }

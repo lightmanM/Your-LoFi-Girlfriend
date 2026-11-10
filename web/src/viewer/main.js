@@ -24,9 +24,13 @@ import {createChat} from '../voice/chat.js';
 import {mountAnswers} from '../voice/answers.js';
 import {CHAT,canStart} from '../voice/chat-plan.js';
 import {createReach,herCapsules} from '../voice/reach.js';
+import {resolveAssets,probeFile} from '../standin/resolve.js';
+import {standinChair} from '../standin/chair.js';
+import {plantCards,readTexture} from '../standin/plant-cards.js';
+import {withPoseFix} from '../standin/pose-fix.js';
 import {setGlow} from '../voice/glow.js';
 import {pickLine,lastLine,rememberLine} from '../voice/pick-line.js';
-import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
+import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,chairPanels,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
 const BASE='/environment/balcony-toon/';
 // Light on her, matched by eye to the toon picture: warm low sun through the door, a sky fill, warm bounce below.
@@ -63,7 +67,10 @@ function layer(material,distance,order){
 }
 function place(vrm,pose,c){
  vrm.scene.scale.setScalar(c.scale);vrm.scene.rotation.y+=rad(c.yaw_deg);
- for(const t of pose.tracks){const n=vrm.humanoid.getNormalizedBoneNode(t.bone);if(n)n.quaternion.fromArray(t.rotations,0);}
+ // as the reader applies it every frame (reader.applyPose): a VRM 0.x model is turned around on load, so its pose
+ // rotations mirror x and z. The book's grip is captured in this pose, so both must agree (a stand-in is VRM 0.x).
+ const v0=vrm.meta?.metaVersion==='0'&&!state.assets?.facesForward;
+ for(const t of pose.tracks){const n=vrm.humanoid.getNormalizedBoneNode(t.bone);if(n){n.quaternion.fromArray(t.rotations,0);if(v0){n.quaternion.x*=-1;n.quaternion.z*=-1;}}}
  vrm.update(0);vrm.scene.updateMatrixWorld(true);
  const hip=vrm.humanoid.getRawBoneNode('hips').getWorldPosition(new THREE.Vector3());
  vrm.scene.position.add(new THREE.Vector3().fromArray(c.hips).sub(hip));vrm.scene.updateMatrixWorld(true);
@@ -73,7 +80,12 @@ function place(vrm,pose,c){
 const character=d=>{const c=params.get('character');return c&&/^[\w.-]+\.vrm$/.test(c)?d.vrm.replace(/[^/]+$/,c):d.vrm;};
 const json=async url=>{const r=await fetch(url);if(!r.ok)throw Error(`${url}: HTTP ${r.status}`);return r.json();};
 async function load(){
- const d=state.data=await json(BASE+'scene.json');
+ // standin.json is only needed for a missing file, so the owner's page does not depend on it
+ const [d,standin]=await Promise.all([json(BASE+'scene.json'),json('/standin/standin.json').catch(()=>null)]);
+ state.data=d;
+ // the owner's files when present, a stand-in for each missing one (src/standin/resolve.js); ?standin=1 forces them all
+ const assets=state.assets=await resolveAssets(d,standin,{probe:probeFile,force:params.get('standin')==='1'});
+ Object.assign(d,{vrm:assets.vrm,pose:assets.pose,character:assets.character});
  // framing (scripts/balcony-toon/framing.json): the chair and she sit offset along the floor; palm and leaves bend points
  const F=d.framing??{},off=new THREE.Vector3().fromArray(F.character_offset??[0,0,0]);
  d.character={...d.character,hips:new THREE.Vector3().fromArray(d.character.hips).add(off).toArray()};
@@ -83,9 +95,9 @@ async function load(){
  camera.position.fromArray(d.camera.position);camera.quaternion.fromArray(d.camera.quaternion);fit();new ResizeObserver(fit).observe(host);
  const tex=new THREE.TextureLoader();
  const [plate,leaves,chair,book,pose,vrmBuffer,clean,field,plantMask,plants,cover,plantsFull,palmFull]=await Promise.all([
-  tex.loadAsync(BASE+d.plate),tex.loadAsync(BASE+d.leaves),loader.loadAsync(VISIBLE_CHAIR),loader.loadAsync(BASE+d.book),json(d.pose),
+  tex.loadAsync(BASE+d.plate),tex.loadAsync(BASE+d.leaves),(assets.chair.standin?json(assets.chair.url).then(c=>({scene:standinChair(c),standin:true})):loader.loadAsync(VISIBLE_CHAIR)),loader.loadAsync(BASE+d.book),json(d.pose).then(p=>withPoseFix(p,assets.poseFix)),
   fetch(character(d)).then(r=>{if(!r.ok)throw Error('character: HTTP '+r.status);return r.arrayBuffer();}),
-  tex.loadAsync(BASE+d.wind.clean),tex.loadAsync(BASE+d.wind.field),tex.loadAsync(BASE+d.wind.mask),loader.loadAsync(BASE+d.wind.plants),
+  tex.loadAsync(BASE+d.wind.clean),tex.loadAsync(BASE+d.wind.field),tex.loadAsync(BASE+d.wind.mask),(assets.plants.standin?Promise.resolve(null):loader.loadAsync(assets.plants.url)),
   tex.loadAsync(BASE+d.wind.cover),tex.loadAsync(BASE+d.wind.full),tex.loadAsync(BASE+d.wind.palm_full),
  ]);
  // the picture and the near leaves sway in one wind (wind.js)
@@ -96,16 +108,18 @@ async function load(){
  // roses, balcony plants and ivy: live 3D, coloured from the picture at their rest position (whole where it hid them)
  const picCam=pictureCamera(d.camera.position,d.camera.quaternion,d.camera.hfov_deg,d.camera.vfov_deg);
  const windDir=new THREE.Vector3(1,0,0).applyQuaternion(picCam.quaternion).setY(0).normalize();   // toward screen right
- state.plants=livePlants(plants.scene,plate,plantMask,picCam,windDir,cover,plantsFull,d.wind.depth_range,d.wind.sheer_near);scene.add(state.plants);
+ // the balcony's plant meshes, or cards cut from the plant mask when they are missing (src/standin/plant-cards.js)
+ const plantRoot=plants?.scene??standinPlants(plantMask,cover,picCam,d);
+ state.plants=livePlants(plantRoot,plate,plantMask,picCam,windDir,cover,plantsFull,d.wind.depth_range,d.wind.sheer_near);scene.add(state.plants);
  // ?shadow=r,g,b,opacity[,elevation,radius] for tuning her shadow on the chair against the Blender picture
  if(params.has('contact')){const v=params.get('contact').split(',').map(Number);CHAIR_CONTACT.strength=v[0];CHAIR_CONTACT.capsules.forEach(c=>{c[3]*=v[1]??1;});if(v.length>=5)CHAIR_CONTACT.color=v.slice(2,5);}
  if(params.has('shadow')){const v=params.get('shadow').split(',').map(Number);Object.assign(CHAIR_SHADOW,{color:v.slice(0,3),opacity:v[3],...(v.length>4?{elevation:v[4],radius:v[5]??7}:{})});}
- chair.scene.position.add(off);chair.scene.updateMatrixWorld(true);
+ if(!chair.standin)chair.scene.position.add(off);chair.scene.updateMatrixWorld(true);   // the stand-in is in world space already
  state.chair=prepareChair(chair.scene,plate,pictureCamera(d.camera.position,d.camera.quaternion,d.camera.hfov_deg,d.camera.vfov_deg));scene.add(state.chair);
- book.scene.position.add(off);book.scene.updateMatrixWorld(true);   // the book was exported at her old seat: it moves with her
+ book.scene.position.add(off).add(new THREE.Vector3().fromArray(assets.book.offset));book.scene.updateMatrixWorld(true);   // the book was exported at her old seat: it moves with her
  book.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.castShadow=true;state.bookMesh??=o;}});scene.add(book.scene);state.book=book.scene;
  const vrm=state.vrm=(await loader.parseAsync(vrmBuffer,'')).userData.vrm;
- VRMUtils.removeUnnecessaryVertices(vrm.scene);VRMUtils.combineSkeletons(vrm.scene);VRMUtils.rotateVRM0(vrm);
+ VRMUtils.removeUnnecessaryVertices(vrm.scene);VRMUtils.combineSkeletons(vrm.scene);if(assets.facesForward){vrm.lookAt?.faceFront.set(0,0,1);vrm.lookAt?.applier?.faceFront?.set(0,0,1);}else VRMUtils.rotateVRM0(vrm);   // a stand-in turned in its file faces +Z already
  vrm.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.frustumCulled=false;o.castShadow=true;}});
  if(params.has('grade')){const v=params.get('grade').split(',').map(Number);Object.assign(GRADE,{gain:v[0],sat:v[1],warm:v.slice(2,5)});}
  for(const root of [vrm.scene,book.scene])root.traverse(o=>{if(o.isMesh)[o.material].flat().forEach(m=>gradeMaterial(m));});
@@ -122,7 +136,7 @@ async function load(){
  scene.add(sun,sun.target,new THREE.HemisphereLight(new THREE.Color().fromArray(LIGHT.sky),new THREE.Color().fromArray(LIGHT.ground),LIGHT.fill));
  state.reader=new Reader(vrm,book.scene,pose,look,{seed:params.has('seed')?+params.get('seed'):(Math.random()*1e9)|0,
   random:params.has('seed')?()=>.5:Math.random,
-  eventScale:+(params.get('events')??1),stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
+  eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
  state.ready=true;requestAnimationFrame(()=>host.classList.add('ready'));
 }
@@ -256,6 +270,19 @@ function chatPoint(){
  const p=b.getWorldPosition(new THREE.Vector3()).project(camera),r=canvas.getBoundingClientRect();
  return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height};
 }
+// Plant cards from the shared plant mask and cover map, read back exactly at a quarter of the picture's size.
+function standinPlants(mask,cover,cam,d){
+ for(const t of [mask,cover])t.colorSpace=THREE.NoColorSpace;
+ cover.generateMipmaps=false;cover.minFilter=cover.magFilter=THREE.NearestFilter;   // its depth is split over two bytes
+ const w=Math.round(d.size[0]/4),h=Math.round(d.size[1]/4);cam.updateMatrixWorld(true);
+ return plantCards({mask:readTexture(renderer,mask,w,h),cover:readTexture(renderer,cover,w,h)},cam,{depthRange:d.wind.depth_range});
+}
+// The live plants, for checks: how many meshes (or cards) each group has, and how far each group is bending now.
+function plantsReport(){
+ const cards={},angles={};
+ for(const m of state.plants?.children??[]){const g=m.userData.group;cards[g]=(cards[g]??0)+1;angles[g]=m.material.uniforms.angle.value;}
+ return {cards,angles};
+}
 // The book's box on screen (CSS px), for checks: nothing of a conversation may cover it.
 function bookRect(){
  const box=bookBox();if(!box)return null;
@@ -299,5 +326,5 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
   busy:r.busy(),away:+r.reading.away.toFixed(3),eyeScale:state.vrm.lookAt?.applier?.rangeMapHorizontalOuter?.outputScale??null,head:{yaw:+r.reading.head.yaw.toFixed(2),pitch:+r.reading.head.pitch.toFixed(2)}};},
  glance:o=>state.reader?.reading.glance(o),holdReading:on=>state.reader?.reading.holdReading(on),talking:on=>{if(state.reader)state.reader.talking=!!on;}};
 // click to talk, for checks: its state, start one as if she were clicked, pick an answer, the book's box on screen
-Object.assign(window.lofiViewer,{chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
+Object.assign(window.lofiViewer,{standin:()=>({using:state.assets?.using??[]}),eyes:()=>({front:state.vrm?.lookAt?.faceFront.toArray()??null,applierFront:state.vrm?.lookAt?.applier?.faceFront?.toArray()??null}),plants:plantsReport,chairPanels:()=>state.chair&&chairPanels(state.chair),chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
 load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';console.error(e);});

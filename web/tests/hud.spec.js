@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {musicFiles} from './owner-files.js';
 // The camera-frame HUD: frame, counter and the music line with controls that unfold on interaction.
 const music=page=>page.evaluate(()=>window.lofiViewer?.music());
 const until=(page,fn,arg,timeout=15000)=>page.waitForFunction(fn,arg,{timeout,polling:100});
-const hasMusic=async request=>(await request.get('/music/playlist.json')).ok();
+const hasMusic=musicFiles;   // the playlist and its tracks (owner-files.js)
 
 test('hud shows the frame and a counter that runs',async({page})=>{
  await page.goto('/?music=0&intro=0');

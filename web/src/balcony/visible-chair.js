@@ -81,6 +81,17 @@ function solidPanels(root,inverse){
  const up=new THREE.Vector3(0,1,0),c=principal(seat).c,b=principal(back).c,front=c.clone().sub(b).setY(0).normalize();
  return [panel(seat,up,.08),panel(back,front,.1)].map(g=>g.applyMatrix4(inverse));
 }
+/** The fitted seat and back panels of a prepared chair, as world-space outlines (for the stand-in chair, chair.json). */
+export function chairPanels(root){
+ const rings=[];root.updateWorldMatrix(true,true);
+ root.traverse(o=>{
+  if(!o.isMesh||o.name!=='Chair weave panel')return;
+  const a=o.geometry.attributes.position,ring=[];   // a fan: each triangle is (centre, ring point, next ring point)
+  for(let i=1;i<a.count;i+=3)ring.push(new THREE.Vector3().fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld).toArray().map(x=>+x.toFixed(4)));
+  rings.push(ring);
+ });
+ return {seat:rings[0]??null,back:rings[1]??null};
+}
 /** Turn the exported chair into the projected chair plus its shadow layer. */
 export function prepareChair(root,picture,cam,shadow=CHAIR_SHADOW,contact=CHAIR_CONTACT){
  root.name='Visible reading chair';

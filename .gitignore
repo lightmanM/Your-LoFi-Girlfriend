@@ -13,6 +13,13 @@ web/public/models/marycia/*
 !web/public/models/marycia/CREDITS.md
 web/public/environment/*
 !web/public/environment/CREDITS.md
+# the balcony's shared renders, scene description and our book (for this project only: CREDITS.md); its chair and
+# plant meshes stay local (the page rebuilds stand-ins when they are missing). An allowlist: anything new stays out.
+!web/public/environment/balcony-toon/
+web/public/environment/balcony-toon/*
+!web/public/environment/balcony-toon/*.webp
+!web/public/environment/balcony-toon/scene.json
+!web/public/environment/balcony-toon/book.glb
 web/public/music/*.mp3
 
 # Renders and clips made from those assets (linked from the design notes) stay local too

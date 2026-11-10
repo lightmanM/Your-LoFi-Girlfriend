@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
+import {ownerFiles} from './owner-files.js';
 // Opening shot: out of focus with a start button; pressing it pulls focus, then the music flows in and the HUD appears.
-const sceneReady=async request=>(await request.get('/environment/balcony-toon/scene.json')).ok();
+const sceneReady=async request=>(await ownerFiles(request));
 const hasMusic=async request=>(await request.get('/music/playlist.json')).ok();
 const canvasFilter=page=>page.evaluate(()=>getComputedStyle(document.querySelector('#stage canvas')).filter);
 

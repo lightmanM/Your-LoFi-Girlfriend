@@ -1,7 +1,8 @@
 import {test,expect} from '@playwright/test';
+import {ownerFiles} from './owner-files.js';
 import {readFileSync} from 'node:fs';
 // The greeting: after start she looks up at the camera, says "okaeri" with her mouth on the voice, and the subtitle shows.
-const sceneReady=async request=>(await request.get('/environment/balcony-toon/scene.json')).ok();
+const sceneReady=async request=>(await ownerFiles(request));
 const ready=page=>page.waitForFunction(()=>window.lofiViewer?.ready(),null,{timeout:60000});
 // Dominant mouth shape each frame until the greeting ends (or `until` s), with what she and the subtitle were doing.
 const watch=(page,until=99)=>page.evaluate(until=>new Promise(resolve=>{
