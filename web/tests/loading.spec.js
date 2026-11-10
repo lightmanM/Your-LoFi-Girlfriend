@@ -82,6 +82,44 @@ test('a picture layer that cannot be loaded says so on the stand-by display',asy
  await expect(page.locator('#standby')).toBeVisible();
 });
 
+// The balcony's own plant meshes (plants.glb, 8 MB) come after she is ready; plant cards stand in until then.
+const PLANTS_GLB='**/environment/balcony-toon/plants.glb';
+/** Hold the full download of plants.glb back (its first-bytes check goes through); the returned function lets it go. */
+const holdPlants=async page=>{
+ let open;const gate=new Promise(r=>{open=r;});
+ await page.route(PLANTS_GLB,async route=>{if(!route.request().headers().range)await gate;await route.continue();});
+ return open;
+};
+const plantsHere=async request=>{const r=await request.get('/environment/balcony-toon/plants.glb',{headers:{Range:'bytes=0-3'}});return r.ok()&&(await r.body()).toString('latin1')==='glTF';};
+
+test('she is ready before the full plants arrive; they then take the plant cards\' place',async({page,request})=>{
+ test.skip(!(await plantsHere(request)),'the balcony\'s plant meshes are not on this machine');
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const open=await holdPlants(page);
+ await page.goto('/?intro=0&music=0&greet=0&talkevery=9999');await ready(page);
+ const before=await page.evaluate(()=>({plants:window.lofiViewer.plants(),progress:window.lofiViewer.progress(),using:window.lofiViewer.standin().using}));
+ expect(before.plants.source).toBe('cards');
+ expect(before.progress.total).toBeLessThan(12e6);                     // the 8 MB of plants is not in the first load
+ expect(before.using).toEqual([]);                                      // the owner's plants are still the ones to show
+ open();
+ await page.waitForFunction(()=>window.lofiViewer.plants().source==='full',null,{timeout:60000});
+ const after=await page.evaluate(()=>window.lofiViewer.plants());
+ for(const g of ['ivy','roses','pots'])expect(after.cards[g],`${g} meshes`).toBeGreaterThan(0);
+ expect(errors).toEqual([]);
+});
+
+test('if the full plants cannot be loaded later, the plant cards stay and nothing breaks',async({page,request})=>{
+ test.skip(!(await plantsHere(request)),'the balcony\'s plant meshes are not on this machine');
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route(PLANTS_GLB,route=>route.request().headers().range?route.continue():route.abort());
+ await page.goto('/?intro=0&music=0&greet=0&talkevery=9999');await ready(page);
+ await page.waitForFunction(()=>window.lofiViewer.standin().using.includes('plants'),null,{timeout:30000});
+ const s=await page.evaluate(()=>({plants:window.lofiViewer.plants(),error:window.lofiViewer.error()}));
+ expect(s.plants.source).toBe('cards');
+ expect(s.error).toBe(null);
+ expect(errors).toEqual([]);
+});
+
 test('with reduced motion the stand-by light does not blink',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.route('**/src/viewer/main.js',route=>route.abort());

@@ -6,11 +6,21 @@
 
 export const PRIVATE=Object.freeze({chair:'/environment/balcony-toon/chair-visible.glb',base:'/environment/balcony-toon/'});
 
+/** Up to the first `n` bytes of a response's body; the rest is not downloaded (a host may ignore Range and send it all). */
+async function firstBytes(response,n=64){
+ const reader=response.body?.getReader();if(!reader)return new Uint8Array(0);
+ const head=new Uint8Array(n);let got=0;
+ try{
+  while(got<n){const {done,value}=await reader.read();if(done)break;const take=value.subarray(0,n-got);head.set(take,got);got+=take.length;}
+ }finally{reader.cancel().catch(()=>{/* the body is already gone: nothing left to stop */});}
+ return head.subarray(0,got);
+}
+
 /** Whether a response is really a file of `kind` (its status, its type, and its first bytes). */
 export async function isFile(response,kind){
  if(!response?.ok)return false;
  if((response.headers.get('content-type')??'').includes('text/html'))return false;
- const head=new Uint8Array(await response.arrayBuffer()).subarray(0,64);
+ const head=await firstBytes(response);
  if(kind==='glb')return head.length>=4&&String.fromCharCode(...head.subarray(0,4))==='glTF';
  if(kind==='json'){const s=new TextDecoder().decode(head).trimStart();return s.startsWith('{')||s.startsWith('[');}
  return true;

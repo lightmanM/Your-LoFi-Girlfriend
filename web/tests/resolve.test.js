@@ -46,6 +46,19 @@ test('the stand-in\'s facing travels with it, and only with it',async()=>{
  assert.equal((await resolveAssets(SCENE,STANDIN,{probe:missing()})).facesForward,false);
 });
 
+test('the check reads only the first bytes and stops the rest of the download (a host that ignores Range sends it all)',async()=>{
+ let pulled=0,cancelled=false;
+ const body=new ReadableStream({
+  start(c){c.enqueue(new Uint8Array([0x67,0x6c,0x54,0x46,2,0,0,0]));},
+  pull(c){pulled++;if(pulled>128)c.close();else c.enqueue(new Uint8Array(64*1024));},   // 8 MB in all
+  cancel(){cancelled=true;},
+ },{highWaterMark:0});
+ const whole=async()=>new Response(body,{status:200,headers:{'content-type':'model/gltf-binary'}});
+ assert.equal(await probeFile('/plants.glb','glb',whole),true);
+ assert.ok(pulled<=2,`read ${pulled} chunks past the first bytes`);
+ assert.equal(cancelled,true);
+});
+
 test('only a real "not here" counts as missing: a network error or a server error keeps the owner\'s file (final review)',async()=>{
  const res=(status,type='model/gltf-binary',body='glTF0000')=>async()=>new Response(body,{status,headers:{'content-type':type}});
  assert.equal(await probeFile('/x.glb','glb',async()=>{throw TypeError('network');}),true);

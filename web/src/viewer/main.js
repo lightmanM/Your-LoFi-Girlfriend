@@ -24,7 +24,7 @@ import {createChat} from '../voice/chat.js';
 import {mountAnswers} from '../voice/answers.js';
 import {CHAT,canStart} from '../voice/chat-plan.js';
 import {createReach,herCapsules} from '../voice/reach.js';
-import {resolveAssets,probeFile} from '../standin/resolve.js';
+import {resolveAssets,probeFile,PRIVATE} from '../standin/resolve.js';
 import {standinChair} from '../standin/chair.js';
 import {plantCards,readTexture} from '../standin/plant-cards.js';
 import {withPoseFix} from '../standin/pose-fix.js';
@@ -93,7 +93,10 @@ async function load(){
  const [d,standin]=await Promise.all([json(BASE+'scene.json'),json('/standin/standin.json').catch(()=>null)]);
  state.data=d;
  // the owner's files when present, a stand-in for each missing one (src/standin/resolve.js); ?standin=1 forces them all
- const resolving=resolveAssets(d,standin,{probe:(url,kind)=>probeFile(url,kind,progress.fetch),force:params.get('standin')==='1'});
+ // the plants' check goes past the counted downloads: their file comes after she is ready (swapInPlants), so a host
+ // that ignores Range must not send the whole of it now
+ const later=PRIVATE.base+d.wind.plants;
+ const resolving=resolveAssets(d,standin,{probe:(url,kind)=>probeFile(url,kind,url===later?fetch:progress.fetch),force:params.get('standin')==='1'});
  // the files every visitor needs start now, beside that check; the loaders below pick the same downloads up
  for(const f of [d.plate,d.leaves,d.book,d.wind.clean,d.wind.field,d.wind.mask,d.wind.cover,d.wind.full,d.wind.palm_full])progress.fetch(BASE+f).catch(()=>{/* the loader below asks again and reports it */});
  const assets=state.assets=await resolving;
@@ -106,10 +109,10 @@ async function load(){
  if(F.leaves_pivot_shift)PLANTS.leaves.pivots=PLANTS.leaves.pivots.map(([x,y])=>[x+F.leaves_pivot_shift[0],y+F.leaves_pivot_shift[1]]);
  camera.position.fromArray(d.camera.position);camera.quaternion.fromArray(d.camera.quaternion);fit();new ResizeObserver(fit).observe(host);
  const picture=pictureWith(new THREE.TextureLoader());
- const [plate,leaves,chair,book,pose,vrmBuffer,clean,field,plantMask,plants,cover,plantsFull,palmFull]=await Promise.all([
+ const [plate,leaves,chair,book,pose,vrmBuffer,clean,field,plantMask,cover,plantsFull,palmFull]=await Promise.all([
   picture(BASE+d.plate),picture(BASE+d.leaves),(assets.chair.standin?trackedJson(assets.chair.url).then(c=>({scene:standinChair(c),standin:true})):model(VISIBLE_CHAIR)),model(BASE+d.book),trackedJson(d.pose).then(p=>withPoseFix(p,assets.poseFix)),
   tracked(character(d),'character').then(r=>r.arrayBuffer()),
-  picture(BASE+d.wind.clean),picture(BASE+d.wind.field),picture(BASE+d.wind.mask),(assets.plants.standin?Promise.resolve(null):model(assets.plants.url)),
+  picture(BASE+d.wind.clean),picture(BASE+d.wind.field),picture(BASE+d.wind.mask),
   picture(BASE+d.wind.cover),picture(BASE+d.wind.full),picture(BASE+d.wind.palm_full),
  ]);
  // the picture and the near leaves sway in one wind (wind.js)
@@ -120,9 +123,10 @@ async function load(){
  // roses, balcony plants and ivy: live 3D, coloured from the picture at their rest position (whole where it hid them)
  const picCam=pictureCamera(d.camera.position,d.camera.quaternion,d.camera.hfov_deg,d.camera.vfov_deg);
  const windDir=new THREE.Vector3(1,0,0).applyQuaternion(picCam.quaternion).setY(0).normalize();   // toward screen right
- // the balcony's plant meshes, or cards cut from the plant mask when they are missing (src/standin/plant-cards.js)
- const plantRoot=plants?.scene??standinPlants(plantMask,cover,picCam,d);
- state.plants=livePlants(plantRoot,plate,plantMask,picCam,windDir,cover,plantsFull,d.wind.depth_range,d.wind.sheer_near);scene.add(state.plants);
+ // cards cut from the plant mask first (src/standin/plant-cards.js); the balcony's plant meshes take their place once
+ // they arrive after she is ready (swapInPlants), and the cards stay when those are missing
+ const makePlants=root=>livePlants(root,plate,plantMask,picCam,windDir,cover,plantsFull,d.wind.depth_range,d.wind.sheer_near);
+ state.plants=makePlants(standinPlants(plantMask,cover,picCam,d));state.plantSource='cards';scene.add(state.plants);
  // ?shadow=r,g,b,opacity[,elevation,radius] for tuning her shadow on the chair against the Blender picture
  if(params.has('contact')){const v=params.get('contact').split(',').map(Number);CHAIR_CONTACT.strength=v[0];CHAIR_CONTACT.capsules.forEach(c=>{c[3]*=v[1]??1;});if(v.length>=5)CHAIR_CONTACT.color=v.slice(2,5);}
  if(params.has('shadow')){const v=params.get('shadow').split(',').map(Number);Object.assign(CHAIR_SHADOW,{color:v.slice(0,3),opacity:v[3],...(v.length>4?{elevation:v[4],radius:v[5]??7}:{})});}
@@ -151,6 +155,18 @@ async function load(){
   eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
  state.ready=true;progress.release();standby.ready();requestAnimationFrame(()=>host.classList.add('ready'));
+ if(!assets.plants.standin)swapInPlants(assets.plants.url,makePlants);
+}
+// The balcony's own plant meshes (8 MB) load after she is ready, so they do not hold up the start button; the plant cards
+// show until then, and stay (counted as a stand-in) if the file cannot be loaded.
+async function swapInPlants(url,make){
+ const keepCards=(what,e)=>{state.assets={...state.assets,using:[...state.assets.using,'plants']};console.warn(`the full plants ${what}; the plant cards stay`,e);};
+ let gltf,next;
+ try{gltf=await loader.loadAsync(url);}catch(e){keepCards('could not load',e);return;}
+ try{next=make(gltf.scene);await renderer.compileAsync(next,camera,scene);}   // shaders ready before they show: no hitch
+ catch(e){keepCards('could not be built',e);return;}
+ const old=state.plants;scene.remove(old);scene.add(next);state.plants=next;state.plantSource='full';
+ old.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();}});
 }
 let last=performance.now();
 function frame(now){
@@ -293,7 +309,7 @@ function standinPlants(mask,cover,cam,d){
 function plantsReport(){
  const cards={},angles={};
  for(const m of state.plants?.children??[]){const g=m.userData.group;cards[g]=(cards[g]??0)+1;angles[g]=m.material.uniforms.angle.value;}
- return {cards,angles};
+ return {source:state.plantSource,cards,angles};
 }
 // The book's box on screen (CSS px), for checks: nothing of a conversation may cover it.
 function bookRect(){
