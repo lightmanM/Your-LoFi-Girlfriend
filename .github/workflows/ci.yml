@@ -1,0 +1,51 @@
+name: CI
+
+# The checks every change must pass: the page's unit tests and build, and the Python unit tests for the scripts.
+# The browser suite (npm run test:browser) is not run here: it needs Chrome with WebGL and is run locally
+# (web/README.md, "Verify").
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        working-directory: web
+        run: npm ci
+
+      - name: Unit tests
+        working-directory: web
+        run: npm test
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+
+      - name: Python unit tests
+        run: |
+          python3 --version
+          for suite in voice music standins; do
+            python3 -m unittest discover -s "scripts/$suite" -p 'test_*.py'
+          done

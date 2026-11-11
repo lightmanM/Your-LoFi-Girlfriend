@@ -1,0 +1,47 @@
+name: Bug report
+description: Something on the page or in the scripts does not work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead. A screenshot or short clip helps.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the address and any test switches you used (for example `?standin=1` or `?talkevery=20`).
+      placeholder: |
+        1. Open ...
+        2. Press start ...
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - The live site (yourlofigirl.com)
+        - A local clone with the stand-ins
+        - A local copy with my own files
+        - Scripts (voice, music, Blender, stand-ins)
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      description: Browser and version, operating system, phone or desktop. For scripts, the Node or Python version.
+      placeholder: Chrome 142 on macOS 15, desktop
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Errors from the browser console or the terminal, if any.
+      render: text

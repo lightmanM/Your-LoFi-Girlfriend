@@ -4,11 +4,11 @@
 
 **Live: https://yourlofigirl.com**
 
-A lofi web page that plays like a video that never repeats. A girl reads on a sunny balcony in a soft toon
-afternoon, the plants move in the wind, and the music plays on. She turns pages, looks up now and then, and every few
-minutes rests from her book. When you press start she looks up and greets you; while she reads she says something
-now and then, to you or to herself; click her and she talks with you, sometimes asking how you are and answering what
-you pick. Her voice is VOICEVOX's 冥鳴ひまり, lip-synced, with Japanese and English subtitles.
+A lofi companion for the web. A girl reads on a sunny balcony while the music plays; now and then she looks up and
+talks to you.
+
+It is also an experiment, to see what people can build together: characters, motion, animation, conversations,
+scripts, scenes, music, anything. If you want to add something, start at [Contributing](#contributing).
 
 Front end only: three.js and three-vrm, no server, no tracking.
 
@@ -81,7 +81,8 @@ copy still runs.
 
 ## Contributing
 
-Issues and pull requests are welcome. Some places to start:
+Issues and pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) has the rules (above all: only add files you
+have the right to redistribute). Some places to start:
 
 - **Characters**: bring your own VRM. `web/public/standin/standin.json` places a character (scale, seat, small pose
   corrections); `scripts/standins/compress_vivi.py` shows how Vivi, a VRM 0.x model, was compressed and turned to face

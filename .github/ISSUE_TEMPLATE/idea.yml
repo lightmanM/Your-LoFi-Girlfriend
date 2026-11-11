@@ -1,0 +1,39 @@
+name: Idea
+description: A new behaviour, line, scene, character or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What you would like to see or change, and what it adds to the page.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Characters
+        - Motion and animation
+        - Conversations and voice
+        - Scenes
+        - Music
+        - Scripts and pipelines
+        - Accessibility, performance, phones
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: assets
+    attributes:
+      label: Assets it would need
+      description: >-
+        If the idea needs new files (a model, textures, audio, a font), say where they would come from and under
+        which licence. Only files that may be redistributed can go into the repository (see CONTRIBUTING.md).
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Taking it on
+      options:
+        - label: I would like to work on this myself
