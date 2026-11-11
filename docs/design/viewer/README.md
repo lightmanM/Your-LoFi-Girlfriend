@@ -3,7 +3,8 @@
 The page a visitor opens, `web/index.html` (the root URL). A fullscreen still camera on the warm afternoon balcony,
 no buttons or text; it fades in once loaded. She reads most of the time (eyes along the lines, page turns, looking up,
 shifting in her seat, legs drifting) and every 4 to 8 minutes puts the book down for a short break (since 2026-11-09:
-shoulder rolls and head tilts; it was an overhead stretch, see [reading motion](../reading-motion/README.md)). Each visit
+shoulder rolls and head tilts; since 2026-11-10 an overhead stretch as well, every 5 to 15 minutes, see
+[reading motion](../reading-motion/README.md)). Each visit
 uses a new random seed, so no two sessions match. Clip: [viewer-v1.mp4](viewer-v1.mp4) (stretch triggered early).
 
 The old character studio moved from `index.html` to `studio.html`; the room and Balcony development pages are unchanged.

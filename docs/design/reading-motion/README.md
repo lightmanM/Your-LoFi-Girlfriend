@@ -181,3 +181,132 @@ Tests: `web/tests/unwind.test.js` (timing, hands on the book, both tilts, eyes, 
 test in `web/tests/viewer.spec.js` (hands within 3 cm of their grip, shoulders never below reading height, the old clip
 not downloaded, reading resumes). The overhead stretch's code (`clip-player.js`, `body-coupling.js`) is removed.
 
+
+## Overhead stretch, authored by hand in Blender (study, 2026-11-10)
+
+A second try at the two-arm overhead stretch, this time keyed in Blender instead of taken from the motion capture
+clip. It is a study only: the page still plays the break above, and nothing in `web/` changed.
+
+The shot (15.5 s at 30 fps, `scripts/balcony-stretch/`): she reads, lowers the book to her lap (it lands on its far
+edge and is laid flat as her fingers slide out from under the cover), rests her hands on the pages and looks up,
+gathers her hands, raises her elbows with loose fists outside her shoulders, pushes up into an open V with her back
+arched over the chair back and her eyes pressed shut, leans a little left and right at the top, lets the V fall open
+with the elbows dropping first and the hands trailing, takes hold of the book, lifts it with a small overshoot and
+reads on.
+
+How it is made:
+
+- `stretch.py` is the whole choreography: times, angles and hand positions. Every channel is a start value plus
+  moves, each with its own time window and ease; windows overlap, so one move blends into the next with no stop
+  (`tracks.py`). Her right arm runs 0.07 s behind her left on the way up and a little more on the way down.
+- `rig.py` solves the pose with its own maths on the armature's rest data (the rig has no constraints): two-bone
+  reach for the arms, the forearm taking the hand's roll as in the reading pose, and the shoulder girdle following
+  the upper arm (0.27° of lift per degree above 35°, about 5 cm at the top). While her hands hold the book they are
+  solved onto their grip on it every frame.
+- `lap.py` finds where the open book lies: rays cast down onto her posed thighs under the book's footprint, a plane
+  through the upper surface, the near edge 2 cm clear of her dress.
+- `hair.py` runs after the body: strands hang a little toward the ground when her head tips back and lag behind its
+  turns (a damped follower). Face: the character's own keys (`はぅ` at the top, a small open mouth, `にこり` after).
+- `apply.py` shows a moment on the live rig (`show(t)`), bakes every frame to one action with three slots (bones,
+  book, face keys), and reports the motion in numbers (`analyse()`); `check_shot.py` turns those into pass or fail.
+- `overlap.py` measures hands against the book on the deformed skin: every hand vertex, every frame, against the
+  book's solid (page surface above, cover below), plus how far a hand dips under her clothes.
+
+Hands and the book (second pass, same day). In the first version the hands went from their grip to the pages by a
+straight blend, and the resting pose assumed a flat book. The open book is a shallow V (each half rises 12° to its
+outer edge, where the page surface is 4 cm up), so the resting hands lay 13 mm inside the pages and the fingers
+crossed the cover on the way. Now the hand goes round the outer edge: the fingers slide out from under the cover,
+the hand comes up beside the book with the palm turning down, and settles on the page, tilted with it, thumb out
+beside the palm; leaving for the stretch it lifts 5 cm before it turns. Picking the book up is the same path
+backwards. Measured: nothing deeper than 1.2 mm (contact) once the hands have let go, against 6.6 mm (right through
+the pages) before. The reading grip itself presses 4.7 mm into the page edge; that is the approved reading pose and
+is unchanged. Her left hand still brushes 6 mm into her skirt for three frames as it reaches under the cover.
+
+Measured on the baked shot: hands peak at 1.0 m/s (rise) and 0.9 m/s (fall), no acceleration above 5 m/s²; the book
+peaks at 0.5 m/s; her hands stay exactly on their grip while they carry it; elbows never straighter than 17°; first
+and last frames are within 1.2° of the approved reading pose.
+
+To rebuild and render (the study file is local, like the other files under `assets/`):
+
+```sh
+# in Blender, with assets/characters/marycia/balcony-study/balcony-stretch-anim-2026-11-10.blend open
+#   import sys; sys.path.insert(0, '<repo>/scripts/balcony-stretch'); import apply, hair; apply.bake(extra=hair.layer)
+blender -b assets/characters/marycia/balcony-study/balcony-stretch-anim-2026-11-10.blend \
+  -P scripts/balcony-stretch/check_shot.py
+blender -b assets/characters/marycia/balcony-study/balcony-stretch-anim-2026-11-10.blend \
+  -P scripts/balcony-stretch/render.py -- --view close --out <frames dir> --height 480 --samples 8
+python3 -m unittest discover -s scripts/balcony-stretch
+```
+
+Two things about the Blender file that cost time:
+
+- **A scene nobody uses is not saved.** `Balcony • Stretch anim (Claude)` had no users, so a saved copy silently
+  lacked it; it now has a fake user. Six other study scenes in the open session are in the same state.
+- **The toon compositor reads the backdrop scene.** Its Render Layers and Cryptomatte nodes point at
+  `Balcony • Toon test (Claude)`, so rendering any other scene with it gives the empty balcony. `render.py` works on
+  its own copy of the node tree aimed at the scene it renders. The render has no foreground schefflera: the page
+  draws that plant live over the picture.
+
+A frame costs about 4 s at 1080p with 16 samples (7.7 s with 24), and several Blender processes at once only share
+the one GPU: three in parallel were slower than one. Most of that is fixed per-frame scene work: 480 px square with
+8 samples is still about 3 s a frame (23 minutes for the shot), so for a quick look render only the frames that
+changed (`--start`, `--end`). Previews are rendered small: `--view close --height 480 --samples 8`.
+
+Clips, second pass (hands round the book): [stretch-blender-v2-closeup.mp4](stretch-blender-v2-closeup.mp4) (the
+whole shot, close view, 480 px), [stretch-blender-v2-hands.mp4](stretch-blender-v2-hands.mp4) (only the put-down and
+the pick-up). First pass: [stretch-blender-v1-full.mp4](stretch-blender-v1-full.mp4) (the page's camera),
+[stretch-blender-v1-closeup.mp4](stretch-blender-v1-closeup.mp4) (the same frames cropped on her);
+[stretch-blender-v1-sequence.png](stretch-blender-v1-sequence.png).
+
+## The overhead stretch on the page (2026-11-10)
+
+The stretch above now plays on the page, beside the calm break rather than in place of it.
+
+**What plays.** `web/src/balcony/overhead-stretch.js`, about 12 s: the book goes down to her lap (2.3 s), her hands
+leave it, gather in front of her ribs, come up as loose fists outside her shoulders and push up into an open V with
+her back arched, her head tipped back and her eyes shut; she leans a little to her left, then her right; the V falls
+open with the elbows dropping first and the hands trailing; her hands go back to the book and she lifts it (1.8 s).
+The study's shot reads for 1.5 s before and 2 s after; the page's event is the part in between.
+
+**Ported, not exported.** The times, angles and hand positions are the study's (`stretch.py`, its curve maths in
+`tracks.py`, here `web/src/balcony/tracks.js`), but the pose is solved on the VRM's normalized bones each frame, so it
+plays on any character: the stand-in runs it as well as Marycia. A baked clip would have been tied to one skeleton.
+What changed on the way:
+
+- Wrist positions are scaled by the character's own arm length (the study's are for Marycia), and the wrist never
+  goes further than 97 % of it from the shoulder, so the elbows never lock.
+- The arm is solved with the page's two-bone reach (`arm-ik.js`), which now takes the direction the elbow should
+  point. The upper and lower arm are then turned about their own length so the elbow folds like a hinge, whatever way
+  the arm points; the forearm takes up to 75 degrees of the hand's roll and the wrist bends for the rest.
+- The shoulder girdle follows the arm as in the study (0.27 degrees per degree above 35), but stops at 22 degrees:
+  the motion-capture stretch showed that more puts her shoulders at her ears.
+- The book is carried by the reader exactly as for the calm break (hands on its side edges while it is low). The
+  study's finer handling (landing on the far edge, the hands going round the edge to rest on the pages) is not ported:
+  on the page the book on her lap is at the bottom edge of the picture.
+- Her hair is left to the VRM's own spring bones. Her face only shuts its eyes (the blink expression every VRM has);
+  the study's Marycia-only shapes (a pressed-shut squeeze, a small smile after) are not used.
+- An arm blends from the reading pose to the choreography by how far its hand is off the book, and the reader brings
+  the hand back onto the book by the rest; her right arm runs 0.07 s behind her left.
+
+**When.** `web/src/balcony/breaks.js` (pure): the calm break every 4 to 8 minutes, the stretch every 5 to 15, each on
+its own timer. Neither starts during a page turn, a look-up, a line she is saying or the other one; a break whose
+time has come waits. After either ends the other waits at least a minute. `Reader.busy()` is true from the moment the
+book leaves her hands to its return, so she cannot be clicked, does not glow under the pointer and says nothing
+through the whole stretch, as during the calm break. `?reach=<seconds>` starts one for a check (`?stretch=<seconds>`
+still starts the calm break).
+
+**Measured on the page** (Chrome, the live scene, 715 frames): her hands peak at 1.1 m/s on the way up and 0.9 m/s
+coming down (the study: 1.0 and 0.9), the book at 0.5 m/s; nothing jumps between frames; both hands are 28 to 33 cm
+above her head at the top (26 cm on the stand-in); the arm is never straighter than 97 %; she is busy for all of it.
+
+**Looked at** on Marycia and on the stand-in, as stills through the whole event: the put-down, the hands leaving, the
+fists by her shoulders, the top, both leans, the fall, the hands returning. Her left arm is mostly behind the near
+plant from the page's camera. As her hands come back to the book they turn palm up to go under its edges; that is the
+reader's grip, and reads as reaching under the book.
+
+Tests: `web/tests/tracks.test.js`, `breaks.test.js` (a simulated day: never together, never back to back, the gaps),
+`overhead-stretch.test.js` (order, hands on the book while it travels, eyes, both hands above her head, shoulders,
+elbows, no jump, fists, the lean, a character without finger bones), `arm-ik.test.js`, and in the browser
+`viewer.spec.js` (the motion on the live scene), `standin.spec.js` (on the stand-in) and `chat.spec.js` (a click
+during the stretch starts nothing; one after it does).
+

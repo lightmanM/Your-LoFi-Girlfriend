@@ -104,6 +104,23 @@ test('her face reaches you when she looks up, and her smile and mouth work',asyn
  expect(Math.max(...f.map(x=>x.mouth))).toBeGreaterThan(.3);
 });
 
+test('her overhead stretch runs: both hands above her head, then she reads on',async({page})=>{
+ test.setTimeout(60000);
+ const errs=errors(page);
+ await page.goto(VIVI+'&reach=1');await loaded(page);
+ await page.waitForFunction(()=>window.lofiViewer.reader().reach,null,{timeout:10000});
+ const up=await page.evaluate(()=>new Promise(resolve=>{let best=-1,fastest=0,last=null;
+  (function tick(){const v=window.lofiViewer,p=v.pose(),now=performance.now()/1000;
+   best=Math.max(best,Math.min(p.leftHand[1],p.rightHand[1])-p.head[1]);
+   if(last){const dt=Math.max(1/240,now-last.now);for(const k of ['leftHand','rightHand'])fastest=Math.max(fastest,Math.hypot(...p[k].map((x,i)=>x-last.p[k][i]))/dt);}
+   last={p,now};
+   if(v.reader().reach)requestAnimationFrame(tick);else resolve({best,fastest});})();}));
+ expect(up.best,'both hands above her head at the top').toBeGreaterThan(.1);
+ expect(up.fastest,`fastest hand ${up.fastest.toFixed(2)} m/s`).toBeLessThan(1.8);
+ expect(await page.evaluate(()=>window.lofiViewer.error())).toBe(null);
+ expect(errs).toEqual([]);
+});
+
 test('her break runs and she reads on',async({page})=>{
  test.setTimeout(60000);
  await page.goto(VIVI+'&stretch=1');await loaded(page);

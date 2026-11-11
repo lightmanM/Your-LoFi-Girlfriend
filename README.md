@@ -15,7 +15,8 @@ Front end only: three.js and three-vrm, no server, no tracking.
 ## Features
 
 - **Reading that never loops**: eyes along the lines, page turns, look-ups, glances, breathing, small posture shifts,
-  and a short break every 4 to 8 minutes (book on her lap, shoulder rolls, head tilts with her eyes closed).
+  a short break every 4 to 8 minutes (book on her lap, shoulder rolls, head tilts with her eyes closed), and every
+  5 to 15 minutes a full stretch with both arms over her head.
 - **Greeting**: one of five lines at random as the picture comes into focus, never the same as last visit.
 - **Small talk** every 1 to 2 minutes: 32 lines about her small days, quiet thoughts and the philosophy book she is
   reading, some to you, some murmured to herself with a glance aside.
@@ -87,9 +88,9 @@ have the right to redistribute). Some places to start:
 - **Characters**: bring your own VRM. `web/public/standin/standin.json` places a character (scale, seat, small pose
   corrections); `scripts/standins/compress_vivi.py` shows how Vivi, a VRM 0.x model, was compressed and turned to face
   forward like a VRM 1.0 model. A character switcher would be welcome.
-- **Motion and animation**: reading, page turns, looks and the break in `web/src/balcony/` (`reader.js`, `reading.js`,
-  `unwind.js`), breathing in `web/src/companion/life.js`, motion while she speaks in `web/src/voice/`. New gestures,
-  idle behaviours and transitions are all open.
+- **Motion and animation**: reading, page turns, looks, the break and the overhead stretch in `web/src/balcony/`
+  (`reader.js`, `reading.js`, `unwind.js`, `overhead-stretch.js`), breathing in `web/src/companion/life.js`, motion
+  while she speaks in `web/src/voice/`. New gestures, idle behaviours and transitions are all open.
 - **Conversations and voice**: lines live in `scripts/voice/lines.json` (greetings, small talk, questions, replies);
   `scripts/voice/generate_lines.py` voices them with the VOICEVOX app. Please keep within
   [冥鳴ひまり's terms](https://meimeihimari.wixsite.com/himari/terms-of-use).
@@ -113,7 +114,7 @@ Design notes, specs and plans are in [docs/](docs/README.md).
 | `web/public/standin/` | The stand-ins: Vivi, her placement, the chair, the reading pose |
 | `scripts/voice/`, `scripts/music/` | Her lines and the VOICEVOX generator; the music list and encoder |
 | `scripts/standins/` | Vivi's compression, the chair measurement, the clone check |
-| `scripts/marycia/`, `scripts/balcony-*/`, `scripts/motion/` | Character conversion and the Blender scene scripts |
+| `scripts/marycia/`, `scripts/balcony-*/`, `scripts/motion/` | Character conversion and the Blender scene scripts (`scripts/balcony-stretch/`: the overhead stretch as keyed in Blender) |
 | [`docs/`](docs/README.md) | Design notes, specs and plans |
 
 ## Credits and licence

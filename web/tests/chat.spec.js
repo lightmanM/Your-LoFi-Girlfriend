@@ -189,6 +189,24 @@ test('she is not clickable during her break',async({page})=>{
  expect((await chat(page)).active).toBe(false);
 });
 
+test('she is not clickable during her overhead stretch, and is again once she reads on',async({page})=>{
+ test.setTimeout(60000);
+ await page.goto(QUIET+'&reach=1');await ready(page);
+ await page.waitForFunction(()=>window.lofiViewer.reader().reach,null,{timeout:10000});
+ // as the book goes down, at the top of the stretch, and as her hands come back to the book
+ for(const at of [.5,5.5,9]){
+  await page.waitForFunction(at=>window.lofiViewer.pose().reach.t>=at,at,{timeout:15000});
+  await hoverOn(page);await page.waitForTimeout(300);
+  expect(await cursor(page),`${at} s into the stretch`).not.toBe('pointer');
+  expect((await chat(page)).glow,'no glow').toBeLessThan(.01);
+  const p=await point(page);await page.mouse.click(p.x,p.y);await page.waitForTimeout(200);
+  expect((await chat(page)).active,`a click ${at} s into the stretch starts nothing`).toBe(false);
+ }
+ await page.waitForFunction(()=>!window.lofiViewer.reader().reach,null,{timeout:15000});
+ await free(page);const p=await point(page);await page.mouse.click(p.x,p.y);
+ await page.waitForFunction(()=>window.lofiViewer.chat().active,null,{timeout:2000});
+});
+
 test('a double click starts one conversation',async({page})=>{
  await page.goto(QUIET);await ready(page);
  await free(page);const p=await point(page);await page.mouse.dblclick(p.x,p.y);

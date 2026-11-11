@@ -152,7 +152,8 @@ async function load(){
  scene.add(sun,sun.target,new THREE.HemisphereLight(new THREE.Color().fromArray(LIGHT.sky),new THREE.Color().fromArray(LIGHT.ground),LIGHT.fill));
  state.reader=new Reader(vrm,book.scene,pose,look,{seed:params.has('seed')?+params.get('seed'):(Math.random()*1e9)|0,
   random:params.has('seed')?()=>.5:Math.random,
-  eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined});
+  eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined,
+  reachAt:params.has('reach')?+params.get('reach'):undefined});
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
  state.ready=true;progress.release();standby.ready();requestAnimationFrame(()=>host.classList.add('ready'));
  if(!assets.plants.standin)swapInPlants(assets.plants.url,makePlants);
@@ -345,12 +346,13 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
  const out=Object.fromEntries(['neck','chest','leftShoulder','rightShoulder','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm','leftHand','rightHand','head'].map(n=>[n,P(n)]));
  out.rot=Object.fromEntries(['leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm','leftHand','rightHand','leftShoulder','rightShoulder'].map(n=>[n,h.getRawBoneNode(n).getWorldQuaternion(new THREE.Quaternion()).toArray().map(x=>+x.toFixed(4))]));
  out.book=state.bookMesh&&new THREE.Box3().setFromObject(state.bookMesh).getCenter(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3));
- out.shoulderQ=['leftShoulder','rightShoulder'].map(n=>h.getNormalizedBoneNode(n).quaternion.toArray().map(x=>+x.toFixed(3)));out.stretch=state.reader.stretch&&{active:state.reader.stretch.active,w:+state.reader.stretch.weight().toFixed(2),t:+state.reader.stretch.t.toFixed(2)};return out;},seat:()=>({drop:+(state.seat?.drop??0).toFixed(3),contactRadii:state.contactRadii}),ready:()=>state.ready,error:()=>state.error,
+ out.shoulderQ=['leftShoulder','rightShoulder'].map(n=>h.getNormalizedBoneNode(n).quaternion.toArray().map(x=>+x.toFixed(3)));const brk=b=>b&&{active:b.active,w:+b.weight().toFixed(2),t:+b.t.toFixed(2)};out.stretch=brk(state.reader.stretch);out.reach=brk(state.reader.reach);return out;},seat:()=>({drop:+(state.seat?.drop??0).toFixed(3),contactRadii:state.contactRadii}),ready:()=>state.ready,error:()=>state.error,
  chair:()=>{const meshes=[];state.chair?.traverse(o=>{if(o.isMesh)meshes.push(o);});return {meshes:meshes.length,visible:meshes.every(o=>o.visible&&[o.material].flat().every(m=>m.colorWrite)),receivesShadows:meshes.some(o=>o.receiveShadow),shadowMap:renderer.shadowMap.enabled};},
  stats:()=>{const f=[...state.frames].sort((a,b)=>a-b),i=renderer.info;return {calls:i.render.calls,triangles:i.render.triangles,textures:i.memory.textures,medianFrameMs:f[f.length>>1]??null,p95FrameMs:f[Math.floor(f.length*.95)]??null};},
  greet:o=>greet(o),talk:(id,o)=>smallTalk?.say(id,o)??false,smallTalk:()=>smallTalk?.state()??null,greeting:()=>voice&&{line:greetingLine,ids:voice.ids(l=>l.kind==='greeting'),...voice.state()},hush:()=>state.greeting?.stop(),voice:()=>state.greeting?.state()??null,hold:on=>{state.held=!!on;},
  grips:()=>state.reader?.gripsLocal(),hands:()=>state.reader?.handsLocal(),music:()=>music?.state()??null,beeps:()=>beeps,musicSeekEnd:s=>music?.seekToEnd(s),musicDuck:on=>music?.duck(on),
- reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1),
+ reader:()=>{const r=state.reader;return r&&{time:+r.time.toFixed(1),line:r.reading.line,page:r.reading.page,stretch:!!r.stretch?.active,nextStretch:+(r.nextStretch-r.time).toFixed(1),reach:!!r.reach?.active,nextReach:+(r.nextReach-r.time).toFixed(1),
+  hands:r.reach?.active?{left:+r.reach.armWeight('left').toFixed(2),right:+r.reach.armWeight('right').toFixed(2)}:null,
   busy:r.busy(),away:+r.reading.away.toFixed(3),eyeScale:state.vrm.lookAt?.applier?.rangeMapHorizontalOuter?.outputScale??null,head:{yaw:+r.reading.head.yaw.toFixed(2),pitch:+r.reading.head.pitch.toFixed(2)}};},
  glance:o=>state.reader?.reading.glance(o),holdReading:on=>state.reader?.reading.holdReading(on),talking:on=>{if(state.reader)state.reader.talking=!!on;}};
 // click to talk, for checks: its state, start one as if she were clicked, pick an answer, the book's box on screen

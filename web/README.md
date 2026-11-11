@@ -2,8 +2,10 @@
 
 One page: Marycia reading on a sunny balcony, like a video that never repeats. No controls, fixed camera. She reads
 (eyes along the lines, page turns, look-ups, small posture shifts) and takes a short break every 4 to 8 minutes (book
-down on her lap, two slow shoulder rolls, her head tilted to each side with her eyes closed, book back up); the
-palm, roses, potted plants, ivy and the near leaves move in one wind.
+down on her lap, two slow shoulder rolls, her head tilted to each side with her eyes closed, book back up). Every 5
+to 15 minutes she stretches instead: book down on her lap, hands off it, both arms up over her head with her back
+arched and her eyes shut, a small lean to each side, arms down, book back up (about 12 s). The two never run
+together or within a minute of each other. The palm, roses, potted plants, ivy and the near leaves move in one wind.
 
 ## Run
 
@@ -14,7 +16,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?stretch=<seconds>`, `?still=<seconds>`,
+Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?stretch=<seconds>` (her calm break), `?reach=<seconds>` (her overhead stretch), `?still=<seconds>`,
 `?wind=0`, `?plantgain=<n>`, `?seat=0`, `?music=0`, `?musicstall=<seconds>`, `?hud=0`, `?intro=0`, `?greet=0`, `?line=<id>`, `?talk=0`, `?talkevery=<seconds>`,
 `?chat=0`, `?ask=<id>`, `?notice=<id>`, `?chatwait=<seconds>`, `?chatcool=<seconds>`, `?standin=1`;
 `window.lofiViewer` reports state (`greeting()` this visit's line, `voice()` the greeting as it plays, `greet()` starts
@@ -40,7 +42,7 @@ turns it off. The music dips a little while she speaks, and her voice follows th
 [small talk](../docs/superpowers/specs/2026-11-08-small-talk-design.md).
 
 Click her while she quietly reads and she talks with you (click to talk). The pointer turns to a hand over her and she
-glows very faintly; she is not clickable while she greets, talks, turns a page, looks up, takes her break, or for 3 s
+glows very faintly; she is not clickable while she greets, talks, turns a page, looks up, takes her break or stretches, or for 3 s
 after a conversation. About two clicks in three she just says something warm (20 lines); about one in three she asks
 how you are (11 questions), and two or three answers appear as soft pills under her words once she has finished (on a
 phone they take the subtitle's place; held sideways, they stand at the left, clear of her and the book). Pick one (click, tap, or Tab and Enter) and she replies to it (27 replies); if
@@ -79,9 +81,10 @@ be credited and played unedited (no trims, loops or baked-in mixes, and no recor
 
 - `index.html`, `src/viewer/`: the page, the picture layers and wind (`wind.js`), the live 3D plants (`plants.js`),
   her colour grade (`grade.js`).
-- `src/balcony/`: her motion: reading and book grip (`reading.js`, `page-turn.js`), her break from reading
-  (`unwind.js`), arm and leg IK (`arm-ik.js`), seating on the chair
-  (`seat.js`, `visible-chair.js`), all driven by `reader.js`.
+- `src/balcony/`: her motion: reading and book grip (`reading.js`, `page-turn.js`), her calm break from reading
+  (`unwind.js`), her overhead stretch (`overhead-stretch.js`, its timing curves in `tracks.js`), when the two happen
+  (`breaks.js`, pure), arm and leg IK (`arm-ik.js`), seating on the chair (`seat.js`, `visible-chair.js`), all driven
+  by `reader.js`.
 - `src/music/`: background music: `player.js` (two audio decks through Web Audio: shuffle without repeats, 6 s
   equal-power crossfades, per-track loudness gain, preloading, skipping broken or stalled tracks, Media Session),
   `playlist.js` and `fades.js` (pure logic), `controls.js` (the stand-in keys and tap-to-start).
@@ -110,6 +113,7 @@ npm run test:browser
 npm run build
 python3 -m unittest discover -s ../scripts/voice -p 'test_*.py'
 python3 -m unittest discover -s ../scripts/standins -p 'test_*.py'
+python3 -m unittest discover -s ../scripts/balcony-stretch -p 'test_*.py'
 ../scripts/standins/clone_check.sh   # everything as a fresh clone would run it (no private files)
 ```
 
