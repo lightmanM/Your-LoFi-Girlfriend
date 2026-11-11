@@ -41,8 +41,9 @@ loosen it in a pull request without saying why.
 
 **Things already here that have their own terms:**
 
-- The balcony renders (`web/public/environment/balcony-toon/*.webp`) and the README screenshot are shared for this
-  project only. Use them to run and develop it; do not reuse them elsewhere or add edited copies.
+- The balcony renders (`web/public/environment/balcony-toon/*.webp`), the README screenshot and the link-preview
+  picture the owner cropped from it (`web/public/og.jpg`) are shared for this project only. Use them to run and
+  develop it; do not reuse them elsewhere or add edited copies.
 - Her voice is VOICEVOX:冥鳴ひまり. New or changed lines are written in `scripts/voice/lines.json`, voiced with
   `scripts/voice/generate_lines.py`, and must stay within
   [冥鳴ひまり's terms of use](https://meimeihimari.wixsite.com/himari/terms-of-use), both in what she is made to say

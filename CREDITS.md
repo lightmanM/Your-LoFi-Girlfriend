@@ -4,9 +4,9 @@ The code in this repository is MIT-licensed (see [LICENSE](LICENSE)). The charac
 the music are third-party works under their own terms. The live site's character and the scene's 3D files are not in
 this repository; it runs with stand-ins instead (see the README).
 
-**Balcony renders and the README screenshot** (`web/public/environment/balcony-toon/*.webp`,
-`.github/readme/screenshot.jpg`): © the project owner; included so this project runs; you may use them to run and develop this project, not reuse them elsewhere or redistribute them separately; not covered by the MIT licence.
-The screenshot shows the live site's character, Marycia ©BeroarN, who is not in this repository.
+**Balcony renders, the README screenshot and the link-preview picture** (`web/public/environment/balcony-toon/*.webp`,
+`.github/readme/screenshot.jpg`, and `web/public/og.jpg`, which is that screenshot cropped to 1200×630): © the project owner; included so this project runs; you may use them to run and develop this project, not reuse them elsewhere or redistribute them separately; not covered by the MIT licence.
+The screenshot and the picture cropped from it show the live site's character, Marycia ©BeroarN, who is not in this repository.
 
 | What | Credit | Terms | In this repo |
 | --- | --- | --- | --- |
