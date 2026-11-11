@@ -68,11 +68,13 @@ const meanDiff=(page,a,b)=>page.evaluate(async([a,b])=>{
 
 test('at rest the plant cards look like the real plants',async({page,request})=>{
  test.skip(!(await glbAt(request,'/environment/balcony-toon/plants.glb')),'the real plants are not on this machine');
- const clip={x:280,y:200,width:500,height:420},shot=async()=>{await loaded(page);await page.waitForTimeout(800);return page.screenshot({clip});};
+ const clip={x:280,y:200,width:500,height:420},shot=async(source)=>{await loaded(page);
+  await page.waitForFunction(s=>window.lofiViewer.plants().source===s,source,{timeout:60000});   // the full plants come after ready
+  await page.waitForTimeout(800);return page.screenshot({clip});};
  await page.setViewportSize({width:1280,height:720});
- await page.goto('/?intro=0&music=0&greet=0&talk=0&hud=0&seed=3&wind=0');const real=await shot();
+ await page.goto('/?intro=0&music=0&greet=0&talk=0&hud=0&seed=3&wind=0');const real=await shot('full');
  await page.route('**/environment/balcony-toon/plants.glb',r=>r.fulfill({status:404,body:''}));
- await page.goto('/?intro=0&music=0&greet=0&talk=0&hud=0&seed=3&wind=0');const cards=await shot();
+ await page.goto('/?intro=0&music=0&greet=0&talk=0&hud=0&seed=3&wind=0');const cards=await shot('cards');
  const d=await meanDiff(page,real,cards);
  expect(d,`mean difference ${d.toFixed(2)} per channel`).toBeLessThan(3.5);
 });
