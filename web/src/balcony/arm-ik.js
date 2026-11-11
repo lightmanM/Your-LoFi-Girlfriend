@@ -1,21 +1,26 @@
 // Two-bone reach for a VRM arm on its normalized bones: rotates the upper and lower arm so the wrist moves toward
-// a world-space target, keeping the elbow on the side it already bends to. weight 0 leaves the pose untouched.
+// a world-space target, keeping the elbow on the side it already bends to, or sending it toward a given direction.
+// weight 0 leaves the pose untouched.
 import {Quaternion,Vector3} from 'three';
 
 const v=()=>new Vector3();
 const S=v(),E=v(),W=v(),T=v(),D=v(),B=v(),E2=v(),W1=v(),T2=v();
 const qa=new Quaternion(),qb=new Quaternion(),qw=new Quaternion(),qp=new Quaternion(),id=new Quaternion();
 
-function rotateWorld(node,delta){
+/** Turn a bone by a world-space rotation (its children follow). `delta` is used up. */
+export function rotateWorld(node,delta){
  node.updateWorldMatrix(true,false);node.getWorldQuaternion(qw);
  node.parent.getWorldQuaternion(qp);node.quaternion.copy(qp.invert().multiply(delta.multiply(qw)));node.updateWorldMatrix(false,true);
 }
 
-/** @param {import('@pixiv/three-vrm').VRM} vrm @param {'left'|'right'} side @param {Vector3} target @param {number} weight */
-export function reachArm(vrm,side,target,weight){return reachLimb(vrm,side+'UpperArm',side+'LowerArm',side+'Hand',target,weight);}
+/**
+ * @param {import('@pixiv/three-vrm').VRM} vrm @param {'left'|'right'} side @param {Vector3} target @param {number} weight
+ * @param {Vector3} [bend] world direction the elbow goes toward (default: the side it bends to now)
+ */
+export function reachArm(vrm,side,target,weight,bend){return reachLimb(vrm,side+'UpperArm',side+'LowerArm',side+'Hand',target,weight,bend);}
 /** The same two-bone reach for a leg: the ankle moves toward the target, the knee keeps its bend side. */
 export function reachLeg(vrm,side,target,weight){return reachLimb(vrm,side+'UpperLeg',side+'LowerLeg',side+'Foot',target,weight);}
-function reachLimb(vrm,upper,lower,end,target,weight){
+function reachLimb(vrm,upper,lower,end,target,weight,bend){
  if(weight<=0)return;
  const h=vrm.humanoid,up=h.getNormalizedBoneNode(upper),lo=h.getNormalizedBoneNode(lower),hand=h.getNormalizedBoneNode(end);
  up.updateWorldMatrix(true,true);
@@ -23,7 +28,9 @@ function reachLimb(vrm,upper,lower,end,target,weight){
  const a=E.distanceTo(S),b=W.distanceTo(E);
  T.copy(W).lerp(target,Math.min(1,weight));
  D.subVectors(T,S);const d=Math.min(a+b-1e-4,Math.max(Math.abs(a-b)+1e-4,D.length()));D.normalize();
- B.subVectors(E,S);B.addScaledVector(D,-B.dot(D));if(B.lengthSq()<1e-10)B.set(0,-1,0);B.normalize();   // keep the current bend side
+ if(bend)B.copy(bend).addScaledVector(D,-bend.dot(D));
+ if(!bend||B.lengthSq()<1e-10){B.subVectors(E,S);B.addScaledVector(D,-B.dot(D));}                    // keep the current bend side
+ if(B.lengthSq()<1e-10)B.set(0,-1,0);B.normalize();
  const cosA=(a*a+d*d-b*b)/(2*a*d),sinA=Math.sqrt(Math.max(0,1-cosA*cosA));
  E2.copy(S).addScaledVector(D,a*cosA).addScaledVector(B,a*sinA);
  qa.setFromUnitVectors(v().subVectors(E,S).normalize(),v().subVectors(E2,S).normalize());

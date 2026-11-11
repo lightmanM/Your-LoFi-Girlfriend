@@ -1,19 +1,24 @@
 // The reading character as one unit: the static reading pose with breathing and sway, the reading layer (eyes, head,
-// page turns, look-ups, legs), the book in her hands, and an occasional short break (unwind.js). The viewer drives it
-// with update(dt) once per frame, before vrm.update().
+// page turns, look-ups, legs), the book in her hands, and her two occasional breaks from reading: the calm one
+// (unwind.js) and the overhead stretch (overhead-stretch.js). The viewer drives it with update(dt) once per frame,
+// before vrm.update().
 import * as THREE from 'three';
 import {lifeSignals,applyLife} from '../companion/life.js';
 import {ReadingMotion,BookGrip,READING} from './reading.js';
 import {reachArm} from './arm-ik.js';
 import {aimTurn} from './head-aim.js';
 import {Unwind} from './unwind.js';
+import {OverheadStretch} from './overhead-stretch.js';
+import {BREAKS,gap,due,after} from './breaks.js';
 
 const V=()=>new THREE.Vector3(),Q=()=>new THREE.Quaternion();
 const smoothstep=THREE.MathUtils.smoothstep;
 
-// Her break from reading (unwind.js: book down to her lap, shoulder rolls, head tilts, book up): every 4 to 8 minutes,
-// never during a page turn, a look-up or a line she is saying. (It replaced an overhead stretch from motion capture.)
-export const STRETCH={every:[240,480]};
+// Her breaks from reading, never during a page turn, a look-up or a line she is saying, one at a time and never back to
+// back (breaks.js). The calm break (unwind.js: book down to her lap, shoulder rolls, head tilts, book up) every 4 to 8
+// minutes; in the code and the hooks it is still called "stretch", after the motion-capture stretch it replaced. The
+// overhead stretch (overhead-stretch.js: hands off the book, both arms up) every 5 to 15 minutes, called "reach".
+export const STRETCH=BREAKS.unwind,REACH=BREAKS.stretch;
 const LIFE={breathDepth:2.8,headDepth:.8,swayDepth:2.2};
 // Head during the break: she looks up before the book lands (neck first, the head a beat later, a little overshoot)
 // and back down as she takes hold of it again.
@@ -45,15 +50,19 @@ export class Reader{
   * @param {THREE.Object3D} book the book's root (its first child holds the pages)
   * @param {{tracks:object[],blink?:number}} pose the static reading pose (absolute normalized-bone rotations)
   * @param {THREE.Object3D} look the gaze target the VRM's lookAt follows
-  * @param {{seed?:number,eventScale?:number,stretchAt?:number,lines?:number,random?:()=>number}} o
+  * @param {{seed?:number,eventScale?:number,stretchAt?:number,reachAt?:number,lines?:number,random?:()=>number}} o
+  *  stretchAt, reachAt: seconds until the first calm break and the first overhead stretch (for checks)
   */
  constructor(vrm,book,pose,look,o={}){
   this.vrm=vrm;this.pose=pose;this.look=look;this.o={eventScale:1,random:Math.random,...o};this.time=0;
   this.grip=new BookGrip(vrm,book);
   this.reading=new ReadingMotion(vrm,book.children[0],{seed:o.seed??7,eventScale:this.o.eventScale});
   if(o.lines)this.reading.linesPerPage=Math.max(1,o.lines);
-  this.stretch=new Unwind();   // her break from reading (named stretch for the hooks and ?stretch=N that start it)
-  this.nextStretch=o.stretchAt??this.stretchGap();
+  this.stretch=new Unwind();           // her calm break (named stretch for the hooks and ?stretch=N that start it)
+  this.reach=new OverheadStretch();    // her overhead stretch (?reach=N)
+  this.breaks={unwind:this.stretch,stretch:this.reach};
+  this.next={unwind:o.stretchAt??this.breakGap('unwind'),stretch:o.reachAt??this.breakGap('stretch')};   // when each is due
+  this.playing=null;                   // the break she is taking now: 'unwind', 'stretch' or null
   this.lids=0;          // 0..1: eyes half-closed while she says something (small talk), on top of blinking
   this.talking=false;   // while she talks, her break does not start
   this.lap={local:[new THREE.Matrix4(),new THREE.Matrix4()],legs:['leftUpperLeg','rightUpperLeg'],meshes:null,m:new THREE.Matrix4()};
@@ -61,7 +70,11 @@ export class Reader{
   this.tmp={grip:V(),target:V(),gL:V(),pa:V(),pb:V(),p2:V(),cL:V(),left:V(),toLocal:new THREE.Matrix4(),edge:new THREE.Matrix4()};
  }
  bone(n){return this.vrm.humanoid.getNormalizedBoneNode(n);}
- stretchGap(){const [a,b]=STRETCH.every;return this.time+(a+(b-a)*this.o.random())*this.o.eventScale;}
+ breakGap(name){return gap(BREAKS[name].every,this.o.random,this.o.eventScale);}
+ get nextStretch(){return this.next.unwind;}
+ get nextReach(){return this.next.stretch;}
+ /** The break she is taking now, if any. */
+ breakNow(){return this.playing?this.breaks[this.playing]:null;}
  /** The static reading pose plus breathing and sway. */
  applyPose(){
   const v0=this.vrm.meta.metaVersion==='0'&&this.o.mirrorV0!==false;   // false: a VRM 0.x file already turned to face +Z
@@ -74,9 +87,13 @@ export class Reader{
  update(dt){
   this.time+=dt;this.applyPose();
   if(this.pendingAttend){this.reading.lookUpAt(this.attendAngles(this.pendingAttend));this.pendingAttend=null;}
-  const st=this.stretch,r0=this.reading,busy=r0.turn||r0.lookUp;
-  if(st&&!st.active&&this.time>=this.nextStretch&&!busy&&!this.talking){this.grip.setLap(this.bookLapPose());st.begin();}
-  const was=st?.active;st?.advance(dt);if(was&&!st.active)this.nextStretch=this.stretchGap();
+  const r0=this.reading;
+  if(!this.playing){
+   const name=due(this.time,this.next,!(r0.turn||r0.lookUp||this.talking));
+   if(name){this.playing=name;this.grip.setLap(this.bookLapPose());this.breaks[name].begin();}
+  }
+  const st=this.breakNow();st?.advance(dt);
+  if(st&&!st.active){this.next=after(this.playing,this.time,this.next,name=>this.breakGap(name),BREAKS.apart*this.o.eventScale);this.playing=null;}
   const sw=st?.weight()??0;
   if(sw>0)st.apply(this.vrm,sw);
   const lift=this.headLift(st),r=r0.update(dt,this.look,Math.max(sw,Math.min(1,lift.head)));   // reading stops as she looks up
@@ -92,17 +109,17 @@ export class Reader{
   if(em)em.setValue('blink',Math.max(this.pose.blink??0,r0.blink(),st?.face('eyeBlinkLeft')??0,this.lids));
   return r;
  }
- /** Her break, a page turn, any look-up or a pending attend: she is in the middle of something. */
- busy(){return !!(this.stretch?.active||this.reading.turn||this.reading.lookUp||this.pendingAttend);}
+ /** A break (either one, from the book leaving her hands to its return), a page turn, any look-up or a pending attend: she is in the middle of something. */
+ busy(){return !!(this.playing||this.reading.turn||this.reading.lookUp||this.pendingAttend);}
  /**
   * Look up from the book at a point (world space) for `hold` seconds, e.g. the camera when she greets you. Takes
-  * effect on the next update(), aimed from her head as the reading pose holds it. Not during her break.
+  * effect on the next update(), aimed from her head as the reading pose holds it. Not during a break.
   * @param {{at:THREE.Vector3,hold:number,ease?:number,tilt?:number,share?:number}} o  tilt: most sideways head tilt seen
   *  from `at` (degrees); share < 1: the head turns only that share of the way sideways (it still lifts fully) and her
   *  eyes, widened, do the rest
   * @returns {boolean} whether she will look
   */
- attend(o){if(this.stretch?.active)return false;this.pendingAttend={...o,at:o.at.clone()};return true;}
+ attend(o){if(this.playing)return false;this.pendingAttend={...o,at:o.at.clone()};return true;}
  /** Stop attending: she eases back to her book now. */
  cancelAttend(){this.pendingAttend=null;this.reading.endLookUpAt();}
  /** True while she is looking at something she was asked to attend to. */

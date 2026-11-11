@@ -46,6 +46,6 @@ jobs:
       - name: Python unit tests
         run: |
           python3 --version
-          for suite in voice music standins; do
+          for suite in voice music standins balcony-stretch; do
             python3 -m unittest discover -s "scripts/$suite" -p 'test_*.py'
           done
