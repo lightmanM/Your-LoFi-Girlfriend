@@ -81,7 +81,8 @@ copy still runs.
 
 ## Contributing
 
-Issues and pull requests are welcome. Some places to start:
+Issues and pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) has the rules (above all: only add files you
+have the right to redistribute). Some places to start:
 
 - **Characters**: bring your own VRM. `web/public/standin/standin.json` places a character (scale, seat, small pose
   corrections); `scripts/standins/compress_vivi.py` shows how Vivi, a VRM 0.x model, was compressed and turned to face
