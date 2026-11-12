@@ -310,3 +310,35 @@ elbows, no jump, fists, the lean, a character without finger bones), `arm-ik.tes
 `viewer.spec.js` (the motion on the live scene), `standin.spec.js` (on the stand-in) and `chat.spec.js` (a click
 during the stretch starts nothing; one after it does).
 
+### Small motions while she reads (2026-11-11)
+
+Three small things, none of which puts the book down. Clips (local, git-ignored): `small-motions-v1.mp4` (all three,
+with the first, quicker hair tuck) and `hair-tuck-v2.mp4` (the tuck as it is now).
+
+- **Hair tuck** (`web/src/balcony/hair-tuck.js`, every 2.5 to 7 minutes, 5.4 s). Her left hand, the one the camera
+  sees, slides out off the book's edge, comes up beside her neck to her temple, strokes back over her ear to behind it
+  and a little down her hair, and returns the same way; her head leans 3.5 degrees away. The first version took 3.3 s
+  with a flat, upright hand, which the owner found too sharp and the hand's angle off. Now the rise takes about 1.5 s
+  and the stroke 1.6 s, the hand never moves faster than 0.9 m/s, its fingers point up and back along her hair in
+  line with her forearm, the first two fingers lead, gently curved and held together, and the small ones curl in. The book stays where the reading pose holds it, with her
+  right hand on its grip. Where her hair is comes from the model: a ray from her side to the middle of her head at
+  three heights, so it plays on the stand-in too. It only starts on the left page, so no page turn can come due while
+  one hand is away. Her hair does not move: the hand passes over it. The first try used her right hand, which the
+  page's camera cannot see at all.
+- **Nod to the music** (`web/src/music/beat.js`, `web/src/balcony/groove.js`, every 100 to 260 s, 8 to 16 beats). The
+  beat is found from the level meter's own numbers: the last 8 s of how sharply the level rose, the spacing those
+  rises repeat at (58 to 112 beats a minute, under one octave so half and double time cannot be confused), and a
+  steady clock on top so the phase runs evenly. On six real tracks it settled within about 6 s on 80, 80, 82, 85, 87
+  and 90 and held them. A rough offline check of three files agreed on one and chose a dotted rhythm of the same
+  tempo on the other two (107 for 80, 60 for 90), so the tempo is right or a simple ratio of it. Her head dips 2.4
+  degrees on the beat with a slight tilt from side to side. Muted or paused music has no beat, so she does not nod.
+- **Welcome back** (`web/src/companion/welcome-back.js`). When the tab was hidden for a minute or more she looks up at
+  the camera with a small smile for about 2 s and reads on, silently. Not over her greeting, a line, a chat or a
+  break.
+
+**Looked at** in headless Chrome on Marycia and, for the tuck, on the stand-in: stills through the tuck and a real-time
+recording of all three. The hand comes close to her cheek on the way up; it no longer crosses her face.
+
+Tests: `web/tests/hair-tuck.test.js`, `beat.test.js` (made-up signals at four tempos, an off-beat hit, silence, noise,
+a new track, a gap), `groove.test.js`, `welcome-back.test.js`, and in the browser `motions.spec.js` (all three, with
+the stand-ins; the nod is given a steady beat with `?beat`).

@@ -6,9 +6,10 @@
 // (scripts/balcony-stretch/stretch.py); here it is solved on any VRM's normalized bones, so it plays on the stand-in
 // character as well. It has the interface of the calm break (unwind.js: weight, carry, apply, armWeight, face), so the
 // reader carries the book down and up and keeps her hands on it exactly as it does there.
-import {Quaternion,Vector3,Matrix4,MathUtils} from 'three';
+import {Quaternion,Vector3,MathUtils} from 'three';
 import {Track,EASE,smooth,smoother} from './tracks.js';
-import {reachArm,rotateWorld} from './arm-ik.js';
+import {reachArm} from './arm-ik.js';
+import {worldPos,worldQuat,hingeRoll,orientHand} from './arm-pose.js';
 
 export const STRETCH=Object.freeze({
  pre:2.3,easeIn:.8,easeOut:.8,post:1.8,   // s: book down, into the stretch, out of it, book up
@@ -67,12 +68,6 @@ const TRACKS=Object.freeze(Object.fromEntries(SIDES.map(([side,,lag])=>[side,arm
 
 const X=new Vector3(1,0,0),Y=new Vector3(0,1,0),Z=new Vector3(0,0,1),rad=MathUtils.degToRad,deg=MathUtils.radToDeg;
 const q=new Quaternion(),turn=(node,axis,degrees)=>{if(node&&degrees)node.quaternion.multiply(q.setFromAxisAngle(axis,rad(degrees)));};
-const worldPos=node=>node.getWorldPosition(new Vector3()),worldQuat=node=>node.getWorldQuaternion(new Quaternion());
-/** Give a bone a world rotation (its children follow). */
-function setWorld(node,world){
- node.parent.updateWorldMatrix(true,false);
- node.quaternion.copy(worldQuat(node.parent).invert().multiply(world));node.updateWorldMatrix(false,true);
-}
 
 export class OverheadStretch{
  constructor(){
@@ -145,35 +140,12 @@ export class OverheadStretch{
    turn(shoulder,Y,-sign*G.forward*smooth((raised-50)/60)*Math.max(0,aim.dot(seen([0,0,1],1))));
    shoulder.updateWorldMatrix(false,true);solve();
   }
-  this.roll(upper,lower,hand,sign,elbow);
-  // the hand: fingers and the back of the hand the way the choreography points them
-  const fingers=seen(tracks.fingers.at(s)).normalize(),back=seen(tracks.back.at(s));
-  back.addScaledVector(fingers,-back.dot(fingers)).normalize();
-  const palm=new Vector3().crossVectors(fingers,back);
-  const want=new Quaternion().setFromRotationMatrix(new Matrix4().makeBasis(fingers.clone().multiplyScalar(sign),back,palm.multiplyScalar(sign)));
-  // the forearm takes the hand's roll (as far as a forearm turns), the wrist only bends
-  const axis=worldPos(hand).sub(worldPos(lower)).normalize(),rel=want.clone().multiply(worldQuat(lower).invert());
-  const along=axis.x*rel.x+axis.y*rel.y+axis.z*rel.z,most=rad(O.forearmRoll);
-  let twist=2*Math.atan2(along,rel.w);if(twist>Math.PI)twist-=2*Math.PI;if(twist<-Math.PI)twist+=2*Math.PI;
-  rotateWorld(lower,new Quaternion().setFromAxisAngle(axis,MathUtils.clamp(twist,-most,most)));
-  setWorld(hand,want);
+  hingeRoll(upper,lower,hand,sign,elbow);   // the elbow a hinge, whatever way the arm points (arm-pose.js)
+  // the hand: fingers and the back of the hand the way the choreography points them; the forearm takes its roll
+  orientHand(lower,hand,sign,seen(tracks.fingers.at(s)),seen(tracks.back.at(s)),O.forearmRoll);
   joints.forEach((n,i)=>{const posed=n.quaternion.clone();n.quaternion.copy(before[i]).slerp(posed,free);});
   joints[0].updateWorldMatrix(false,true);
   this.hand(bone,side,sign,FIST.at(s-(side==='right'?O.rightLag:0)),free);
- }
- // Turn the upper and lower arm about their own length so the elbow is a hinge: it folds the forearm toward the front
- // of the upper arm (as in the T-pose, where the hand comes forward), whatever way the arm points. The joints stay put.
- roll(upper,lower,hand,sign,elbow){
-  const S=worldPos(upper),E=worldPos(lower),W=worldPos(hand),u=E.clone().sub(S).normalize(),v=W.clone().sub(E).normalize();
-  const fold=v.clone().addScaledVector(u,-v.dot(u));
-  if(fold.lengthSq()<1e-8)fold.copy(elbow).negate().addScaledVector(u,elbow.dot(u));   // a straight arm: away from the elbow's side
-  if(fold.lengthSq()<1e-8)return;
-  fold.normalize();
-  const basis=(along,front)=>{const x=along.clone().multiplyScalar(sign),z=front.clone().addScaledVector(x,-front.dot(x)).normalize(),y=new Vector3().crossVectors(z,x);
-   return new Quaternion().setFromRotationMatrix(new Matrix4().makeBasis(x,y,z));};
-  setWorld(upper,basis(u,fold));
-  const hinge=new Vector3().crossVectors(fold,u.clone().multiplyScalar(sign)).normalize();     // the upper arm's own up: the elbow's axis
-  setWorld(lower,basis(v,new Vector3().crossVectors(v.clone().multiplyScalar(sign),hinge)));
  }
  // Fingers: the grip they hold in the pose, opened or curled into a loose fist; the thumb relaxed out beside the palm.
  hand(bone,side,sign,fist,free){

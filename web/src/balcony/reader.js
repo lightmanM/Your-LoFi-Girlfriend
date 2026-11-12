@@ -1,6 +1,7 @@
 // The reading character as one unit: the static reading pose with breathing and sway, the reading layer (eyes, head,
-// page turns, look-ups, legs), the book in her hands, and her two occasional breaks from reading: the calm one
-// (unwind.js) and the overhead stretch (overhead-stretch.js). The viewer drives it with update(dt) once per frame,
+// page turns, look-ups, legs), the book in her hands, her two occasional breaks from reading: the calm one
+// (unwind.js) and the overhead stretch (overhead-stretch.js), and two small things she does while she reads: a few
+// bars of nodding to the music (groove.js) and tucking her hair behind her ear (hair-tuck.js). The viewer drives it with update(dt) once per frame,
 // before vrm.update().
 import * as THREE from 'three';
 import {lifeSignals,applyLife} from '../companion/life.js';
@@ -10,6 +11,8 @@ import {aimTurn} from './head-aim.js';
 import {Unwind} from './unwind.js';
 import {OverheadStretch} from './overhead-stretch.js';
 import {BREAKS,gap,due,after} from './breaks.js';
+import {Groove} from './groove.js';
+import {HairTuck,TUCK} from './hair-tuck.js';
 
 const V=()=>new THREE.Vector3(),Q=()=>new THREE.Quaternion();
 const smoothstep=THREE.MathUtils.smoothstep;
@@ -32,6 +35,9 @@ const KEEP_OUT={side:.24,low:.10,high:.45};
 // A hand reaching for the book low on her lap never locks the arm straight: no farther from the shoulder than this share
 // of the arm's length (about 140 degrees at the elbow).
 const SOFT_ARMS={reach:.94};
+// Letting go of the book with her left hand (the hair tuck): the hand first slides this far out along the book's
+// side (m), so its fingers come clear of the cover's edge, as her right hand's do before a page turn.
+const LET_GO={out:.065};
 const READING_TEXT=READING.text;
 // Looking at someone (greet): the head makes this share of the turn toward them, the eyes the rest, within these
 // limits (degrees on the normalized head; negative pitch is up).
@@ -50,8 +56,9 @@ export class Reader{
   * @param {THREE.Object3D} book the book's root (its first child holds the pages)
   * @param {{tracks:object[],blink?:number}} pose the static reading pose (absolute normalized-bone rotations)
   * @param {THREE.Object3D} look the gaze target the VRM's lookAt follows
-  * @param {{seed?:number,eventScale?:number,stretchAt?:number,reachAt?:number,lines?:number,random?:()=>number}} o
-  *  stretchAt, reachAt: seconds until the first calm break and the first overhead stretch (for checks)
+  * @param {{seed?:number,eventScale?:number,stretchAt?:number,reachAt?:number,nodAt?:number,tuckAt?:number,lines?:number,random?:()=>number}} o
+  *  stretchAt, reachAt, nodAt, tuckAt: seconds until the first calm break, overhead stretch, nod to the music and hair
+  *  tuck (for checks)
   */
  constructor(vrm,book,pose,look,o={}){
   this.vrm=vrm;this.pose=pose;this.look=look;this.o={eventScale:1,random:Math.random,...o};this.time=0;
@@ -63,6 +70,9 @@ export class Reader{
   this.breaks={unwind:this.stretch,stretch:this.reach};
   this.next={unwind:o.stretchAt??this.breakGap('unwind'),stretch:o.reachAt??this.breakGap('stretch')};   // when each is due
   this.playing=null;                   // the break she is taking now: 'unwind', 'stretch' or null
+  this.groove=new Groove({random:this.o.random,first:o.nodAt,scale:this.o.eventScale});   // nodding to the music (?nod=N)
+  this.tuck=new HairTuck();this.nextTuck=o.tuckAt??this.tuckGap();   // tucking her hair behind her ear (?tuck=N)
+  this.beat=null;       // the music's beat now, set by the viewer every frame ({phase,confidence}); null: none heard
   this.lids=0;          // 0..1: eyes half-closed while she says something (small talk), on top of blinking
   this.talking=false;   // while she talks, her break does not start
   this.lap={local:[new THREE.Matrix4(),new THREE.Matrix4()],legs:['leftUpperLeg','rightUpperLeg'],meshes:null,m:new THREE.Matrix4()};
@@ -71,6 +81,7 @@ export class Reader{
  }
  bone(n){return this.vrm.humanoid.getNormalizedBoneNode(n);}
  breakGap(name){return gap(BREAKS[name].every,this.o.random,this.o.eventScale);}
+ tuckGap(){return gap(TUCK.every,this.o.random,this.o.eventScale);}
  get nextStretch(){return this.next.unwind;}
  get nextReach(){return this.next.stretch;}
  /** The break she is taking now, if any. */
@@ -89,8 +100,13 @@ export class Reader{
   if(this.pendingAttend){this.reading.lookUpAt(this.attendAngles(this.pendingAttend));this.pendingAttend=null;}
   const r0=this.reading;
   if(!this.playing){
-   const name=due(this.time,this.next,!(r0.turn||r0.lookUp||this.talking));
+   const name=due(this.time,this.next,!(r0.turn||r0.lookUp||this.talking||this.tuck.active));
    if(name){this.playing=name;this.grip.setLap(this.bookLapPose());this.breaks[name].begin();}
+  }
+  // a hair tuck, when she is only reading and no page turn can come due while only her right hand holds the book (she
+  // is on the left page: the whole right page comes first); if this model cannot do it, the next try is a whole wait away
+  if(!this.tuck.active&&this.time>=this.nextTuck&&!this.playing&&!r0.turn&&r0.page===0&&!r0.lookUp&&!this.talking&&!this.pendingAttend&&!this.groove.on&&this.groove.weight()<=0){
+   this.tuck.begin(this.vrm);this.nextTuck=this.time+this.tuckGap();
   }
   const st=this.breakNow();st?.advance(dt);
   if(st&&!st.active){this.next=after(this.playing,this.time,this.next,name=>this.breakGap(name),BREAKS.apart*this.o.eventScale);this.playing=null;}
@@ -98,6 +114,8 @@ export class Reader{
   if(sw>0)st.apply(this.vrm,sw);
   const lift=this.headLift(st),r=r0.update(dt,this.look,Math.max(sw,Math.min(1,lift.head)));   // reading stops as she looks up
   this.applyHeadLift(lift,sw);
+  // a few bars of nodding to the music, only while she is doing nothing but reading (groove.js)
+  this.groove.update(dt,{beat:this.beat,free:!(this.playing||this.talking||r0.lookUp||this.pendingAttend||this.tuck.active)});this.groove.apply(this.vrm);
   // the book: in her left hand, or on its way to (or resting on) her lap during her break
   if(st?.active)this.grip.setLap(this.lapNow());
   this.grip.update(st?.carry()??0);
@@ -105,21 +123,25 @@ export class Reader{
   const edge=st?.active?smoothstep(st.carry(),.35,.95):0;
   if(st?.active)this.leftHand(1-sw*st.armWeight('left'),edge);
   this.rightHand(st?.active?null:r?.turn,1-sw*(st?.armWeight('right')??1),edge);
+  // the hair tuck: the book stays where the pose holds it (placed above, before her left hand moves) with her right
+  // hand on its grip; her left slides out off its edge, then goes up to her hair and comes back the same way
+  this.tuck.advance(dt);
+  if(this.tuck.active){this.letGoLeft(this.tuck.slide());this.tuck.apply(this.vrm);}
   const em=this.vrm.expressionManager;
   if(em)em.setValue('blink',Math.max(this.pose.blink??0,r0.blink(),st?.face('eyeBlinkLeft')??0,this.lids));
   return r;
  }
- /** A break (either one, from the book leaving her hands to its return), a page turn, any look-up or a pending attend: she is in the middle of something. */
- busy(){return !!(this.playing||this.reading.turn||this.reading.lookUp||this.pendingAttend);}
+ /** A break (either one, from the book leaving her hands to its return), a page turn, any look-up, a pending attend or a hair tuck: she is in the middle of something. */
+ busy(){return !!(this.playing||this.reading.turn||this.reading.lookUp||this.pendingAttend||this.tuck.active);}
  /**
   * Look up from the book at a point (world space) for `hold` seconds, e.g. the camera when she greets you. Takes
-  * effect on the next update(), aimed from her head as the reading pose holds it. Not during a break.
+  * effect on the next update(), aimed from her head as the reading pose holds it. Not during a break or a hair tuck.
   * @param {{at:THREE.Vector3,hold:number,ease?:number,tilt?:number,share?:number}} o  tilt: most sideways head tilt seen
   *  from `at` (degrees); share < 1: the head turns only that share of the way sideways (it still lifts fully) and her
   *  eyes, widened, do the rest
   * @returns {boolean} whether she will look
   */
- attend(o){if(this.playing)return false;this.pendingAttend={...o,at:o.at.clone()};return true;}
+ attend(o){if(this.playing||this.tuck.active)return false;this.pendingAttend={...o,at:o.at.clone()};return true;}
  /** Stop attending: she eases back to her book now. */
  cancelAttend(){this.pendingAttend=null;this.reading.endLookUpAt();}
  /** True while she is looking at something she was asked to attend to. */
@@ -151,6 +173,13 @@ export class Reader{
   this.keepOut('left',edge);
   if(weight<=0)return;
   reachArm(this.vrm,'left',this.edgeGrip(this.grip.leftGrip(this.tmp.left),edge),weight);this.grip.alignLeft(weight);
+ }
+ // Her left hand, still in its grip shape, moved out along the book's side by `slide` (0..1) of LET_GO.out.
+ letGoLeft(slide){
+  if(slide<=0)return;
+  const pages=this.reading.book,t=this.tmp,p=this.grip.leftGrip(t.left);pages.updateWorldMatrix(true,false);t.edge.copy(pages.matrixWorld).invert();
+  p.applyMatrix4(t.edge);p.x+=Math.sign(p.x||1)*LET_GO.out*slide;p.applyMatrix4(pages.matrixWorld);
+  reachArm(this.vrm,'left',p,1);this.grip.alignLeft(1);
  }
  // Arm geometry for one side: shoulder, wrist (world) and the arm's full length.
  arm(side){

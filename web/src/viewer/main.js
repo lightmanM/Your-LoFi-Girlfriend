@@ -10,6 +10,7 @@ import {seatCharacter} from '../balcony/seat.js';
 import {Wind,PLANTS,plateMaterial,leavesMaterial} from './wind.js';
 import {livePlants,PLANTS3D} from './plants.js';
 import {createMusic} from '../music/player.js';
+import {createBeat} from '../music/beat.js';
 import {bindMusicControls} from '../music/controls.js';
 import {mountHud} from '../hud/hud.js';
 import {mountIntro,INTRO} from '../intro/intro.js';
@@ -24,6 +25,7 @@ import {createChat} from '../voice/chat.js';
 import {mountAnswers} from '../voice/answers.js';
 import {CHAT,canStart} from '../voice/chat-plan.js';
 import {createReach,herCapsules} from '../voice/reach.js';
+import {createWelcome,welcomeDue,WELCOME} from '../companion/welcome-back.js';
 import {resolveAssets,probeFile,PRIVATE} from '../standin/resolve.js';
 import {standinChair} from '../standin/chair.js';
 import {plantCards,readTexture} from '../standin/plant-cards.js';
@@ -153,7 +155,8 @@ async function load(){
  state.reader=new Reader(vrm,book.scene,pose,look,{seed:params.has('seed')?+params.get('seed'):(Math.random()*1e9)|0,
   random:params.has('seed')?()=>.5:Math.random,
   eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined,
-  reachAt:params.has('reach')?+params.get('reach'):undefined});
+  reachAt:params.has('reach')?+params.get('reach'):undefined,nodAt:params.has('nod')?+params.get('nod'):undefined,
+  tuckAt:params.has('tuck')?+params.get('tuck'):undefined});
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
  state.ready=true;progress.release();standby.ready();requestAnimationFrame(()=>host.classList.add('ready'));
  if(!assets.plants.standin)swapInPlants(assets.plants.url,makePlants);
@@ -182,7 +185,7 @@ function frame(now){
   l.ang.value=w.angle('leaves');l.act.value=w.activity('leaves');
  }
  soundFrame();
- if(state.reader&&!state.frozen&&!state.held){state.reader.update(dt);greetingFrame();talkFrame(dt);chatFrame(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
+ if(state.reader&&!state.frozen&&!state.held){beatFrame(now);state.reader.update(dt);greetingFrame();welcomeFrame(dt);talkFrame(dt);chatFrame(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
@@ -241,7 +244,7 @@ function talkFrame(dt){
  try{
   if(!smallTalk&&voice&&talkOn&&state.reader)
   {smallTalk=createSmallTalk({voice,reader:state.reader,vrm:state.vrm,subtitles,target:camera.position,music,store,every:talkEvery});if(talkStarted)smallTalk.start();}
-  smallTalk?.update(dt,{greeting:!!state.greeting&&!state.greetingDone(),chatting:!!chat?.active()});
+  smallTalk?.update(dt,{greeting:greetingNow()||!!welcome?.active(),chatting:!!chat?.active()});
  }catch(e){   // a failure in small talk ends it for this visit, never the page
   console.error('small talk failed',e);talkBroken=true;try{smallTalk?.dispose();}catch{/* already broken */}smallTalk=null;
  }
@@ -274,6 +277,45 @@ function pokeChat(o){
  const first=chatFirstUsed?null:{ask:params.get('ask')??undefined,notice:params.get('notice')??undefined};chatFirstUsed=true;
  return chat.start(o??(first?.ask||first?.notice?first:undefined));
 }
+// The beat of the music, heard from its level as it plays (src/music/beat.js): now and then she nods to it for a few
+// bars (src/balcony/groove.js). Muted or paused music has no beat. ?nod=<s> brings the first nod forward; ?beat=<bpm>
+// gives her a steady beat without any music (for checks).
+const beat=createBeat(),steadyBeat=params.has('beat')?+params.get('beat'):0;
+function beatFrame(now){
+ if(steadyBeat>0){state.reader.beat={bpm:steadyBeat,phase:now/1000*steadyBeat/60%1,confidence:1};return;}
+ const s=music?.state();
+ if(s?.status!=='playing'||s.muted){state.reader.beat=null;return;}
+ const [low,mid,high]=music.levels(),t=now/1000;
+ beat.push(low+.5*mid+.5*high,t);state.reader.beat=beat.read(t);
+}
+// Welcome back (src/companion/welcome-back.js): when the visitor returns to the page after a minute or more away (its
+// tab was hidden), she looks up at them with a small smile and reads on. ?welcome=0 turns it off; ?away=<s> sets how
+// long an absence it takes.
+const welcomeOn=params.get('welcome')!=='0',welcomeAfter=params.has('away')?+params.get('away'):WELCOME.away;
+const greetingNow=()=>!!state.greeting&&!state.greetingDone();
+let welcome=null,welcomeBroken=false,hiddenAt=null;
+function welcomeFrame(dt){
+ if(welcomeBroken||!welcomeOn)return;
+ try{
+  if(!welcome&&state.reader)welcome=createWelcome({reader:state.reader,vrm:state.vrm,target:camera.position});
+  if(welcome?.active()&&(greetingNow()||smallTalk?.state().active||chat?.active()))welcome.yield();   // her voice comes first
+  welcome?.update(dt);
+ }catch(e){   // a failure here ends the welcome for this visit, never the page
+  console.error('welcome back failed',e);welcomeBroken=true;try{welcome?.yield();}catch{/* already broken */}welcome=null;
+ }
+}
+/** The visitor is back after `away` seconds: she looks up and smiles, if she is only reading. @returns {boolean} */
+function comeBack(away){
+ if(!welcome||welcome.active()||!state.reader)return false;
+ const due=welcomeDue(away,{started:talkStarted,greeting:greetingNow(),talking:!!smallTalk?.state().active,chatting:!!chat?.active(),
+  busy:state.reader.busy(),frozen:!!(state.frozen||state.held)},{...WELCOME,away:welcomeAfter});
+ if(due)welcome.greet();
+ return due;
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='hidden'){hiddenAt=performance.now();return;}
+ if(hiddenAt!==null){const away=(performance.now()-hiddenAt)/1000;hiddenAt=null;comeBack(away);}
+});
 // The pointer over her: a hand cursor and a very faint warm glow while a click would start a conversation (glow.js);
 // the hit test (reach.js) runs at most once a frame, only when the pointer has moved. Touch has no hover: a tap is a click.
 let reach=null,pointer=null,hover=false,glow=0,glowShown=0;
@@ -357,4 +399,12 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
  glance:o=>state.reader?.reading.glance(o),holdReading:on=>state.reader?.reading.holdReading(on),talking:on=>{if(state.reader)state.reader.talking=!!on;}};
 // click to talk, for checks: its state, start one as if she were clicked, pick an answer, the book's box on screen
 Object.assign(window.lofiViewer,{progress:()=>progress.snapshot(),standin:()=>({using:state.assets?.using??[]}),eyes:()=>({front:state.vrm?.lookAt?.faceFront.toArray()??null,applierFront:state.vrm?.lookAt?.applier?.faceFront?.toArray()??null}),plants:plantsReport,chairPanels:()=>state.chair&&chairPanels(state.chair),chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
+// welcome back, for checks: act as if the visitor returned after `away` seconds; its state
+Object.assign(window.lofiViewer,{comeBack:away=>comeBack(away),welcome:()=>welcome?.state()??null});
+// nodding to the music, for checks: the beat it hears, her nod now, and start one as soon as she is free
+Object.assign(window.lofiViewer,{beat:()=>state.reader?.beat??null,nod:()=>state.reader&&{weight:+state.reader.groove.weight().toFixed(3),on:state.reader.groove.on,next:+state.reader.groove.next.toFixed(1)},
+ nodSoon:()=>state.reader?.groove.startSoon(),
+ // the hair tuck, for checks: where it is now, and start one as soon as she is free
+ tuck:()=>state.reader&&{active:state.reader.tuck.active,t:+state.reader.tuck.t.toFixed(2),arm:+state.reader.tuck.armWeight().toFixed(3),next:+state.reader.nextTuck.toFixed(1)},
+ tuckSoon:()=>{if(state.reader)state.reader.nextTuck=state.reader.time;}});
 load().catch(e=>{state.error=e.message;note.textContent='The balcony could not load. Please refresh.';progress.release();standby.fail();console.error(e);});

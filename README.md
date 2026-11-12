@@ -17,6 +17,9 @@ Front end only: three.js and three-vrm, no server, no tracking.
 - **Reading that never loops**: eyes along the lines, page turns, look-ups, glances, breathing, small posture shifts,
   a short break every 4 to 8 minutes (book on her lap, shoulder rolls, head tilts with her eyes closed), and every
   5 to 15 minutes a full stretch with both arms over her head.
+- **Small things while she reads**: every few minutes she tucks her hair behind her ear, and when the music has a
+  clear beat she nods to it for a few bars.
+- **Welcome back**: return to the tab after a minute or more away and she looks up at you with a small smile.
 - **Greeting**: one of five lines at random as the picture comes into focus, never the same as last visit.
 - **Small talk** every 1 to 2 minutes: 32 lines about her small days, quiet thoughts and the philosophy book she is
   reading, some to you, some murmured to herself with a glance aside.
@@ -88,8 +91,9 @@ have the right to redistribute). Some places to start:
 - **Characters**: bring your own VRM. `web/public/standin/standin.json` places a character (scale, seat, small pose
   corrections); `scripts/standins/compress_vivi.py` shows how Vivi, a VRM 0.x model, was compressed and turned to face
   forward like a VRM 1.0 model. A character switcher would be welcome.
-- **Motion and animation**: reading, page turns, looks, the break and the overhead stretch in `web/src/balcony/`
-  (`reader.js`, `reading.js`, `unwind.js`, `overhead-stretch.js`), breathing in `web/src/companion/life.js`, motion
+- **Motion and animation**: reading, page turns, looks, the break, the overhead stretch, the hair tuck and the nod
+  to the music in `web/src/balcony/` (`reader.js`, `reading.js`, `unwind.js`, `overhead-stretch.js`, `hair-tuck.js`,
+  `groove.js`), breathing in `web/src/companion/life.js`, motion
   while she speaks in `web/src/voice/`. New gestures, idle behaviours and transitions are all open.
 - **Conversations and voice**: lines live in `scripts/voice/lines.json` (greetings, small talk, questions, replies);
   `scripts/voice/generate_lines.py` voices them with the VOICEVOX app. Please keep within
