@@ -16,7 +16,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?stretch=<seconds>` (her calm break), `?reach=<seconds>` (her overhead stretch), `?still=<seconds>`,
+Open http://127.0.0.1:5173/. Test hooks (not visible to visitors): `?seed=N`, `?stretch=<seconds>` (her calm break), `?reach=<seconds>` (her overhead stretch), `?tuck=<seconds>` (her hair tuck), `?nod=<seconds>` (her nod to the music), `?beat=<bpm>` (a steady beat without music), `?welcome=0`, `?away=<seconds>` (how long an absence gets a welcome back), `?still=<seconds>`,
 `?wind=0`, `?plantgain=<n>`, `?seat=0`, `?music=0`, `?musicstall=<seconds>`, `?hud=0`, `?intro=0`, `?greet=0`, `?line=<id>`, `?talk=0`, `?talkevery=<seconds>`,
 `?chat=0`, `?ask=<id>`, `?notice=<id>`, `?chatwait=<seconds>`, `?chatcool=<seconds>`, `?standin=1`;
 `window.lofiViewer` reports state (`greeting()` this visit's line, `voice()` the greeting as it plays, `greet()` starts
