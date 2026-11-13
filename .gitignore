@@ -20,6 +20,9 @@ web/public/environment/balcony-toon/*
 !web/public/environment/balcony-toon/*.webp
 !web/public/environment/balcony-toon/scene.json
 !web/public/environment/balcony-toon/book.glb
+!web/public/environment/balcony-toon/nap.json
+!web/public/environment/balcony-toon/nap-walk.json
+!web/public/environment/balcony-toon/nap-back.json
 web/public/music/*.mp3
 
 # Renders and clips made from those assets (linked from the design notes) stay local too

@@ -50,6 +50,9 @@
  "vrm": "/models/marycia/marycia-web.vrm",
  "pose": "/standin/reading-balcony.json",
  "book": "book.glb",
+ "nap": "nap.json",
+ "nap_walk": "nap-walk.json",
+ "nap_back": "nap-back.json",
  "wind": {
   "clean": "plate-clean.webp",
   "field": "wind-field.webp",

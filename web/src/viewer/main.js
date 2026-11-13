@@ -7,7 +7,7 @@ import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
 import {Reader} from '../balcony/reader.js';
 import {GRADE,gradeMaterial} from './grade.js';
 import {seatCharacter} from '../balcony/seat.js';
-import {Wind,PLANTS,plateMaterial,leavesMaterial} from './wind.js';
+import {Wind,PLANTS,REST,plateMaterial,leavesMaterial} from './wind.js';
 import {livePlants,PLANTS3D} from './plants.js';
 import {createMusic} from '../music/player.js';
 import {createBeat} from '../music/beat.js';
@@ -34,6 +34,10 @@ import {setGlow} from '../voice/glow.js';
 import {createProgress} from '../loading/progress.js';
 import {mountStandby} from '../loading/standby.js';
 import {pickLine,lastLine,rememberLine} from '../voice/pick-line.js';
+import {Sleeper} from '../balcony/nap.js';
+import {NapWalk,clipLength,seated,covered,shadowed} from '../balcony/nap-walk.js';
+import {NAP,napGap,napDue,napStart,napStep,darkness} from '../balcony/nap-plan.js';
+import {coverMaterial} from './cover.js';
 import {VISIBLE_CHAIR,CHAIR_SHADOW,CHAIR_CONTACT,prepareChair,chairPanels,pictureCamera,enableChairShadows,updateChairContact,calibrateChairContact} from '../balcony/visible-chair.js';
 
 const BASE='/environment/balcony-toon/';
@@ -43,6 +47,7 @@ const LIGHT={sunIntensity:2.0,sunColor:[1,.72,.5],sky:[.95,.78,.62],ground:[.59,
 if(new URLSearchParams(location.search).has('light')){const v=new URLSearchParams(location.search).get('light').split(',').map(Number);
  Object.assign(LIGHT,{sunIntensity:v[0],fill:v[1],sky:v.slice(2,5),sunColor:v.length>=8?v.slice(5,8):null,ground:v.slice(2,5).map(x=>x*.62)});}
 const FOCUS_X=.74;            // where she sits across the picture (0 left, 1 right): narrow screens crop around her
+const NAP_FOCUS_X=.3;         // and where she naps on the daybed: the crop goes with her, in the dark of the cut
 const host=document.getElementById('stage'),note=document.getElementById('note');
 const params=new URLSearchParams(location.search);
 // first load: every file she needs goes through one counted download, shown on the stand-by display (src/loading)
@@ -52,17 +57,19 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace
 host.append(renderer.domElement);
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(17,16/9,.05,120);
 const loader=new GLTFLoader();loader.register(p=>new VRMLoaderPlugin(p));
-const state={data:null,vrm:null,reader:null,ready:false,error:null,frames:[]};
+const state={data:null,vrm:null,reader:null,ready:false,error:null,frames:[],coverOn:{value:0},napData:null,walkClips:{out:null,back:null},lights:null,look:null,settleHair:false};
 const rad=THREE.MathUtils.degToRad;
 
 // Cover the screen with the authored 16:9 frame; on narrower screens keep her in view rather than the frame's centre.
-function fit(){
+// aim(): the crop alone (it follows her across the picture on narrow screens); fit(): with the canvas's size.
+function aim(){
  const w=host.clientWidth,h=host.clientHeight,a=w/h,c=state.data.camera,k=16/9;
  camera.fov=c.vfov_deg;camera.aspect=k;
  if(a>=k){const fullH=w/k;camera.setViewOffset(w,fullH,0,(fullH-h)/2,w,h);}
- else{const fullW=h*k,x=THREE.MathUtils.clamp(fullW*FOCUS_X-w/2,0,fullW-w);camera.setViewOffset(fullW,h,x,0,w,h);}
- camera.updateProjectionMatrix();renderer.setSize(w,h);
+ else{const fullW=h*k,x=THREE.MathUtils.clamp(fullW*(state.focusX??FOCUS_X)-w/2,0,fullW-w);camera.setViewOffset(fullW,h,x,0,w,h);}
+ state.narrow=a<k;camera.updateProjectionMatrix();
 }
+function fit(){aim();renderer.setSize(host.clientWidth,host.clientHeight);}
 // A picture layer: a plane filling the camera's view at a distance, drawn in a fixed order around her.
 function layer(material,distance,order){
  const c=state.data.camera,q=new THREE.Quaternion().fromArray(c.quaternion);
@@ -119,11 +126,13 @@ async function load(){
  ]);
  // the picture and the near leaves sway in one wind (wind.js)
  state.wind=new Wind();const palm={full:palmFull,overscan:d.wind.overscan,cover,near:d.wind.palm_near,depthRange:d.wind.depth_range};
- state.plateMat=plateMaterial(plate,clean,field,plantMask,false,palm);state.leavesMat=leavesMaterial(leaves);
- state.palmMat=plateMaterial(plate,clean,field,plantMask,true,palm);
- layer(state.plateMat,60,0);layer(state.palmMat,59,1.5);layer(state.leavesMat,1,10);
- // roses, balcony plants and ivy: live 3D, coloured from the picture at their rest position (whole where it hid them)
  const picCam=pictureCamera(d.camera.position,d.camera.quaternion,d.camera.hfov_deg,d.camera.vfov_deg);
+ const picTan=[Math.tan(rad(d.camera.hfov_deg)/2),Math.tan(rad(d.camera.vfov_deg)/2)];
+ state.plateMat=plateMaterial(plate,clean,field,plantMask,false,palm,{matrixWorld:picCam.matrixWorld,tan:picTan});state.leavesMat=leavesMaterial(leaves);
+ state.palmMat=plateMaterial(plate,clean,field,plantMask,true,palm);
+ // the palm goes over her: it stands in the room, in front of the daybed where she naps (never near her chair)
+ layer(state.plateMat,60,0);layer(state.palmMat,59,2.5);layer(state.leavesMat,1,10);
+ // roses, balcony plants and ivy: live 3D, coloured from the picture at their rest position (whole where it hid them)
  const windDir=new THREE.Vector3(1,0,0).applyQuaternion(picCam.quaternion).setY(0).normalize();   // toward screen right
  // cards cut from the plant mask first (src/standin/plant-cards.js); the balcony's plant meshes take their place once
  // they arrive after she is ready (swapInPlants), and the cards stay when those are missing
@@ -141,17 +150,20 @@ async function load(){
  vrm.scene.traverse(o=>{if(o.isMesh){o.renderOrder=2;o.frustumCulled=false;o.castShadow=true;}});
  if(params.has('grade')){const v=params.get('grade').split(',').map(Number);Object.assign(GRADE,{gain:v[0],sat:v[1],warm:v.slice(2,5)});}
  for(const root of [vrm.scene,book.scene])root.traverse(o=>{if(o.isMesh)[o.material].flat().forEach(m=>gradeMaterial(m));});
+ // on the daybed the picture's door frame and furniture cover her (cover.js); off while she is in her chair
+ for(const root of [vrm.scene,book.scene])root.traverse(o=>{if(o.isMesh)[o.material].flat().forEach(m=>coverMaterial(m,cover,{tan:new THREE.Vector2(...picTan),depthLog:Math.log2(d.wind.depth_range),on:state.coverOn}));});
  place(vrm,pose,d.character);scene.add(vrm.scene);
- state.seat=params.get('seat')==='0'?{drop:0,update(){}}:seatCharacter(vrm,state.chair);   // sit on the seat, not above it
+ state.seat=params.get('seat')==='0'?{drop:0,update(){},sync(){},press(){}}:seatCharacter(vrm,state.chair);   // sit on the seat, not above it
  // the book was exported in her hands at her unseated height: it drops with her, before its grip is captured
  book.scene.position.y-=state.seat.drop;book.scene.updateMatrixWorld(true);
  state.contactRadii=calibrateChairContact(state.chair,vrm);
- const look=new THREE.Object3D();look.position.fromArray(d.look_target);scene.add(look);
+ const look=state.look=new THREE.Object3D();look.position.fromArray(d.look_target);scene.add(look);
  if(vrm.lookAt){vrm.lookAt.target=look;vrm.lookAt.autoUpdate=true;}
  const hips=new THREE.Vector3().fromArray(d.character.hips);
  const sun=new THREE.DirectionalLight(new THREE.Color().fromArray(LIGHT.sunColor??d.sun.color),LIGHT.sunIntensity);
  sun.position.copy(hips).addScaledVector(new THREE.Vector3().fromArray(d.sun.direction),10);sun.target.position.copy(hips);enableChairShadows(renderer,scene,hips,d.sun.direction);
- scene.add(sun,sun.target,new THREE.HemisphereLight(new THREE.Color().fromArray(LIGHT.sky),new THREE.Color().fromArray(LIGHT.ground),LIGHT.fill));
+ const sky=new THREE.HemisphereLight(new THREE.Color().fromArray(LIGHT.sky),new THREE.Color().fromArray(LIGHT.ground),LIGHT.fill);
+ scene.add(sun,sun.target,sky);state.lights={sun,sky};
  state.reader=new Reader(vrm,book.scene,pose,look,{seed:params.has('seed')?+params.get('seed'):(Math.random()*1e9)|0,
   random:params.has('seed')?()=>.5:Math.random,
   eventScale:+(params.get('events')??1),mirrorV0:!assets.facesForward,stretchAt:params.has('stretch')?+params.get('stretch'):undefined,
@@ -160,6 +172,12 @@ async function load(){
  if(params.has('still')){const n=Math.round(+params.get('still')*60);for(let i=0;i<n;i++){state.reader.update(1/60);state.seat.update();vrm.update(1/60);}state.frozen=true;updateChairContact(state.chair,vrm);}
  state.ready=true;progress.release();standby.ready();requestAnimationFrame(()=>host.classList.add('ready'));
  if(!assets.plants.standin)swapInPlants(assets.plants.url,makePlants);
+ // where and how she naps (small; not needed to start): without it she simply never naps
+ if(d.nap)json(BASE+d.nap).then(n=>{state.napData=n;}).catch(e=>console.warn('her nap is unavailable',e.message));
+ // her walk to the daybed (half a megabyte of poses): without it she goes there by the cut
+ // (false: asked for and not to be had)
+ if(d.nap_walk)json(BASE+d.nap_walk).then(c=>{state.walkClips.out=c;}).catch(e=>{state.walkClips.out=false;console.warn('her walk to the daybed is unavailable',e.message);});
+ if(d.nap_back)json(BASE+d.nap_back).then(c=>{state.walkClips.back=c;}).catch(e=>{state.walkClips.back=false;console.warn('her way back from the daybed is unavailable',e.message);});
 }
 // The balcony's own plant meshes (8 MB) load after she is ready, so they do not hold up the start button; the plant cards
 // show until then, and stay (counted as a stand-in) if the file cannot be loaded.
@@ -185,7 +203,18 @@ function frame(now){
   l.ang.value=w.angle('leaves');l.act.value=w.activity('leaves');
  }
  soundFrame();
- if(state.reader&&!state.frozen&&!state.held){beatFrame(now);state.reader.update(dt);greetingFrame();welcomeFrame(dt);talkFrame(dt);chatFrame(dt);state.seat.update();state.vrm.update(dt);updateChairContact(state.chair,state.vrm);if(state.frames.length<600)state.frames.push(dt*1000);}
+ if(state.reader&&!state.frozen&&!state.held){
+  if(napFrame(dt))state.vrm.update(dt);   // on her way to the daybed, asleep on it or on her way back: she is posed there, and her voice rests
+  else{
+   beatFrame(now);state.reader.update(dt);greetingFrame();welcomeFrame(dt);talkFrame(dt);chatFrame(dt);state.seat.update();
+   if(state.settleHair){   // just back from the daybed: her hair starts at rest in the pose she now has
+    state.settleHair=false;state.vrm.humanoid.update();state.vrm.scene.updateMatrixWorld(true);state.vrm.springBoneManager?.reset();
+   }
+   state.vrm.update(dt);
+  }
+  updateChairContact(state.chair,state.vrm);   // also while she is away: the chair must not keep her shade
+  if(state.frames.length<600)state.frames.push(dt*1000);
+ }
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
@@ -215,7 +244,7 @@ const voiceReady=voice?.load().then(()=>{
  if(greetingLine)voice.prefetch(greetingLine);   // only this visit's line is downloaded
 }).catch(e=>console.warn('voice: lines unavailable, she will not speak',e.message));
 function greet({line=greetingLine,...options}={}){
- if(!voice||!greetOn||!line||!state.reader||state.frozen||(state.greeting&&!state.greetingDone()))return false;
+ if(!voice||!greetOn||!line||!state.reader||state.frozen||napBusy()||(state.greeting&&!state.greetingDone()))return false;
  smallTalk?.stop();chat?.stop();   // the greeting comes first: never two voices at once
  state.greeting=startGreeting({reader:state.reader,vrm:state.vrm,voice,lineId:line,target:camera.position,subtitles,options});
  if(state.greeting&&greetingPicked&&line===greetingLine)rememberLine(store,line);
@@ -244,7 +273,7 @@ function talkFrame(dt){
  try{
   if(!smallTalk&&voice&&talkOn&&state.reader)
   {smallTalk=createSmallTalk({voice,reader:state.reader,vrm:state.vrm,subtitles,target:camera.position,music,store,every:talkEvery});if(talkStarted)smallTalk.start();}
-  smallTalk?.update(dt,{greeting:greetingNow()||!!welcome?.active(),chatting:!!chat?.active()});
+  smallTalk?.update(dt,{greeting:greetingNow()||!!welcome?.active()||napBusy(),chatting:!!chat?.active()});   // no new line once she is leaving her chair
  }catch(e){   // a failure in small talk ends it for this visit, never the page
   console.error('small talk failed',e);talkBroken=true;try{smallTalk?.dispose();}catch{/* already broken */}smallTalk=null;
  }
@@ -268,7 +297,7 @@ function chatFrame(dt){
 }
 /** Whether a click on her starts a conversation now: she is only reading, past the cool-down (chat-plan.js). */
 const chatGates=()=>chat&&state.reader?{ready:chat.state().ready,started:talkStarted,greeting:!!state.greeting&&!state.greetingDone(),
- talking:!!smallTalk?.state().active,chatting:chat.active(),busy:state.reader.busy(),frozen:!!(state.frozen||state.held),
+ talking:!!smallTalk?.state().active,chatting:chat.active(),busy:state.reader.busy(),frozen:!!(state.frozen||state.held||napBusy()),
  since:performance.now()/1000-chat.endedAt()}:null;
 function chatFree(){const g=chatGates();return !!g&&canStart(g,chatCool);}
 function pokeChat(o){
@@ -308,7 +337,7 @@ function welcomeFrame(dt){
 function comeBack(away){
  if(!welcome||welcome.active()||!state.reader)return false;
  const due=welcomeDue(away,{started:talkStarted,greeting:greetingNow(),talking:!!smallTalk?.state().active,chatting:!!chat?.active(),
-  busy:state.reader.busy(),frozen:!!(state.frozen||state.held)},{...WELCOME,away:welcomeAfter});
+  busy:state.reader.busy(),frozen:!!(state.frozen||state.held||napBusy())},{...WELCOME,away:welcomeAfter});
  if(due)welcome.greet();
  return due;
 }
@@ -316,6 +345,114 @@ document.addEventListener('visibilitychange',()=>{
  if(document.visibilityState==='hidden'){hiddenAt=performance.now();return;}
  if(hiddenAt!==null){const away=(performance.now()-hiddenAt)/1000;hiddenAt=null;comeBack(away);}
 });
+// Her nap (src/balcony/nap-plan.js, nap-walk.js, nap.js): now and then, when she is only reading, she closes her book,
+// gets up, walks out to the daybed and lies down to sleep; 15 to 20 minutes later she wakes, gets up, walks back to
+// her chair and opens her book again. A character those walks were not made for (a stand-in, ?character=) goes each
+// way by a cut instead: the picture dips to dark like a camera cut and comes back with her in the other place (and
+// back in her chair she stretches). While she is away from her chair she does not talk, and clicks do nothing.
+// ?nap=<s> brings the first nap forward, ?napfor=<s> sets how long she sleeps, ?nap=0 turns naps off, ?napwalk=0
+// sends her by the cut both ways.
+const napOn=params.get('nap')!=='0',napWalkOn=params.get('napwalk')!=='0'&&!params.get('character');
+// how she is lit out on the balcony, matched by colour samples on her to the Blender render of her asleep there (open
+// shade, lit mostly by the sky): sun and fill are of her chair's, sky is the fill's colour out there
+const NAP_LIGHT={sun:.95,fill:2.4,sky:[.85,.88,1.1]};
+// her shadow on the picture: bone to bone, radius and falloff (m)
+const REST_ON=[['hips','chest',.16,.2],['neck','head',.12,.16],['leftUpperLeg','leftLowerLeg',.11,.15],['rightUpperLeg','rightLowerLeg',.11,.15],
+ ['leftLowerLeg','leftFoot',.09,.13],['rightLowerLeg','rightFoot',.09,.13],['leftFoot','leftToes',.11,.12],['rightFoot','rightToes',.11,.12],
+ ['leftUpperArm','leftLowerArm',.07,.11]];
+// her hips' x in the room on her way: in her chair, at the door, well outside, on the daybed
+const NAP_WAY={chair:9,door:8.5,outside:7.4,bed:5.97};
+if(params.has('naplight')){const v=params.get('naplight').split(',').map(Number);Object.assign(NAP_LIGHT,{sun:v[0],fill:v[1]??1,...(v.length>=5?{sky:v.slice(2,5)}:{})});}   // ?naplight=sun,fill[,r,g,b] for tuning
+let napState=napStart(),napClock=0,napNext=params.has('nap')?+params.get('nap'):napGap(NAP.first,Math.random),napFor=0,sleeper=null,napBroken=false;
+const walkers={out:null,back:null},walkBroken={out:false,back:false};   // her walk out and her way back (nap-walk.js)
+const walking=()=>walkers.out?.active?walkers.out:walkers.back?.active?walkers.back:null;
+const napBusy=()=>napState.phase!=='awake';
+const setDark=v=>{const f=v>.001?`brightness(${(1-v).toFixed(3)})`:'';if(canvas.style.filter!==f)canvas.style.filter=f;};
+const AT_CHAIR=Object.freeze({light:0,cover:false,shadow:0,crop:0}),ON_BED=Object.freeze({light:1,cover:true,shadow:1,crop:1});
+const tint=new THREE.Color(),lerp=THREE.MathUtils.lerp,hipsNow=new THREE.Vector3();
+/**
+ * Her surroundings for where she is. light: how she is lit, 0 as in her chair .. 1 as on the daybed; cover: whether the
+ * picture's door frame and furniture cover her (cover.js); shadow: her shadow on the picture, 0..1 (wind.js REST);
+ * crop: where narrow screens look, 0 her chair .. 1 the daybed.
+ */
+function surround({light,cover,shadow,crop}){
+ const u=state.plateMat.userData.uniforms,{sun,sky}=state.lights;
+ sun.intensity=LIGHT.sunIntensity*lerp(1,NAP_LIGHT.sun,light);sky.intensity=LIGHT.fill*lerp(1,NAP_LIGHT.fill,light);
+ sky.color.fromArray(LIGHT.sky).lerp(tint.fromArray(NAP_LIGHT.sky),light);
+ sky.groundColor.fromArray(LIGHT.ground).lerp(tint.fromArray(NAP_LIGHT.sky).multiplyScalar(.72),light);
+ state.coverOn.value=cover?1:0;
+ u.restOn.value=shadow;
+ if(shadow>0){
+  u.restSun.value.fromArray(state.data.sun.direction).normalize();
+  REST_ON.forEach(([from,to,r,fall],i)=>{
+   const h=state.vrm.humanoid,a=h.getNormalizedBoneNode(from),b=h.getNormalizedBoneNode(to);
+   if(a&&b&&i<REST.count){a.getWorldPosition(u.restA.value[i]);b.getWorldPosition(u.restB.value[i]);u.restR.value[i].set(r,fall);}
+  });
+ }
+ const f=lerp(FOCUS_X,NAP_FOCUS_X,crop);if(f!==(state.focusX??FOCUS_X)){state.focusX=f;if(state.narrow)aim();}   // wide screens show the whole width
+}
+/** Her surroundings as she walks: they change with where she is and how far into the walk. */
+function walkSurround(w){
+ const x=w.hips(hipsNow).x,step=THREE.MathUtils.smoothstep;
+ surround({light:1-step(x,NAP_WAY.outside,NAP_WAY.door),cover:covered(w.clip,w.t),shadow:shadowed(w.clip,w.t),crop:1-step(x,NAP_WAY.bed,NAP_WAY.chair)});
+}
+const calmPointer=()=>{hover=false;canvas.style.cursor='';if(glowShown!==0){setGlow(state.vrm,0);glow=glowShown=0;}};
+/** Whether she walks that way ('out', 'back') when it comes to it: its clip has arrived, and it was made for this character. */
+const canWalk=which=>napWalkOn&&!walkBroken[which]&&!!state.walkClips[which]&&!!state.reader&&!state.assets.using.includes('character');
+/** That walk's player, made when it is first needed; a clip it cannot play is given up (she then goes by the cut). */
+function napWalker(which){
+ if(walkers[which]||!canWalk(which))return walkers[which];
+ try{walkers[which]=new NapWalk(state.vrm,state.book,state.walkClips[which],{grip:state.reader.grip,look:state.look,leaf:state.reader.reading.leaf.mesh,drop:state.seat.drop,mirrorV0:!state.assets.facesForward});}
+ catch(e){walkBroken[which]=true;console.warn(`her walk (${which}) cannot be played; she goes by the cut`,e.message);}
+ return walkers[which];
+}
+/** One frame of her nap. @returns {boolean} whether she has been posed for this frame (away from her chair, or
+ *  easing back into her reading): the viewer then leaves her reading and her voice alone. */
+function napFrame(dt){
+ if(!napOn||napBroken||!state.napData)return false;
+ let posed=false;   // the reader has already posed her this frame (the end of her way back)
+ try{
+  sleeper??=new Sleeper(state.vrm,state.book,state.napData,{mirrorV0:!state.assets.facesForward,leaf:state.reader.reading.leaf.mesh});
+  napClock+=dt;
+  const due=napState.phase==='awake'&&napDue(napClock,napNext,{started:talkStarted,greeting:greetingNow(),talking:!!smallTalk?.state().active,
+   chatting:!!chat?.active(),welcoming:!!welcome?.active(),busy:state.reader.busy(),frozen:false,hidden:document.visibilityState==='hidden'});
+  if(due)napFor=params.has('napfor')?Math.max(1,+params.get('napfor')):napGap(NAP.length,Math.random);
+  napState=napStep(napState,dt,{due,length:napFor,walk:due?(napWalker('out')?.length??0):0,back:napState.phase==='asleep'?(napWalker('back')?.length??0):0});
+  const event=napState.event;
+  if(event==='walk'){walkers.out.begin();calmPointer();}
+  if(event==='getup'){walkers.back.begin({home:sleeper.saved});sleeper.release();}   // she wakes and gets up by herself
+  const w=walking(),tailed=!!w?.tailing;
+  if(w){
+   // back in her chair the clip hands over to her reading: the reader poses her first, the clip's share over it goes
+   if(tailed){state.reader.update(dt);state.seat.update();posed=true;}
+   w.update(dt);walkSurround(w);
+   // the seat presses her clothes flat while all her weight is on it, from where she is now; as soon as she starts
+   // to rise it lets go (as the owner saw and approved it on her way out), and it takes hold again once she is down
+   state.seat.sync();state.seat.press(seated(w.clip,w.t)>=1);
+  }
+  if(event==='lie'){
+   if(walkers.out?.active){walkers.out.end();sleeper.lie({home:walkers.out.home,walked:true});}   // she walked there: nothing jumps
+   else{sleeper.lie();sleeper.update(0);state.vrm.update(0);}                                     // placed there in the dark of the cut
+   surround(ON_BED);calmPointer();state.seat.press(false);
+  }
+  if(event==='rise'||(event==='woke'&&sleeper.asleep)){sleeper.rise();surround(AT_CHAIR);state.seat.press(true);state.settleHair=true;}   // the cut back
+  const walkedBack=event==='woke'&&!!walkers.back?.active;
+  if(walkedBack){walkers.back.finish();surround(AT_CHAIR);state.seat.press(true);}
+  if(napState.phase==='awake'&&event){   // back at her book: the next nap is a long way off
+   napNext=napClock+napGap(NAP.every,Math.random);
+   if(!walkedBack)state.reader.next={...state.reader.next,stretch:state.reader.time+NAP.stretchAfter};   // placed back by the cut, she stretches soon
+  }
+  setDark(darkness(napState));
+  if(sleeper.asleep)sleeper.update(dt);
+  return sleeper.asleep||!!walking()||tailed;
+ }catch(e){   // a failure in her nap ends it for this visit, never the page: she is put back in her chair
+  console.error('her nap failed',e);napBroken=true;
+  try{for(const w of [walkers.out,walkers.back])if(w?.active)w.abort();}catch{/* already broken */}
+  try{sleeper?.rise();}catch{/* already broken */}
+  try{surround(AT_CHAIR);state.seat.press(true);}catch{/* already broken */}
+  state.settleHair=true;setDark(0);napState=napStart();return posed;
+ }
+}
 // The pointer over her: a hand cursor and a very faint warm glow while a click would start a conversation (glow.js);
 // the hit test (reach.js) runs at most once a frame, only when the pointer has moved. Touch has no hover: a tap is a click.
 let reach=null,pointer=null,hover=false,glow=0,glowShown=0;
@@ -382,7 +519,7 @@ const intro=withIntro?mountIntro({onStart:()=>{
  bindControls();
 }}):null;
 if(!intro)bindControls();
-import.meta.hot?.dispose(()=>{intro?.dispose();hud?.unmount();unbindMusic?.();music?.dispose();state.greeting?.stop();smallTalk?.dispose();voice?.dispose();subtitles?.unmount();});
+import.meta.hot?.dispose(()=>{setDark(0);intro?.dispose();hud?.unmount();unbindMusic?.();music?.dispose();state.greeting?.stop();smallTalk?.dispose();voice?.dispose();subtitles?.unmount();});
 // For automated checks only; nothing here is shown to visitors.
 window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state.wind.force(state.wind.t).toFixed(2),palmDeg:+(state.wind.angle('palm')*57.3).toFixed(2),leavesDeg:+(state.wind.angle('leaves')*57.3).toFixed(2),gusts:state.wind.gusts?.length??0,next:+(state.wind.next-state.wind.t).toFixed(1)},pose:()=>{const h=state.vrm.humanoid,P=n=>h.getNormalizedBoneNode(n).getWorldPosition(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3));
  const out=Object.fromEntries(['neck','chest','leftShoulder','rightShoulder','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm','leftHand','rightHand','head'].map(n=>[n,P(n)]));
@@ -401,6 +538,12 @@ window.lofiViewer={wind:()=>state.wind&&{t:+state.wind.t.toFixed(1),force:+state
 Object.assign(window.lofiViewer,{progress:()=>progress.snapshot(),standin:()=>({using:state.assets?.using??[]}),eyes:()=>({front:state.vrm?.lookAt?.faceFront.toArray()??null,applierFront:state.vrm?.lookAt?.applier?.faceFront?.toArray()??null}),plants:plantsReport,chairPanels:()=>state.chair&&chairPanels(state.chair),chat:()=>chat&&{...chat.state(),glow:+glow.toFixed(3),free:chatFree(),gates:chatGates()},poke:o=>pokeChat(o),answer:i=>chat?.pick(i)??false,bookRect,chatPoint});
 // welcome back, for checks: act as if the visitor returned after `away` seconds; its state
 Object.assign(window.lofiViewer,{comeBack:away=>comeBack(away),welcome:()=>welcome?.state()??null});
+// her nap, for checks: where it is now, and start one as soon as she is free
+Object.assign(window.lofiViewer,{nap:()=>({phase:napState.phase,t:+napState.t.toFixed(2),asleep:!!sleeper?.asleep,walking:!!walking(),walk:canWalk('out')?+clipLength(state.walkClips.out).toFixed(2):0,back:canWalk('back')?+clipLength(state.walkClips.back).toFixed(2):0,
+  book:bookBox()?.getCenter(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3))??null,
+  dark:+darkness(napState).toFixed(3),next:+(napNext-napClock).toFixed(1),ready:!!state.napData&&(!napWalkOn||((state.walkClips.out!==null||!state.data.nap_walk)&&(state.walkClips.back!==null||!state.data.nap_back))),covered:state.coverOn.value===1,
+  hips:state.vrm?.humanoid.getRawBoneNode('hips').getWorldPosition(new THREE.Vector3()).toArray().map(x=>+x.toFixed(3))??null}),
+ napSoon:()=>{napNext=napClock;}});
 // nodding to the music, for checks: the beat it hears, her nod now, and start one as soon as she is free
 Object.assign(window.lofiViewer,{beat:()=>state.reader?.beat??null,nod:()=>state.reader&&{weight:+state.reader.groove.weight().toFixed(3),on:state.reader.groove.on,next:+state.reader.groove.next.toFixed(1)},
  nodSoon:()=>state.reader?.groove.startSoon(),
