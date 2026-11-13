@@ -19,6 +19,9 @@ Front end only: three.js and three-vrm, no server, no tracking.
   5 to 15 minutes a full stretch with both arms over her head.
 - **Small things while she reads**: every few minutes she tucks her hair behind her ear, and when the music has a
   clear beat she nods to it for a few bars.
+- **A nap**: once in a long while she yawns, closes her book, gets up and walks out to the daybed, lies down on her
+  side with the book beside her and sleeps; 15 to 20 minutes later she wakes, gets up, walks back in, sits down and
+  opens her book again. (The stand-in character goes each way by a cut to dark: the walks are fitted to Marycia.)
 - **Welcome back**: return to the tab after a minute or more away and she looks up at you with a small smile.
 - **Greeting**: one of five lines at random as the picture comes into focus, never the same as last visit.
 - **Small talk** every 1 to 2 minutes: 32 lines about her small days, quiet thoughts and the philosophy book she is
@@ -93,7 +96,8 @@ have the right to redistribute). Some places to start:
   forward like a VRM 1.0 model. A character switcher would be welcome.
 - **Motion and animation**: reading, page turns, looks, the break, the overhead stretch, the hair tuck and the nod
   to the music in `web/src/balcony/` (`reader.js`, `reading.js`, `unwind.js`, `overhead-stretch.js`, `hair-tuck.js`,
-  `groove.js`), breathing in `web/src/companion/life.js`, motion
+  `groove.js`), her nap and her walks to the daybed and back (`nap-plan.js`, `nap-walk.js`, `nap.js`; made in Blender
+  with `scripts/balcony-nap/`), breathing in `web/src/companion/life.js`, motion
   while she speaks in `web/src/voice/`. New gestures, idle behaviours and transitions are all open.
 - **Conversations and voice**: lines live in `scripts/voice/lines.json` (greetings, small talk, questions, replies);
   `scripts/voice/generate_lines.py` voices them with the VOICEVOX app. Please keep within

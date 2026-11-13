@@ -67,10 +67,17 @@ vec2 lofiBend(vec2 px,vec2 pivot,float ang,float h){
 }`;
 const toUv=([x,y])=>new THREE.Vector2(x,1440-y);   // pivots in the shader: pixels with y up
 
+// Where she lies on the daybed the picture takes her shadow, so she rests on it instead of floating over it: each
+// pixel's place in the room (from the cover map's distance) is measured to capsules along her body, for the darkening
+// right against her, and a ray from it toward the sun is tested against the same capsules, for the shadow she casts.
+// Colour and strengths are matched by eye to her shadow in the Blender render of the same pose.
+export const REST={count:9,color:[.36,.22,.17],contact:.5,shadow:.25,soft:3};
+
 /** The background: picture, the picture without the swaying plants, and the wind field. palm: the palm alone and whole
  * (rendered `overscan` times wider than the picture, so fronds swinging in from past the edge exist), the cover map
- * (R: distance to the nearest opaque surface) and the palm's nearest distance, to keep it behind anything in front. */
-export function plateMaterial(full,clean,field,plantMask,palmOnly=false,palm){
+ * (R: distance to the nearest opaque surface) and the palm's nearest distance, to keep it behind anything in front.
+ * view: the picture camera's world matrix and the tangents of half its field of view, for the darkening under her. */
+export function plateMaterial(full,clean,field,plantMask,palmOnly=false,palm,view=null){
  for(const t of [full,clean,palm.full])t.colorSpace=THREE.SRGBColorSpace;
  palm.full.generateMipmaps=false;palm.full.minFilter=THREE.LinearFilter;
  palm.cover.colorSpace=THREE.NoColorSpace;palm.cover.generateMipmaps=false;palm.cover.minFilter=palm.cover.magFilter=THREE.NearestFilter;
@@ -80,12 +87,23 @@ export function plateMaterial(full,clean,field,plantMask,palmOnly=false,palm){
   angPalm:{value:0},angIvy:{value:0},angRoses:{value:0},shearPots:{value:0},act:{value:new THREE.Vector4()},
   pivPalm:{value:toUv(PLANTS.palm.pivots[0])},pivRoses:{value:toUv(PLANTS.roses.pivots[0])},
   pivIvyA:{value:toUv(PLANTS.ivy.pivots[0])},pivIvyB:{value:toUv(PLANTS.ivy.pivots[1])},
-  clump:{value:new THREE.Vector4(PLANTS.palm.clump,PLANTS.ivy.clump,PLANTS.balcony.clump,PLANTS.roses.clump)}};
+  clump:{value:new THREE.Vector4(PLANTS.palm.clump,PLANTS.ivy.clump,PLANTS.balcony.clump,PLANTS.roses.clump)},
+  restOn:{value:0},restA:{value:Array.from({length:REST.count},()=>new THREE.Vector3(0,-99,0))},restB:{value:Array.from({length:REST.count},()=>new THREE.Vector3(0,-99,0))},
+  restR:{value:Array.from({length:REST.count},()=>new THREE.Vector2(.1,.1))},restColor:{value:new THREE.Color().fromArray(REST.color)},
+  camWorld:{value:view?.matrixWorld??new THREE.Matrix4()},camTan:{value:new THREE.Vector2(...(view?.tan??[1,1]))},restSun:{value:new THREE.Vector3(0,1,0)}};
  const m=new THREE.ShaderMaterial({uniforms:u,depthTest:false,depthWrite:false,toneMapped:false,transparent:palmOnly,
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
   fragmentShader:`${SIZE}${NOISE}
 uniform sampler2D plate,clean,field,plantMask,palmFull,cover;uniform float time,angPalm,angIvy,angRoses,shearPots,palmOnly,overscan,palmNear,depthLog;uniform vec4 act,clump;
 uniform vec2 pivPalm,pivRoses,pivIvyA,pivIvyB;varying vec2 vUv;
+uniform float restOn;uniform vec3 restA[${REST.count}],restB[${REST.count}],restColor,restSun;uniform vec2 restR[${REST.count}],camTan;uniform mat4 camWorld;
+float lofiSeg(vec3 p,vec3 a,vec3 b){vec3 ab=b-a;float t=clamp(dot(p-a,ab)/max(dot(ab,ab),1e-6),0.,1.);return length(p-a-ab*t);}
+// how much of the sun a capsule leaves a point (1: all of it): the ray's nearest pass by the capsule, softer with distance
+float lofiLit(vec3 ro,vec3 rd,vec3 a,vec3 b,float r){
+ vec3 ba=b-a,oa=ro-a;float baba=dot(ba,ba),dba=dot(rd,ba),oad=dot(oa,rd),oaba=dot(oa,ba),den=max(baba-dba*dba,1e-5);
+ float ts=clamp((oaba-oad*dba)/den,0.,1.),tr=max(dot(a+ba*ts-ro,rd),.02);   // along the capsule, then along the ray
+ float s=clamp(${REST.soft.toFixed(1)}*(length(ro+rd*tr-a-ba*ts)-r)/tr+.5,0.,1.);return s*s*(3.-2.*s);
+}
 void main(){
  vec4 f=texture2D(field,vUv);float h=f.r,wPalm=f.g,wIvy=f.b,wBal=f.a;
  vec2 px=vUv*lofiPx;
@@ -108,7 +126,18 @@ void main(){
  still=mix(still,texture2D(clean,vUv).rgb,smoothstep(0.,.5,pm));
  if(palmOnly>.5){       // second pass after the 3D plants: only the palm, so its fronds stay in front of the roses
   gl_FragColor=vec4(palmCol,a*step(.01,wPalm));
- }else gl_FragColor=vec4(mix(still,palmCol,a),1.);
+ }else{
+  if(restOn>0.){      // the daybed darkens where she rests on it
+   float dd=exp2((cv.r+cv.g/255.)*depthLog);vec3 pw=(camWorld*vec4((vUv*2.-1.)*camTan*dd,-dd,1.)).xyz;float near=0.;
+   float lit=1.;
+   for(int i=0;i<${REST.count};i++){
+    float q=1.-smoothstep(restR[i].x,restR[i].x+restR[i].y,lofiSeg(pw,restA[i],restB[i]));near=max(near,q*q);
+    lit=min(lit,lofiLit(pw,restSun,restA[i],restB[i],restR[i].x));
+   }
+   still=mix(still,still*restColor,max(near*${REST.contact.toFixed(2)},(1.-lit)*${REST.shadow.toFixed(2)})*restOn);
+  }
+  gl_FragColor=vec4(mix(still,palmCol,a),1.);
+ }
  #include <colorspace_fragment>
 }`});
  m.userData.uniforms=u;return m;
