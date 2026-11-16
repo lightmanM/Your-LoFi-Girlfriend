@@ -1,5 +1,5 @@
 {
-  "_note": "Licences were checked on each Free Music Archive page on 2026-11-07. 'include': false keeps a track out of the web build.",
+  "_note": "Free Music Archive licences were checked on each track's page on 2026-11-07; later entries say in their notes where the permission comes from. A source is one 'file', a 'zip' of MP3s, or a 'folder' of audio files. 'include': false keeps it out of the web build.",
   "sources": [
     {
       "artist": "Lao Ban",
@@ -35,6 +35,22 @@
       "license": {"name": "CC BY-NC-ND 4.0", "url": "https://creativecommons.org/licenses/by-nc-nd/4.0/"},
       "source_url": "https://freemusicarchive.org/music/john-lopker/tomorrows-never-come/your-best-friend/",
       "notes": "Non-commercial only; excluded until we know the site will never make money."
+    },
+    {
+      "artist": "SoapXI",
+      "folder": "soapxi",
+      "include": true,
+      "license": {"name": "CC BY-NC-SA 4.0", "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"},
+      "source_url": "https://soapxi.github.io",
+      "notes": "Album 'Sodium Lauryl Sulfate', 8 tracks, downloaded from the artist's own download page on 2026-11-16. The artist offered all their music for the site and asked for credit by website and/or Instagram @soapximusic: https://www.reddit.com/r/LofiHipHop/comments/1xuqzrr/comment/19skxqqqhmcxw/. Non-commercial licence: holds only while the site makes no money. Their site asks that the music not be fed to AI. Their single and Halloween EP are tagged sample-based and are left out."
+    },
+    {
+      "artist": "Bamboo Fox",
+      "folder": "bamboo-fox",
+      "include": false,
+      "license": {"name": "Used with permission", "url": "https://www.reddit.com/r/LofiHipHop/comments/1xuqzrr/comment/19smptnyi524k/"},
+      "source_url": "https://youtu.be/iZOFH_Dd1lI",
+      "notes": "Album 'Cloud Journeys', 11 tracks. Excluded until the artist confirms: the artist offered the music in the linked Reddit comment and asked for credit by YouTube or Spotify link, but has not yet said in plain words that the site may play it. Audio was taken from the YouTube upload on 2026-11-16 and split at its chapters; replace it with files from the artist."
     }
   ]
 }

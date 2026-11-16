@@ -30,7 +30,7 @@ Front end only: three.js and three-vrm, no server, no tracking.
   and a reply to your pick; subtle motion (a curious tilt while she waits, a nod when you answer).
 - **Voice**: VOICEVOX 冥鳴ひまり, mouth on the sound, subtitles in Japanese and English, the music dipping while she speaks.
 - **Camera frame and music**: a quiet HUD with a counter, level bars, play, pause, skip, volume and a playlist of
-  CC-licensed lofi tracks; media keys and phone controls work.
+  credited lofi tracks; media keys and phone controls work.
 - **Wind**: the palm, near leaves and potted plants sway in one wind across the painted picture.
 - Works on phones; keyboard reachable; nothing is sent anywhere (her memory of what you heard stays in your browser).
 
@@ -132,7 +132,7 @@ Design notes, specs and plans are in [docs/](docs/README.md).
   included so this project runs; you may use them to run and develop this project, not reuse them elsewhere or
   redistribute them separately; not covered by the MIT licence.
 - **Stand-in character**: Vivi, pixiv Inc. (VRoid Project), CC0 ([record](web/public/standin/CREDITS.md)).
-- **Voice**: VOICEVOX:冥鳴ひまり. **Music**: Lao Ban (CC0) and VibeDepot (CC BY-ND 4.0) via Free Music Archive, credited
-  on the page. **Live site's character**: Marycia ©BeroarN.
+- **Voice**: VOICEVOX:冥鳴ひまり. **Music**: Lao Ban (CC0) and VibeDepot (CC BY-ND 4.0) via Free Music Archive, and SoapXI
+  (CC BY-NC-SA 4.0, shared by the artist), credited on the page. **Live site's character**: Marycia ©BeroarN.
 
 Full details: [CREDITS.md](CREDITS.md).

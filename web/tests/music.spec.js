@@ -18,7 +18,9 @@ test('music waits for a gesture, then plays, skips, mutes and pauses',async({pag
  await expect(page.locator('.hud-ctl')).toBeHidden();                   // controls stay folded until interaction
  await page.mouse.click(40,40);
  await until(page,()=>window.lofiViewer.music().status==='playing');
- const first=await music(page);expect(first.track.title).toBeTruthy();expect(first.track.license).toMatch(/CC/);
+ const first=await music(page);expect(first.track.title).toBeTruthy();
+ const listed=(await playlist(request)).tracks.find(t=>t.id===first.track.id);   // whichever track the shuffle picked
+ expect(first.track.license).toBeTruthy();expect(first.track.license).toBe(listed.license.name);
  await until(page,t=>window.lofiViewer.music().time>t+.5,first.time);    // the clock is moving: audio is playing
  await page.keyboard.press('n');
  await until(page,id=>window.lofiViewer.music().track.id!==id,first.track.id);
