@@ -74,8 +74,9 @@ change or add a line, edit `scripts/voice/lines.json` and, with the VOICEVOX app
 
 Music lives in `public/music/`. `playlist.json` (track, duration, licence, loudness gain) and `CREDITS.md` are
 tracked; the MP3s are git-ignored and rebuilt from the downloads in `assets/music/` with
-`python3 scripts/music/prepare_music.py`. Licences are recorded in `scripts/music/tracks.json`; CC BY-ND tracks must
-be credited and played unedited (no trims, loops or baked-in mixes, and no recording them into videos).
+`python3 scripts/music/prepare_music.py`. Licences are recorded in `scripts/music/tracks.json` (a source is one file, a
+zip, or a folder of audio files); CC BY-ND tracks must be credited and played unedited (no trims, loops or baked-in
+mixes, and no recording them into videos), and CC BY-NC-SA tracks only while the site makes no money.
 
 ## Structure
 

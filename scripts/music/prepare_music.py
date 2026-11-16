@@ -1,7 +1,7 @@
 """Prepare licensed music for the web player.
 
 Reads scripts/music/tracks.json, encodes every included track to a small MP3
-(audio untouched apart from the format change, which the CC licences allow),
+(audio untouched apart from the format change, which the licences allow),
 measures loudness so the player can level tracks at runtime, and writes
 playlist.json plus CREDITS.md next to the audio.
 
@@ -25,6 +25,7 @@ TARGET_LUFS = -16.0      # common loudness for web/streaming playback
 PEAK_CEILING_DB = -1.0   # never let runtime gain push true peaks above this
 VBR_QUALITY = "5"        # LAME V5, about 130 kbps: transparent enough for soft lofi
 REQUIRED = ("artist", "license", "source_url")
+AUDIO = (".mp3", ".opus", ".ogg", ".m4a", ".flac", ".wav")   # what a "folder" entry picks up
 
 
 def slugify(artist: str, title: str) -> str:
@@ -49,8 +50,8 @@ def validate_source(src: dict) -> None:
     lic = src.get("license") or {}
     if not lic.get("name") or not lic.get("url"):
         missing.append("license.name/url")
-    if not (src.get("file") or src.get("zip")):
-        missing.append("file or zip")
+    if not (src.get("file") or src.get("zip") or src.get("folder")):
+        missing.append("file, zip or folder")
     if missing:
         raise ValueError(f"{src.get('artist', '?')}: missing {', '.join(sorted(set(missing)))}")
 
@@ -88,6 +89,15 @@ def expand(src: dict, folder: Path, scratch: Path) -> list[tuple[Path, str]]:
     """(audio path, title) pairs for one manifest entry."""
     if src.get("file"):
         return [(folder / src["file"], src.get("title") or Path(src["file"]).stem)]
+    if src.get("folder"):   # an album kept as loose files: every audio file directly inside, in name order
+        album = folder / src["folder"]
+        if not album.is_dir():
+            raise FileNotFoundError(album)
+        files = sorted(p for p in album.iterdir()
+                       if p.is_file() and p.suffix.lower() in AUDIO and not p.name.startswith("."))
+        if not files:
+            raise FileNotFoundError(f"no audio in {album}")
+        return [(p, title_from_member(p.name, src["artist"])) for p in files]
     target = scratch / slugify(src["artist"], "pack")
     with zipfile.ZipFile(folder / src["zip"]) as z:
         members = sorted(m for m in z.namelist()

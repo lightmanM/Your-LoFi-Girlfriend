@@ -34,7 +34,7 @@ function creditsFooter(){
  return foot;
 }
 
-/** The playlist panel: every track; pick one to play it, "source" opens its page on Free Music Archive. */
+/** The playlist panel: every track; pick one to play it, "source" opens the page it came from. */
 function playlistPanel(music){
  const panel=el('div','hud-playlist');panel.hidden=true;panel.tabIndex=-1;panel.id='hud-playlist';
  panel.setAttribute('role','dialog');panel.setAttribute('aria-label','playlist');
@@ -57,7 +57,7 @@ function playlistPanel(music){
    list.append(li);
    return {id:t.id,li,pick};
   });
-  panel.replaceChildren(el('h2',null,'PLAYLIST · FREE MUSIC ARCHIVE'),list,creditsFooter());
+  panel.replaceChildren(el('h2',null,'PLAYLIST'),list,creditsFooter());
  };
  /** Highlight the playing track. */
  function mark(id){

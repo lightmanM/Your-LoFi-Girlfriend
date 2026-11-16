@@ -1,5 +1,6 @@
 """Unit tests for the pure helpers in prepare_music.py (run: python3 -m unittest scripts/music/test_prepare_music.py)."""
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -45,6 +46,45 @@ class ManifestTest(unittest.TestCase):
             "license": {"name": "CC0 1.0", "url": "https://creativecommons.org/publicdomain/zero/1.0/"},
             "source_url": "https://example.org",
         })
+
+    def test_accepts_a_folder_of_tracks(self):
+        pm.validate_source({
+            "artist": "A", "folder": "a", "include": True,
+            "license": {"name": "Used with permission", "url": "https://example.org/yes"},
+            "source_url": "https://example.org",
+        })
+
+    def test_rejects_entry_without_audio(self):
+        with self.assertRaises(ValueError):
+            pm.validate_source({
+                "artist": "A", "include": True,
+                "license": {"name": "CC0 1.0", "url": "https://creativecommons.org/publicdomain/zero/1.0/"},
+                "source_url": "https://example.org",
+            })
+
+
+class FolderTest(unittest.TestCase):
+    def test_lists_audio_in_order_with_clean_titles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            album = Path(tmp) / "album"
+            (album / "full-album").mkdir(parents=True)
+            for name in ("02 Second Song.opus", "01 First Song.opus", "notes.txt", "._01 First Song.opus",
+                         "full-album/Whole.opus"):   # the "._" file is what macOS leaves beside copied files
+                (album / name).write_bytes(b"")
+            found = pm.expand({"artist": "A", "folder": "album"}, Path(tmp), Path(tmp))
+            self.assertEqual([(p.name, t) for p, t in found],
+                             [("01 First Song.opus", "First Song"), ("02 Second Song.opus", "Second Song")])
+
+    def test_missing_folder_is_an_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(FileNotFoundError):
+                pm.expand({"artist": "A", "folder": "nowhere"}, Path(tmp), Path(tmp))
+
+    def test_empty_folder_is_an_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "album").mkdir()
+            with self.assertRaises(FileNotFoundError):
+                pm.expand({"artist": "A", "folder": "album"}, Path(tmp), Path(tmp))
 
 
 if __name__ == "__main__":

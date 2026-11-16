@@ -15,7 +15,7 @@ The screenshot and the picture cropped from it show the live site's character, M
 | Stand-in character | Vivi, VRoid beta AvatarSample_2, pixiv Inc. (VRoid Project) | CC0 1.0 | Yes, compressed ([record](web/public/standin/CREDITS.md)) |
 | Book, stand-in chair, plant cards, reading pose | Made for this project (the chair's outline is measured from the scene's chair: numbers only) | MIT | Yes |
 | Voice | **VOICEVOX:冥鳴ひまり** ([VOICEVOX](https://voicevox.hiroshiba.jp/)) | [冥鳴ひまり terms](https://meimeihimari.wixsite.com/himari/terms-of-use): credit required | Yes, generated lines ([credits](web/public/voice/CREDITS.md)) |
-| Music | Lao Ban (CC0 1.0) and VibeDepot (CC BY-ND 4.0), via Free Music Archive | Played unedited, credited on the page | Playlist only; MP3s stay local ([credits](web/public/music/CREDITS.md)) |
+| Music | Lao Ban (CC0 1.0) and VibeDepot (CC BY-ND 4.0), via Free Music Archive; SoapXI (CC BY-NC-SA 4.0), shared by the artist | Played unedited, credited on the page; SoapXI's only while the site makes no money | Playlist only; MP3s stay local ([credits](web/public/music/CREDITS.md)) |
 | Font | DM Mono, Colophon Foundry (via @fontsource) | SIL Open Font License 1.1 | npm dependency |
 | Libraries | three.js, @pixiv/three-vrm | MIT | npm dependencies |
 

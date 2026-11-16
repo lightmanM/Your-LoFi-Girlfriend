@@ -300,6 +300,110 @@
         "url": "https://creativecommons.org/licenses/by-nd/4.0/"
       },
       "source": "https://freemusicarchive.org/music/vibedepot/lofi/"
+    },
+    {
+      "id": "soapxi-what-a-dream",
+      "file": "soapxi-what-a-dream.mp3",
+      "title": "What a Dream",
+      "artist": "SoapXI",
+      "duration": 291.08,
+      "gain_db": -2.2,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-park-bench",
+      "file": "soapxi-park-bench.mp3",
+      "title": "Park Bench",
+      "artist": "SoapXI",
+      "duration": 315.3,
+      "gain_db": -1.67,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-gravel-driveway",
+      "file": "soapxi-gravel-driveway.mp3",
+      "title": "Gravel Driveway",
+      "artist": "SoapXI",
+      "duration": 164.39,
+      "gain_db": -4.95,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-storm-drain",
+      "file": "soapxi-storm-drain.mp3",
+      "title": "Storm Drain",
+      "artist": "SoapXI",
+      "duration": 227.08,
+      "gain_db": -0.94,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-dialing-tips",
+      "file": "soapxi-dialing-tips.mp3",
+      "title": "Dialing Tips",
+      "artist": "SoapXI",
+      "duration": 162.25,
+      "gain_db": -0.87,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-sidewalk",
+      "file": "soapxi-sidewalk.mp3",
+      "title": "Sidewalk",
+      "artist": "SoapXI",
+      "duration": 194.59,
+      "gain_db": -1.29,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-rooftop",
+      "file": "soapxi-rooftop.mp3",
+      "title": "Rooftop",
+      "artist": "SoapXI",
+      "duration": 231.89,
+      "gain_db": -1.69,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
+    },
+    {
+      "id": "soapxi-streetlight",
+      "file": "soapxi-streetlight.mp3",
+      "title": "Streetlight",
+      "artist": "SoapXI",
+      "duration": 186.88,
+      "gain_db": -1.03,
+      "license": {
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "source": "https://soapxi.github.io"
     }
   ]
 }
